@@ -363,4 +363,361 @@ mod tests {
 
         assert_eq!(response["error"]["code"], -32600);
     }
+
+    // Helper function to initialize a handler
+    fn init_handler(handler: &McpHandler) {
+        let init_request = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-11-25",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1.0"}
+            }
+        }"#;
+        handler.handle_json(init_request).expect("Initialize should succeed");
+    }
+
+    // ===== TDD Tests for Plan 02: Tool Implementations =====
+
+    #[test]
+    fn test_tools_list_returns_four_tools() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list"
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["jsonrpc"], "2.0");
+        assert_eq!(response["id"], 2);
+        assert!(response["result"]["tools"].is_array());
+
+        let tools = response["result"]["tools"].as_array().unwrap();
+        assert_eq!(tools.len(), 4, "Should return exactly 4 tools");
+
+        // Check tool names
+        let tool_names: Vec<&str> = tools
+            .iter()
+            .map(|t| t["name"].as_str().unwrap())
+            .collect();
+        assert!(tool_names.contains(&"get_sources"));
+        assert!(tool_names.contains(&"list_categories"));
+        assert!(tool_names.contains(&"get_provenance"));
+        assert!(tool_names.contains(&"get_endorsements"));
+    }
+
+    #[test]
+    fn test_tools_list_has_input_schemas() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list"
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        let tools = response["result"]["tools"].as_array().unwrap();
+
+        for tool in tools {
+            assert!(tool["name"].is_string(), "Tool should have name");
+            assert!(tool["description"].is_string(), "Tool should have description");
+            assert!(tool["inputSchema"].is_object(), "Tool should have inputSchema");
+            assert_eq!(
+                tool["inputSchema"]["type"].as_str().unwrap(),
+                "object",
+                "inputSchema should be object type"
+            );
+        }
+    }
+
+    #[test]
+    fn test_get_sources_success() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": "learn rust"}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["id"], 3);
+        assert!(response["result"]["content"].is_array());
+
+        let content = &response["result"]["content"][0];
+        assert_eq!(content["type"], "text");
+
+        let text = content["text"].as_str().unwrap();
+        assert!(text.contains("Rust Learning"), "Should contain category name");
+        assert!(
+            text.matches("http").count() >= 3,
+            "Should contain 3 source URLs"
+        );
+
+        assert_eq!(response["result"]["isError"], false);
+    }
+
+    #[test]
+    fn test_get_sources_includes_registry_metadata() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 4,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": "learn rust"}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("Registry Version:"), "Should include registry version");
+        assert!(text.contains("Curator:"), "Should include curator name");
+    }
+
+    #[test]
+    fn test_get_sources_no_match() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 5,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": "quantum physics supercollider"}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["result"]["isError"], true);
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(
+            text.contains("No matching category") || text.contains("Available categories"),
+            "Should explain no match and show available categories"
+        );
+    }
+
+    #[test]
+    fn test_get_sources_empty_query() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 6,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": ""}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["result"]["isError"], true);
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(
+            text.contains("empty") || text.contains("cannot be empty"),
+            "Should explain empty query error"
+        );
+    }
+
+    #[test]
+    fn test_get_sources_custom_threshold() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        // With threshold 0.9, "learn rust" should fail to match (score likely < 0.9)
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": "learn rust", "threshold": 0.9}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        // Should return error due to high threshold
+        assert_eq!(response["result"]["isError"], true);
+    }
+
+    #[test]
+    fn test_list_categories_returns_all() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 8,
+            "method": "tools/call",
+            "params": {
+                "name": "list_categories",
+                "arguments": {}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["result"]["isError"], false);
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("rust-learning"), "Should include rust-learning slug");
+        assert!(text.contains("bitcoin-node-setup"), "Should include bitcoin-node-setup slug");
+
+        // Count how many category slugs are mentioned (should be 10)
+        let slug_count = text.matches("-").count();
+        assert!(slug_count >= 10, "Should mention all 10 categories");
+    }
+
+    #[test]
+    fn test_get_provenance_returns_curator() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 9,
+            "method": "tools/call",
+            "params": {
+                "name": "get_provenance",
+                "arguments": {}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["result"]["isError"], false);
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("John Turner"), "Should include curator name");
+        assert!(text.contains("Curator:"), "Should have Curator label");
+    }
+
+    #[test]
+    fn test_get_endorsements_empty_v1() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 10,
+            "method": "tools/call",
+            "params": {
+                "name": "get_endorsements",
+                "arguments": {}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["result"]["isError"], false);
+
+        let text = response["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(
+            text.contains("no endorsements") || text.contains("Endorsements: 0"),
+            "Should indicate no endorsements"
+        );
+    }
+
+    #[test]
+    fn test_unknown_tool_returns_error() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 11,
+            "method": "tools/call",
+            "params": {
+                "name": "unknown_tool",
+                "arguments": {}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["error"]["code"], -32601, "Should be Method not found");
+    }
+
+    #[test]
+    fn test_invalid_tool_params() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        // get_sources with extra unknown field
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 12,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {"query": "test", "extra_field": "invalid"}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["error"]["code"], -32602, "Should be Invalid params");
+    }
+
+    #[test]
+    fn test_get_sources_missing_query() {
+        let handler = test_handler();
+        init_handler(&handler);
+
+        // get_sources without query parameter
+        let request = r#"{
+            "jsonrpc": "2.0",
+            "id": 13,
+            "method": "tools/call",
+            "params": {
+                "name": "get_sources",
+                "arguments": {}
+            }
+        }"#;
+
+        let response_str = handler.handle_json(request).expect("Expected response");
+        let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
+
+        assert_eq!(response["error"]["code"], -32602, "Should be Invalid params");
+    }
 }
