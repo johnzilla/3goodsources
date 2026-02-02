@@ -109,46 +109,55 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MCP-01 | — | Pending |
-| MCP-02 | — | Pending |
-| MCP-03 | — | Pending |
-| MCP-04 | — | Pending |
-| MCP-05 | — | Pending |
-| MCP-06 | — | Pending |
-| MCP-07 | — | Pending |
-| MCP-08 | — | Pending |
-| REG-01 | — | Pending |
-| REG-02 | — | Pending |
-| REG-03 | — | Pending |
-| REG-04 | — | Pending |
-| REG-05 | — | Pending |
-| REG-06 | — | Pending |
-| REG-07 | — | Pending |
-| IDENT-01 | — | Pending |
-| IDENT-02 | — | Pending |
-| IDENT-03 | — | Pending |
-| ENDP-01 | — | Pending |
-| ENDP-02 | — | Pending |
-| ENDP-03 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| DOCS-03 | — | Pending |
-| DOCS-04 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
+| MCP-01 | Phase 3 | Pending |
+| MCP-02 | Phase 3 | Pending |
+| MCP-03 | Phase 3 | Pending |
+| MCP-04 | Phase 3 | Pending |
+| MCP-05 | Phase 3 | Pending |
+| MCP-06 | Phase 3 | Pending |
+| MCP-07 | Phase 3 | Pending |
+| MCP-08 | Phase 3 | Pending |
+| REG-01 | Phase 1 | Pending |
+| REG-02 | Phase 1 | Pending |
+| REG-03 | Phase 1 | Pending |
+| REG-04 | Phase 1 | Pending |
+| REG-05 | Phase 2 | Pending |
+| REG-06 | Phase 2 | Pending |
+| REG-07 | Phase 2 | Pending |
+| IDENT-01 | Phase 5 | Pending |
+| IDENT-02 | Phase 5 | Pending |
+| IDENT-03 | Phase 5 | Pending |
+| ENDP-01 | Phase 4 | Pending |
+| ENDP-02 | Phase 4 | Pending |
+| ENDP-03 | Phase 4 | Pending |
+| INFRA-01 | Phase 6 | Pending |
+| INFRA-02 | Phase 6 | Pending |
+| INFRA-03 | Phase 6 | Pending |
+| INFRA-04 | Phase 4 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| DOCS-01 | Phase 7 | Pending |
+| DOCS-02 | Phase 7 | Pending |
+| DOCS-03 | Phase 7 | Pending |
+| DOCS-04 | Phase 7 | Pending |
+| TEST-01 | Phase 7 | Pending |
+| TEST-02 | Phase 7 | Pending |
+| TEST-03 | Phase 7 | Pending |
+| TEST-04 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 34 total
-- Mapped to phases: 0
-- Unmapped: 34 (pending roadmap creation)
+- Mapped to phases: 34
+- Unmapped: 0 (complete coverage)
+
+**By Phase:**
+- Phase 1 (Foundation & Data Layer): 5 requirements (REG-01, REG-02, REG-03, REG-04, INFRA-05)
+- Phase 2 (Query Matching Engine): 3 requirements (REG-05, REG-06, REG-07)
+- Phase 3 (MCP Protocol Implementation): 8 requirements (MCP-01 through MCP-08)
+- Phase 4 (HTTP Transport Layer): 4 requirements (ENDP-01, ENDP-02, ENDP-03, INFRA-04)
+- Phase 5 (Identity & Provenance): 3 requirements (IDENT-01, IDENT-02, IDENT-03)
+- Phase 6 (Infrastructure & Deployment): 3 requirements (INFRA-01, INFRA-02, INFRA-03)
+- Phase 7 (Documentation & Testing): 8 requirements (DOCS-01 through DOCS-04, TEST-01 through TEST-04)
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after initial definition*
+*Last updated: 2026-02-01 after roadmap creation (traceability complete)*
