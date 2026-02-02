@@ -101,10 +101,11 @@ Plans:
   3. Public key returned in GET /health endpoint
   4. Public key included in get_provenance tool response
   5. Warning logged if keypair generated (not loaded from env)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md -- Identity module with keypair generation and Config secret key field
+- [ ] 05-02-PLAN.md -- Wire pubkey into AppState, health endpoint, and get_provenance tool
 
 ### Phase 6: Infrastructure & Deployment
 **Goal**: Deploy to Render free tier with Docker and static landing page
@@ -154,7 +155,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
 | 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
 | 4. HTTP Transport Layer | 2/2 | Complete | 2026-02-02 |
-| 5. Identity & Provenance | 0/TBD | Not started | - |
+| 5. Identity & Provenance | 0/2 | Not started | - |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
 | 7. Documentation & Testing | 0/TBD | Not started | - |
 
