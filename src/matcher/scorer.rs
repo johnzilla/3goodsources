@@ -4,6 +4,8 @@ use super::normalize;
 use crate::registry::types::{Category, Registry};
 
 /// Result of a successful query match
+///
+/// Contains the slug, score, and full category data for the best matching category.
 #[derive(Debug, Clone)]
 pub struct MatchResult {
     /// The matched category slug
@@ -15,6 +17,23 @@ pub struct MatchResult {
 }
 
 /// Match a query against the registry and return the best match
+///
+/// # Arguments
+/// * `query` - User query string (will be normalized)
+/// * `registry` - Registry containing categories to match against
+/// * `config` - Match configuration (threshold, weights)
+///
+/// # Returns
+/// * `Ok(MatchResult)` - Best match if score >= threshold
+/// * `Err(MatchError::EmptyQuery)` - Query is empty
+/// * `Err(MatchError::QueryAllStopWords)` - Query contains only stop words
+/// * `Err(MatchError::BelowThreshold)` - Best score < threshold
+///
+/// # Scoring
+/// Combines fuzzy similarity (normalized Levenshtein) and keyword boosting:
+/// - Fuzzy: Best match across query_patterns, slug, and name
+/// - Keyword: Fraction of slug terms found in query
+/// - Final: `(fuzzy_weight * fuzzy) + (keyword_weight * keyword)`
 pub fn match_query(
     query: &str,
     registry: &Registry,
