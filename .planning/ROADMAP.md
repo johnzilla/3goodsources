@@ -85,11 +85,11 @@ Plans:
   4. GET /registry returns raw registry.json for transparency
   5. CORS headers permit cross-origin requests
   6. Server handles malformed JSON gracefully with error responses
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Server module with axum routes, AppState, CORS, and dependencies
+- [ ] 04-02-PLAN.md -- Main.rs integration wiring and end-to-end verification
 
 ### Phase 5: Identity & Provenance
 **Goal**: Add PKARR keypair for cryptographic identity
@@ -153,7 +153,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
 | 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
-| 4. HTTP Transport Layer | 0/TBD | Not started | - |
+| 4. HTTP Transport Layer | 0/2 | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
 | 7. Documentation & Testing | 0/TBD | Not started | - |
