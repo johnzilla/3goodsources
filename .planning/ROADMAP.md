@@ -49,11 +49,11 @@ Plans:
   3. Query "email server" matches self-hosted-email category
   4. Queries below 0.4 threshold return helpful error with category list
   5. Keyword boosting increases scores when query contains slug terms
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Matcher module scaffolding, config, errors, and text normalization pipeline
+- [ ] 02-02-PLAN.md -- TDD: Scoring engine and match_query public API
 
 ### Phase 3: MCP Protocol Implementation
 **Goal**: Handle MCP JSON-RPC 2.0 protocol with all four tools
@@ -152,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
-| 2. Query Matching Engine | 0/TBD | Not started | - |
+| 2. Query Matching Engine | 0/2 | Not started | - |
 | 3. MCP Protocol Implementation | 0/TBD | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
