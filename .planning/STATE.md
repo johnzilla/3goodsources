@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 3 of 7 (MCP Protocol Implementation)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-02 — Completed 03-01-PLAN.md (MCP protocol foundation)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-02 — Completed 03-02-PLAN.md (MCP tool implementations)
 
-Progress: [█████████░] 86% (6/7 plans completed)
+Progress: [██████████] 100% (7/7 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 2.5 min
-- Total execution time: 0.42 hours
+- Total plans completed: 7
+- Average duration: 2.7 min
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
@@ -29,12 +29,12 @@ Progress: [█████████░] 86% (6/7 plans completed)
 |-------|-------|-------|----------|
 | 1. Foundation | 3 | 9 min | 3 min |
 | 2. Query Matching | 2 | 6 min | 3 min |
-| 3. MCP Protocol | 1 | 2 min | 2 min |
+| 3. MCP Protocol | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last plan: 03-01 (2 min)
-- Previous: 02-02 (4 min)
-- Trend: Efficient execution continuing
+- Last plan: 03-02 (5 min)
+- Previous: 03-01 (2 min)
+- Trend: TDD plan slightly longer but efficient
 
 *Updated after each plan completion*
 
@@ -63,6 +63,10 @@ Recent decisions affecting current work:
 - **Batch rejection at raw JSON level** (03-01): Check if parsed JSON is array BEFORE deserializing into JsonRpcRequest. Early rejection is cleaner and more efficient.
 - **Notification handling with Option return** (03-01): Return Option<String> from handle_json - None for notifications, Some for requests. Makes distinction explicit in type system.
 - **Forward-compatible InitializeParams** (03-01): Do NOT use deny_unknown_fields on MCP spec-owned types. Server should accept new spec fields without breaking.
+- **JSON Schema via schemars** (03-02): Use schemars::schema_for! macro for MCP inputSchema generation. Automatic type-to-schema conversion keeps schemas in sync with Rust types.
+- **Plain text tool responses** (03-02): Return plain text (not markdown) in tool responses for better agent parsing. Use labels like "Category:", "URL:" for structure.
+- **Match errors as MCP success** (03-02): No-match scenarios return MCP success with isError:true and helpful messages, distinguishing business errors from protocol errors.
+- **Threshold parameter for sensitivity** (03-02): get_sources accepts optional threshold (0.0-1.0) to override config default, enabling per-query match tuning.
 
 ### Pending Todos
 
@@ -81,8 +85,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T13:42:38Z — Completed 03-01-PLAN.md execution
-Stopped at: Phase 3 in progress (1/2 plans), ready for 03-02
+Last session: 2026-02-02T13:52:39Z — Completed 03-02-PLAN.md execution
+Stopped at: Phase 3 complete (2/2 plans), all foundational phases done
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -94,6 +98,8 @@ Resume file: None
 - 02-01: Matcher scaffolding ✓
 - 02-02: Scoring engine ✓
 
-**Phase 3 Status:** In progress
+**Phase 3 Status:** Complete ✓
 - 03-01: MCP protocol foundation ✓
-- 03-02: Tool implementations (pending)
+- 03-02: Tool implementations ✓
+
+**Next Phase:** 04-http-transport (axum server, CORS, streaming)
