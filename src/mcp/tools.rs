@@ -90,7 +90,13 @@ pub fn handle_tool_call(
     }
 }
 
-/// Tool implementation: get_sources
+/// Handle get_sources tool call
+///
+/// Matches a natural language query against the registry categories and returns
+/// the matching category with all three curated sources. Supports optional threshold
+/// parameter for match sensitivity tuning.
+///
+/// Returns MCP content with isError: true for no match, empty query, or stop-word-only queries.
 fn tool_get_sources(
     arguments: Option<Value>,
     registry: &Registry,
@@ -180,7 +186,10 @@ fn tool_get_sources(
     }
 }
 
-/// Tool implementation: list_categories
+/// Handle list_categories tool call
+///
+/// Returns a formatted list of all available categories in the registry,
+/// sorted by slug. Each entry includes the slug, display name, and description.
 fn tool_list_categories(
     arguments: Option<Value>,
     registry: &Registry,
@@ -211,7 +220,11 @@ fn tool_list_categories(
     }))
 }
 
-/// Tool implementation: get_provenance
+/// Handle get_provenance tool call
+///
+/// Returns curator identity and verification information for this registry,
+/// including curator name, PKARR public key, registry version, and instructions
+/// for cryptographic verification.
 fn tool_get_provenance(
     arguments: Option<Value>,
     registry: &Registry,
@@ -244,7 +257,10 @@ fn tool_get_provenance(
     }))
 }
 
-/// Tool implementation: get_endorsements
+/// Handle get_endorsements tool call
+///
+/// Returns the list of curator endorsements for this registry.
+/// In v1, this always returns an empty list with an explanatory message.
 fn tool_get_endorsements(
     arguments: Option<Value>,
     registry: &Registry,
