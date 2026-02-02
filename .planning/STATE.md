@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 3 - MCP Protocol Implementation
+**Current focus:** Phase 4 - HTTP Transport Layer
 
 ## Current Position
 
-Phase: 3 of 7 (MCP Protocol Implementation)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-02 — Completed 03-02-PLAN.md (MCP tool implementations)
+Phase: 4 of 7 (HTTP Transport Layer)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-02 — Completed 04-01-PLAN.md (HTTP server foundation)
 
-Progress: [██████████] 100% (7/7 plans completed)
+Progress: [████████████░] 80% (8/10 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 2.7 min
-- Total execution time: 0.5 hours
+- Total plans completed: 8
+- Average duration: 2.4 min
+- Total execution time: 0.6 hours
 
 **By Phase:**
 
@@ -30,11 +30,12 @@ Progress: [██████████] 100% (7/7 plans completed)
 | 1. Foundation | 3 | 9 min | 3 min |
 | 2. Query Matching | 2 | 6 min | 3 min |
 | 3. MCP Protocol | 2 | 7 min | 3.5 min |
+| 4. HTTP Transport | 1 | 1 min | 1 min |
 
 **Recent Trend:**
-- Last plan: 03-02 (5 min)
-- Previous: 03-01 (2 min)
-- Trend: TDD plan slightly longer but efficient
+- Last plan: 04-01 (1 min)
+- Previous: 03-02 (5 min)
+- Trend: Fast execution on infrastructure setup
 
 *Updated after each plan completion*
 
@@ -67,6 +68,10 @@ Recent decisions affecting current work:
 - **Plain text tool responses** (03-02): Return plain text (not markdown) in tool responses for better agent parsing. Use labels like "Category:", "URL:" for structure.
 - **Match errors as MCP success** (03-02): No-match scenarios return MCP success with isError:true and helpful messages, distinguishing business errors from protocol errors.
 - **Threshold parameter for sensitivity** (03-02): get_sources accepts optional threshold (0.0-1.0) to override config default, enabling per-query match tuning.
+- **Permissive CORS for MVP** (04-01): Apply CorsLayer::permissive() to allow cross-origin requests from any domain for MVP simplicity. Can be tightened later for production.
+- **HTTP 204 for MCP notifications** (04-01): When McpHandler::handle_json returns None (notification), respond with HTTP 204 No Content - semantically correct, matches JSON-RPC spec.
+- **PORT defaults to 3000** (04-01): Config field defaults to 3000 if PORT env var not set, required by Render deployment platform.
+- **String extractor for request body** (04-01): POST /mcp handler uses String extractor for body instead of Json<Value> - McpHandler needs raw JSON for its own parsing logic.
 
 ### Pending Todos
 
@@ -85,8 +90,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T13:52:39Z — Completed 03-02-PLAN.md execution
-Stopped at: Phase 3 complete (2/2 plans), all foundational phases done
+Last session: 2026-02-02T14:41:27Z — Completed 04-01-PLAN.md execution
+Stopped at: Phase 4 plan 1 complete, HTTP server module ready
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -102,4 +107,8 @@ Resume file: None
 - 03-01: MCP protocol foundation ✓
 - 03-02: Tool implementations ✓
 
-**Next Phase:** 04-http-transport (axum server, CORS, streaming)
+**Phase 4 Status:** In progress (1/2 complete)
+- 04-01: HTTP server foundation ✓
+- 04-02: Main integration and server startup (next)
+
+**Next Plan:** 04-02-main-integration (wire AppState, start axum server)
