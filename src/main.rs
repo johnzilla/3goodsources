@@ -7,6 +7,7 @@ mod registry;
 mod server;
 
 use config::Config;
+use std::sync::Arc;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 fn init_logging(log_format: &str) {
@@ -50,7 +51,25 @@ async fn main() -> anyhow::Result<()> {
     );
 
     // Load and validate registry
-    let _registry = registry::load(&config.registry_path).await?;
+    let registry = Arc::new(registry::load(&config.registry_path).await?);
+
+    // Create MCP handler with shared registry and match config
+    let mcp_handler = mcp::McpHandler::new(Arc::clone(&registry), match_config);
+
+    // Build application state
+    let app_state = Arc::new(server::AppState {
+        mcp_handler,
+        registry,
+    });
+
+    // Build router with routes and middleware
+    let app = server::build_router(app_state);
+
+    // Bind to configured address and start server
+    let addr = format!("0.0.0.0:{}", config.port);
+    tracing::info!(port = config.port, "Server listening on {}", addr);
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
+    axum::serve(listener, app).await?;
 
     Ok(())
 }
