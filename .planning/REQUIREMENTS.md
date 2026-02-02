@@ -121,9 +121,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REG-02 | Phase 1 | Complete |
 | REG-03 | Phase 1 | Complete |
 | REG-04 | Phase 1 | Complete |
-| REG-05 | Phase 2 | Pending |
-| REG-06 | Phase 2 | Pending |
-| REG-07 | Phase 2 | Pending |
+| REG-05 | Phase 2 | Complete |
+| REG-06 | Phase 2 | Complete |
+| REG-07 | Phase 2 | Complete |
 | IDENT-01 | Phase 5 | Pending |
 | IDENT-02 | Phase 5 | Pending |
 | IDENT-03 | Phase 5 | Pending |
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 1 execution complete*
+*Last updated: 2026-02-02 after Phase 2 execution complete*

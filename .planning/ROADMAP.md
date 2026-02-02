@@ -13,7 +13,7 @@ This roadmap delivers a working MCP server in Rust that serves curated sources v
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Data Layer** - Project scaffolding, registry schema, and local JSON loading
-- [ ] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
+- [x] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
 - [ ] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
 - [ ] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
 - [ ] **Phase 5: Identity & Provenance** - PKARR keypair generation and provenance tools
@@ -53,7 +53,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Matcher module scaffolding, config, errors, and text normalization pipeline
-- [ ] 02-02-PLAN.md -- TDD: Scoring engine and match_query public API
+- [x] 02-02-PLAN.md -- TDD: Scoring engine and match_query public API
 
 ### Phase 3: MCP Protocol Implementation
 **Goal**: Handle MCP JSON-RPC 2.0 protocol with all four tools
@@ -152,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
-| 2. Query Matching Engine | 1/2 | In progress | - |
+| 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
 | 3. MCP Protocol Implementation | 0/TBD | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
@@ -161,4 +161,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-02 after completing plan 02-01*
+*Last updated: 2026-02-02 after Phase 2 execution complete*
