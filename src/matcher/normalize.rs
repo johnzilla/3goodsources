@@ -24,7 +24,7 @@ pub fn normalize_text(text: &str) -> Result<String, MatchError> {
 
     // Stage 3: Remove stop words
     let stop_words: HashSet<String> = stop_words::get(stop_words::LANGUAGE::English)
-        .into_iter()
+        .iter()
         .map(|s| s.to_string())
         .collect();
 

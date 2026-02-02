@@ -1,4 +1,4 @@
-use super::{Category, Registry, RegistryError};
+use super::{Registry, RegistryError};
 use regex::Regex;
 use std::path::Path;
 use tokio::fs;
