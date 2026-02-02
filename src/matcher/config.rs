@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct MatchConfig {
     /// Minimum score to accept a match (default: 0.4)
     #[serde(default = "default_threshold")]

@@ -1,5 +1,6 @@
 use crate::matcher::MatchConfig;
-use crate::mcp::types::{InitializeParams, JsonRpcRequest, JsonRpcResponse};
+use crate::mcp::tools::{self, ToolCallError};
+use crate::mcp::types::{CallToolParams, InitializeParams, JsonRpcRequest, JsonRpcResponse};
 use crate::registry::Registry;
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -7,9 +8,7 @@ use std::sync::Arc;
 
 pub struct McpHandler {
     initialized: Arc<AtomicBool>,
-    #[allow(dead_code)] // Used in Plan 02
     registry: Arc<Registry>,
-    #[allow(dead_code)] // Used in Plan 02
     match_config: MatchConfig,
 }
 
@@ -108,14 +107,42 @@ impl McpHandler {
         Some(self.serialize_response(JsonRpcResponse::success(id, result)))
     }
 
-    /// Stub for tools/list - Plan 02 will implement
+    /// Handle tools/list request
     fn handle_tools_list(&self, id: Value, _params: Option<Value>) -> Option<String> {
-        Some(self.serialize_response(JsonRpcResponse::method_not_found(id)))
+        let result = tools::get_tools_list();
+        Some(self.serialize_response(JsonRpcResponse::success(id, result)))
     }
 
-    /// Stub for tools/call - Plan 02 will implement
-    fn handle_tools_call(&self, id: Value, _params: Option<Value>) -> Option<String> {
-        Some(self.serialize_response(JsonRpcResponse::method_not_found(id)))
+    /// Handle tools/call request
+    fn handle_tools_call(&self, id: Value, params: Option<Value>) -> Option<String> {
+        // Parse CallToolParams
+        let call_params: CallToolParams = match params {
+            Some(p) => match serde_json::from_value(p) {
+                Ok(params) => params,
+                Err(_) => {
+                    return Some(self.serialize_response(JsonRpcResponse::invalid_params(id)));
+                }
+            },
+            None => {
+                return Some(self.serialize_response(JsonRpcResponse::invalid_params(id)));
+            }
+        };
+
+        // Dispatch to tool handler
+        match tools::handle_tool_call(
+            &call_params.name,
+            call_params.arguments,
+            &self.registry,
+            &self.match_config,
+        ) {
+            Ok(result) => Some(self.serialize_response(JsonRpcResponse::success(id, result))),
+            Err(ToolCallError::UnknownTool) => {
+                Some(self.serialize_response(JsonRpcResponse::method_not_found(id)))
+            }
+            Err(ToolCallError::InvalidParams) => {
+                Some(self.serialize_response(JsonRpcResponse::invalid_params(id)))
+            }
+        }
     }
 
     fn serialize_response(&self, response: JsonRpcResponse) -> String {
@@ -625,7 +652,7 @@ mod tests {
         assert_eq!(response["result"]["isError"], false);
 
         let text = response["result"]["content"][0]["text"].as_str().unwrap();
-        assert!(text.contains("John Turner"), "Should include curator name");
+        assert!(text.contains("3GS Curator"), "Should include curator name");
         assert!(text.contains("Curator:"), "Should have Curator label");
     }
 
