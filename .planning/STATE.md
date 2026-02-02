@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 2 - Query Matching Engine
+**Current focus:** Phase 3 - MCP Protocol Implementation
 
 ## Current Position
 
-Phase: 2 of 7 (Query Matching Engine)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-02 — Completed 02-02-PLAN.md (Scoring engine)
+Phase: 3 of 7 (MCP Protocol Implementation)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-02 — Completed 03-01-PLAN.md (MCP protocol foundation)
 
-Progress: [██████████] 100% (2/2 Phase 2 plans)
+Progress: [█████████░] 86% (6/7 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 3 min
-- Total execution time: 0.27 hours
+- Total plans completed: 6
+- Average duration: 2.5 min
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
@@ -29,11 +29,12 @@ Progress: [██████████] 100% (2/2 Phase 2 plans)
 |-------|-------|-------|----------|
 | 1. Foundation | 3 | 9 min | 3 min |
 | 2. Query Matching | 2 | 6 min | 3 min |
+| 3. MCP Protocol | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last plan: 02-02 (4 min)
-- Previous: 02-01 (2 min)
-- Trend: Consistent fast execution
+- Last plan: 03-01 (2 min)
+- Previous: 02-02 (4 min)
+- Trend: Efficient execution continuing
 
 *Updated after each plan completion*
 
@@ -58,6 +59,10 @@ Recent decisions affecting current work:
 - **Fuzzy scoring surfaces** (02-02): Match query against query_patterns (normalized), slug with hyphens replaced by spaces, and category name lowercased. Do NOT match against description (too noisy).
 - **Weighted sum not multiplicative** (02-02): Use `(fuzzy_weight * fuzzy) + (keyword_weight * keyword)` for score combination. Weighted sum allows independent signal tuning and prevents one zero from killing score.
 - **TDD with atomic commits** (02-02): RED-GREEN-REFACTOR cycle with separate commits (test/feat/refactor) ensures clear history and revertable changes.
+- **Initialization handshake with AtomicBool** (03-01): Use Arc<AtomicBool> to track MCP initialized state. Simple, thread-safe, minimal overhead for binary state tracking.
+- **Batch rejection at raw JSON level** (03-01): Check if parsed JSON is array BEFORE deserializing into JsonRpcRequest. Early rejection is cleaner and more efficient.
+- **Notification handling with Option return** (03-01): Return Option<String> from handle_json - None for notifications, Some for requests. Makes distinction explicit in type system.
+- **Forward-compatible InitializeParams** (03-01): Do NOT use deny_unknown_fields on MCP spec-owned types. Server should accept new spec fields without breaking.
 
 ### Pending Todos
 
@@ -76,8 +81,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T05:22:08Z — Completed 02-02-PLAN.md execution
-Stopped at: Phase 2 complete (2/2 plans), ready for Phase 3
+Last session: 2026-02-02T13:42:38Z — Completed 03-01-PLAN.md execution
+Stopped at: Phase 3 in progress (1/2 plans), ready for 03-02
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -88,3 +93,7 @@ Resume file: None
 **Phase 2 Status:** Complete ✓
 - 02-01: Matcher scaffolding ✓
 - 02-02: Scoring engine ✓
+
+**Phase 3 Status:** In progress
+- 03-01: MCP protocol foundation ✓
+- 03-02: Tool implementations (pending)
