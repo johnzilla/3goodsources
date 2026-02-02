@@ -1,0 +1,341 @@
+{
+  "version": "0.1.0",
+  "updated": "2026-02-01",
+  "curator": {
+    "name": "3GS Curator",
+    "pubkey": "pk:placeholder"
+  },
+  "endorsements": [],
+  "categories": {
+    "bitcoin-node-setup": {
+      "name": "Bitcoin Node Setup",
+      "description": "Running a Bitcoin full node for network participation, transaction validation, and sovereignty over your own blockchain data.",
+      "query_patterns": [
+        "how do I run a bitcoin full node",
+        "setting up bitcoin core",
+        "run my own bitcoin node at home",
+        "bitcoin node hardware requirements"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Bitcoin Core Documentation",
+          "url": "https://bitcoin.org/en/full-node",
+          "type": "documentation",
+          "why": "Official guide from Bitcoin Core covering installation, configuration, and best practices for running a full node."
+        },
+        {
+          "rank": 2,
+          "name": "Umbrel Node Platform",
+          "url": "https://umbrel.com/",
+          "type": "tool",
+          "why": "User-friendly self-hosted platform for running Bitcoin and Lightning nodes with a web interface on Raspberry Pi or other hardware."
+        },
+        {
+          "rank": 3,
+          "name": "Raspibolt Guide",
+          "url": "https://raspibolt.org/",
+          "type": "tutorial",
+          "why": "Comprehensive step-by-step guide to building a Bitcoin and Lightning node on a Raspberry Pi from scratch."
+        }
+      ]
+    },
+    "self-hosted-email": {
+      "name": "Self-Hosted Email",
+      "description": "Self-hosting email servers with complete control over your communication infrastructure, including SMTP, IMAP, spam filtering, and domain configuration.",
+      "query_patterns": [
+        "how to self host email server",
+        "run my own mail server",
+        "self-hosted email setup guide",
+        "alternatives to gmail that I control"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Mail-in-a-Box",
+          "url": "https://mailinabox.email/",
+          "type": "tool",
+          "why": "Turnkey email server solution that sets up a complete mail server on Ubuntu with automated configuration for SMTP, IMAP, DNS, and webmail."
+        },
+        {
+          "rank": 2,
+          "name": "NSA's Email Self-Defense Guide",
+          "url": "https://emailselfdefense.fsf.org/",
+          "type": "tutorial",
+          "why": "Free Software Foundation guide to email encryption and privacy, essential reading for anyone self-hosting email."
+        },
+        {
+          "rank": 3,
+          "name": "Docker Mailserver",
+          "url": "https://docker-mailserver.github.io/docker-mailserver/latest/",
+          "type": "repo",
+          "why": "Production-ready, containerized fullstack mail server with extensive documentation for Docker-based deployments."
+        }
+      ]
+    },
+    "rust-learning": {
+      "name": "Rust Learning",
+      "description": "Learning the Rust programming language from basics through advanced concepts including ownership, lifetimes, async programming, and systems design.",
+      "query_patterns": [
+        "learn rust programming",
+        "rust tutorial for beginners",
+        "how to get started with rust",
+        "best resources for learning rust"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "The Rust Programming Language Book",
+          "url": "https://doc.rust-lang.org/book/",
+          "type": "book",
+          "why": "Official comprehensive guide to Rust, covering fundamentals through advanced topics with clear examples and exercises."
+        },
+        {
+          "rank": 2,
+          "name": "Rust by Example",
+          "url": "https://doc.rust-lang.org/rust-by-example/",
+          "type": "tutorial",
+          "why": "Collection of runnable examples illustrating Rust concepts and standard libraries with hands-on code snippets."
+        },
+        {
+          "rank": 3,
+          "name": "Zero To Production In Rust",
+          "url": "https://www.zero2prod.com/",
+          "type": "book",
+          "why": "Practical guide to building production-ready backend applications in Rust, covering real-world API development and deployment."
+        }
+      ]
+    },
+    "home-automation-private": {
+      "name": "Privacy-Respecting Home Automation",
+      "description": "Building smart home automation systems that operate locally without cloud dependencies, protecting your privacy while automating your living space.",
+      "query_patterns": [
+        "privacy focused home automation",
+        "local home automation without cloud",
+        "self-hosted smart home",
+        "home assistant setup guide"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Home Assistant Documentation",
+          "url": "https://www.home-assistant.io/docs/",
+          "type": "documentation",
+          "why": "Official documentation for Home Assistant, the leading open-source home automation platform with local-first architecture."
+        },
+        {
+          "rank": 2,
+          "name": "Home Assistant Installation Guide",
+          "url": "https://www.home-assistant.io/installation/",
+          "type": "tutorial",
+          "why": "Step-by-step installation instructions for various platforms including Raspberry Pi, Docker, and dedicated hardware."
+        },
+        {
+          "rank": 3,
+          "name": "ESPHome Project",
+          "url": "https://esphome.io/",
+          "type": "tool",
+          "why": "System for controlling ESP8266/ESP32 devices with simple YAML configuration, enabling DIY sensors and actuators without programming."
+        }
+      ]
+    },
+    "password-management": {
+      "name": "Password Management",
+      "description": "Secure password management tools and practices for generating, storing, and organizing credentials with encryption and multi-device sync.",
+      "query_patterns": [
+        "best password manager",
+        "secure password storage",
+        "self-hosted password manager",
+        "password manager comparison"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Bitwarden Help Center",
+          "url": "https://bitwarden.com/help/",
+          "type": "documentation",
+          "why": "Comprehensive documentation for Bitwarden, a leading open-source password manager with self-hosting options and strong encryption."
+        },
+        {
+          "rank": 2,
+          "name": "EFF's Guide to Password Management",
+          "url": "https://ssd.eff.org/module/creating-strong-passwords",
+          "type": "article",
+          "why": "Electronic Frontier Foundation's guide to password security best practices, including generation, storage, and common pitfalls."
+        },
+        {
+          "rank": 3,
+          "name": "KeePassXC",
+          "url": "https://keepassxc.org/",
+          "type": "tool",
+          "why": "Cross-platform, community-driven password manager with local-only encrypted database and no cloud dependencies."
+        }
+      ]
+    },
+    "linux-hardening": {
+      "name": "Linux Security Hardening",
+      "description": "Hardening Linux systems through security configurations, access controls, kernel parameters, and monitoring to reduce attack surface and improve resilience.",
+      "query_patterns": [
+        "linux security hardening guide",
+        "harden ubuntu server",
+        "linux security best practices",
+        "secure linux configuration"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "CIS Benchmarks for Linux",
+          "url": "https://www.cisecurity.org/benchmark/distribution_independent_linux",
+          "type": "documentation",
+          "why": "Industry-standard security configuration benchmarks for Linux distributions developed by consensus of cybersecurity experts."
+        },
+        {
+          "rank": 2,
+          "name": "Lynis Security Auditing Tool",
+          "url": "https://cisofy.com/lynis/",
+          "type": "tool",
+          "why": "Open-source security auditing tool for Linux systems that scans for vulnerabilities and provides hardening recommendations."
+        },
+        {
+          "rank": 3,
+          "name": "ArchWiki Security Guide",
+          "url": "https://wiki.archlinux.org/title/Security",
+          "type": "article",
+          "why": "Comprehensive community-maintained guide covering Linux security concepts, tools, and hardening techniques applicable to all distributions."
+        }
+      ]
+    },
+    "threat-modeling": {
+      "name": "Threat Modeling",
+      "description": "Methodologies for identifying, prioritizing, and mitigating security threats through structured analysis of systems, assets, and attack vectors.",
+      "query_patterns": [
+        "how to do threat modeling",
+        "threat modeling methodology",
+        "security threat analysis",
+        "threat modeling for software"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "OWASP Threat Modeling",
+          "url": "https://owasp.org/www-community/Threat_Modeling",
+          "type": "documentation",
+          "why": "OWASP's comprehensive guide to threat modeling covering methodologies, processes, and practical application for web applications."
+        },
+        {
+          "rank": 2,
+          "name": "Threat Modeling Manifesto",
+          "url": "https://www.threatmodelingmanifesto.org/",
+          "type": "article",
+          "why": "Community-driven manifesto defining values, principles, and patterns for effective threat modeling across different contexts."
+        },
+        {
+          "rank": 3,
+          "name": "STRIDE Threat Model",
+          "url": "https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats",
+          "type": "documentation",
+          "why": "Microsoft's STRIDE methodology documentation explaining threat categorization and analysis for secure system design."
+        }
+      ]
+    },
+    "nostr-development": {
+      "name": "Nostr Protocol Development",
+      "description": "Developing applications on Nostr, a decentralized social protocol using cryptographic keypairs and relay networks for censorship-resistant communication.",
+      "query_patterns": [
+        "nostr protocol development",
+        "build on nostr",
+        "nostr relay setup",
+        "nostr client development"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Nostr NIPs Repository",
+          "url": "https://github.com/nostr-protocol/nips",
+          "type": "repo",
+          "why": "Official Nostr Implementation Possibilities (NIPs) repository defining protocol specifications and extensions."
+        },
+        {
+          "rank": 2,
+          "name": "Nostr Developer Resources",
+          "url": "https://nostr.how/en/developers",
+          "type": "documentation",
+          "why": "Comprehensive developer guide covering protocol basics, client development, relay implementation, and best practices."
+        },
+        {
+          "rank": 3,
+          "name": "nostr-tools Library",
+          "url": "https://github.com/nbd-wtf/nostr-tools",
+          "type": "repo",
+          "why": "JavaScript/TypeScript library for Nostr protocol implementation with utilities for keys, events, and relay connections."
+        }
+      ]
+    },
+    "pubky-development": {
+      "name": "Pubky Development",
+      "description": "Developing with Pubky and PKARR for decentralized identity, DNS, and data storage using public key infrastructure and homeserver architecture.",
+      "query_patterns": [
+        "pubky development guide",
+        "pkarr implementation",
+        "pubky homeserver setup",
+        "decentralized identity with pubky"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Pubky Core Repository",
+          "url": "https://github.com/pubky/pubky-core",
+          "type": "repo",
+          "why": "Core Pubky implementation in Rust with examples, documentation, and reference code for decentralized identity and data."
+        },
+        {
+          "rank": 2,
+          "name": "PKARR Specification",
+          "url": "https://github.com/Nuhvi/pkarr",
+          "type": "documentation",
+          "why": "Public Key Addressable Resource Records specification explaining the DNS-over-mainline-DHT approach underlying Pubky."
+        },
+        {
+          "rank": 3,
+          "name": "Pubky Developer Documentation",
+          "url": "https://pubky.github.io/pubky-core/",
+          "type": "documentation",
+          "why": "Official API documentation and developer guide for building applications on the Pubky protocol."
+        }
+      ]
+    },
+    "mcp-development": {
+      "name": "MCP Development",
+      "description": "Developing Model Context Protocol servers and clients for AI agent integration, enabling structured communication between language models and external systems.",
+      "query_patterns": [
+        "mcp server development",
+        "model context protocol tutorial",
+        "build mcp server",
+        "anthropic mcp guide"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "MCP Specification",
+          "url": "https://spec.modelcontextprotocol.io/",
+          "type": "documentation",
+          "why": "Official Model Context Protocol specification defining the protocol, transport layers, and implementation requirements."
+        },
+        {
+          "rank": 2,
+          "name": "MCP TypeScript SDK",
+          "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+          "type": "repo",
+          "why": "Official TypeScript SDK for building MCP servers and clients with examples and reference implementations."
+        },
+        {
+          "rank": 3,
+          "name": "Building MCP Servers Guide",
+          "url": "https://modelcontextprotocol.io/docs/building-mcp-servers",
+          "type": "tutorial",
+          "why": "Step-by-step tutorial for creating MCP servers, covering tool definitions, resource handling, and client integration."
+        }
+      ]
+    }
+  }
+}
