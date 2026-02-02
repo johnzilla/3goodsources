@@ -52,7 +52,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Matcher module scaffolding, config, errors, and text normalization pipeline
+- [x] 02-01-PLAN.md -- Matcher module scaffolding, config, errors, and text normalization pipeline
 - [ ] 02-02-PLAN.md -- TDD: Scoring engine and match_query public API
 
 ### Phase 3: MCP Protocol Implementation
@@ -152,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
-| 2. Query Matching Engine | 0/2 | Not started | - |
+| 2. Query Matching Engine | 1/2 | In progress | - |
 | 3. MCP Protocol Implementation | 0/TBD | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
@@ -161,4 +161,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 1 execution complete*
+*Last updated: 2026-02-02 after completing plan 02-01*

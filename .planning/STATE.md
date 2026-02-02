@@ -5,34 +5,35 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 1 - Foundation & Data Layer
+**Current focus:** Phase 2 - Query Matching Engine
 
 ## Current Position
 
-Phase: 1 of 7 (Foundation & Data Layer)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-02 — Completed 01-03-PLAN.md (Seed registry data)
+Phase: 2 of 7 (Query Matching Engine)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-02 — Completed 02-01-PLAN.md (Matcher scaffolding)
 
-Progress: [██████████] 100% (3/3 Phase 1 plans)
+Progress: [████████░░] 50% (1/2 Phase 2 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 3 min
-- Total execution time: 0.15 hours
+- Total execution time: 0.17 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 3 | 9 min | 3 min |
+| 2. Query Matching | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last plan: 01-03 (2 min)
-- Previous: 01-02 (4 min)
-- Trend: Accelerating
+- Last plan: 02-01 (2 min)
+- Previous: 01-03 (2 min)
+- Trend: Consistent fast execution
 
 *Updated after each plan completion*
 
@@ -52,6 +53,8 @@ Recent decisions affecting current work:
 - **Structured logging with format switching** (01-02): Support LOG_FORMAT env var to switch between pretty (dev) and json (prod) logging.
 - **Fail-fast validation** (01-02): Load registry on startup and crash with descriptive errors if invalid, rather than serving bad data.
 - **Source curation standards** (01-03): Prioritize official documentation and primary sources over blog posts, include practical tools, use natural language query patterns.
+- **Separate MatchConfig** (02-01): Keep matching configuration separate from Config struct — distinct concerns with clear boundaries.
+- **Text normalization order** (02-01): lowercase -> strip punctuation -> remove stop words -> normalize whitespace is the canonical pipeline order.
 
 ### Pending Todos
 
@@ -70,11 +73,15 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T04:37:28Z — Completed 01-03-PLAN.md execution
-Stopped at: Phase 1 complete (3/3 plans), ready for Phase 2
+Last session: 2026-02-02T05:15:10Z — Completed 02-01-PLAN.md execution
+Stopped at: Phase 2 in progress (1/2 plans), ready for 02-02
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
 - 01-01: Types and schema ✓
 - 01-02: Registry loader ✓
 - 01-03: Seed registry data ✓
+
+**Phase 2 Status:** In progress
+- 02-01: Matcher scaffolding ✓
+- 02-02: Scoring engine (next)
