@@ -1,5 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum McpError {
-    #[error("MCP not implemented")]
-    NotImplemented,
+    #[error("JSON parsing failed: {0}")]
+    ParseError(String),
+    #[error("Response serialization failed: {0}")]
+    SerializationError(String),
 }
