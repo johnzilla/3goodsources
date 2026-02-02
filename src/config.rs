@@ -9,10 +9,18 @@ pub struct Config {
     /// Logging format: "pretty" (default, colored for dev) or "json" (structured for production).
     #[serde(default = "default_log_format")]
     pub log_format: String,
+
+    /// Server port. Defaults to 3000. Set via PORT env var (required by Render).
+    #[serde(default = "default_port")]
+    pub port: u16,
 }
 
 fn default_log_format() -> String {
     "pretty".to_string()
+}
+
+fn default_port() -> u16 {
+    3000
 }
 
 impl Config {
