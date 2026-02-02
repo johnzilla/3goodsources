@@ -4,6 +4,7 @@ mod matcher;
 mod mcp;
 mod pubky;
 mod registry;
+mod server;
 
 use config::Config;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
