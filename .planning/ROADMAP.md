@@ -12,7 +12,7 @@ This roadmap delivers a working MCP server in Rust that serves curated sources v
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Data Layer** - Project scaffolding, registry schema, and local JSON loading
+- [x] **Phase 1: Foundation & Data Layer** - Project scaffolding, registry schema, and local JSON loading
 - [ ] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
 - [ ] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
 - [ ] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
@@ -35,9 +35,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Scaffold Rust project with types, module structure, and dependencies
-- [ ] 01-02-PLAN.md -- Implement registry loader, validation, config, and structured logging
-- [ ] 01-03-PLAN.md -- Create registry.json seed data with 10 categories and 30 sources
+- [x] 01-01-PLAN.md -- Scaffold Rust project with types, module structure, and dependencies
+- [x] 01-02-PLAN.md -- Implement registry loader, validation, config, and structured logging
+- [x] 01-03-PLAN.md -- Create registry.json seed data with 10 categories and 30 sources
 
 ### Phase 2: Query Matching Engine
 **Goal**: Implement fuzzy query matching that maps user queries to categories
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Layer | 0/3 | Planned | - |
+| 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
 | 2. Query Matching Engine | 0/TBD | Not started | - |
 | 3. MCP Protocol Implementation | 0/TBD | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
@@ -161,4 +161,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-01 after Phase 1 planning*
+*Last updated: 2026-02-02 after Phase 1 execution complete*

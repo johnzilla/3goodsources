@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "updated": "2026-02-01",
+  "curator": {
+    "name": "Test Curator",
+    "pubkey": "test_pubkey"
+  },
+  "endorsements": [],
+  "categories": {
+    "test-category": {
+      "name": "Test Category",
+      "description": "Test description",
+      "query_patterns": [
+        "test one",
+        "test two"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "Source One",
+          "url": "https://example.com",
+          "type": "documentation",
+          "why": "Test reason"
+        },
+        {
+          "rank": 2,
+          "name": "Source Two",
+          "url": "https://example.com",
+          "type": "tutorial",
+          "why": "Test reason"
+        },
+        {
+          "rank": 3,
+          "name": "Source Three",
+          "url": "https://example.com",
+          "type": "article",
+          "why": "Test reason"
+        }
+      ]
+    }
+  }
+}

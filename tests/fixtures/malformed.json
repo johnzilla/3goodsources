@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "updated": "2026-02-01",
+  "curator": {
+    "name": "Test",
+    "pubkey": "test"
+  },
+  "endorsements": [],
+  "categories": {
+    "test": {
+      "name": "Test"
+      "description": "Missing comma here"
+    }
+  }
+}
