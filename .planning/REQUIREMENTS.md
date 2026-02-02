@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### MCP Server
 
-- [ ] **MCP-01**: Server accepts JSON-RPC 2.0 requests via HTTP POST at `/mcp`
+- [x] **MCP-01**: Server accepts JSON-RPC 2.0 requests via HTTP POST at `/mcp`
 - [x] **MCP-02**: `initialize` method returns protocol version, server info, and capabilities
 - [x] **MCP-03**: `tools/list` method returns all available tools with input schemas
 - [x] **MCP-04**: `tools/call` method dispatches to the correct tool handler and returns MCP content format
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MCP-01 | Phase 3 | Pending |
+| MCP-01 | Phase 3 | Complete |
 | MCP-02 | Phase 3 | Complete |
 | MCP-03 | Phase 3 | Complete |
 | MCP-04 | Phase 3 | Complete |
@@ -127,13 +127,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDENT-01 | Phase 5 | Pending |
 | IDENT-02 | Phase 5 | Pending |
 | IDENT-03 | Phase 5 | Pending |
-| ENDP-01 | Phase 4 | Pending |
-| ENDP-02 | Phase 4 | Pending |
-| ENDP-03 | Phase 4 | Pending |
+| ENDP-01 | Phase 4 | Complete |
+| ENDP-02 | Phase 4 | Complete |
+| ENDP-03 | Phase 4 | Complete |
 | INFRA-01 | Phase 6 | Pending |
 | INFRA-02 | Phase 6 | Pending |
 | INFRA-03 | Phase 6 | Pending |
-| INFRA-04 | Phase 4 | Pending |
+| INFRA-04 | Phase 4 | Complete |
 | INFRA-05 | Phase 1 | Complete |
 | DOCS-01 | Phase 7 | Pending |
 | DOCS-02 | Phase 7 | Pending |
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 3 execution complete*
+*Last updated: 2026-02-02 after Phase 4 execution complete*

@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Data Layer** - Project scaffolding, registry schema, and local JSON loading
 - [x] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
 - [x] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
-- [ ] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
+- [x] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
 - [ ] **Phase 5: Identity & Provenance** - PKARR keypair generation and provenance tools
 - [ ] **Phase 6: Infrastructure & Deployment** - Docker build and Render deployment
 - [ ] **Phase 7: Documentation & Testing** - Final docs and comprehensive test suite
@@ -88,8 +88,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Server module with axum routes, AppState, CORS, and dependencies
-- [ ] 04-02-PLAN.md -- Main.rs integration wiring and end-to-end verification
+- [x] 04-01-PLAN.md -- Server module with axum routes, AppState, CORS, and dependencies
+- [x] 04-02-PLAN.md -- Main.rs integration wiring and end-to-end verification
 
 ### Phase 5: Identity & Provenance
 **Goal**: Add PKARR keypair for cryptographic identity
@@ -153,11 +153,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
 | 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
-| 4. HTTP Transport Layer | 0/2 | Not started | - |
+| 4. HTTP Transport Layer | 2/2 | Complete | 2026-02-02 |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
 | 7. Documentation & Testing | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 3 execution complete*
+*Last updated: 2026-02-02 after Phase 4 execution complete*
