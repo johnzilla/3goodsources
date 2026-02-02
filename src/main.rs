@@ -1,5 +1,6 @@
 mod config;
 mod error;
+mod matcher;
 mod mcp;
 mod pubky;
 mod registry;
@@ -36,6 +37,16 @@ async fn main() -> anyhow::Result<()> {
     init_logging(&config.log_format);
 
     tracing::info!("Starting 3GS server");
+
+    // Load and validate match configuration
+    let match_config = matcher::MatchConfig::load()?;
+    match_config.validate()?;
+    tracing::info!(
+        threshold = match_config.match_threshold,
+        fuzzy_weight = match_config.match_fuzzy_weight,
+        keyword_weight = match_config.match_keyword_weight,
+        "Match configuration loaded"
+    );
 
     // Load and validate registry
     let _registry = registry::load(&config.registry_path).await?;
