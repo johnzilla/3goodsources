@@ -68,12 +68,11 @@ Plans:
   6. get_provenance returns curator info and verification instructions
   7. get_endorsements returns endorsements list (empty for v1)
   8. All JSON-RPC responses include jsonrpc: "2.0" field
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md -- MCP protocol foundation: JSON-RPC types, handler, initialize handshake, and dispatch
+- [ ] 03-02-PLAN.md -- TDD: Tool implementations (get_sources, list_categories, get_provenance, get_endorsements)
 
 ### Phase 4: HTTP Transport Layer
 **Goal**: Serve MCP protocol over HTTP POST with health/registry endpoints
@@ -153,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
-| 3. MCP Protocol Implementation | 0/TBD | Not started | - |
+| 3. MCP Protocol Implementation | 0/2 | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
