@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 1 of 7 (Foundation & Data Layer)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-02 — Completed 01-01-PLAN.md (Rust scaffold)
+Last activity: 2026-02-02 — Completed 01-02-PLAN.md (Registry loader)
 
-Progress: [███░░░░░░░] 33% (1/3 Phase 1 plans)
+Progress: [██████░░░░] 67% (2/3 Phase 1 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3 min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: 3.5 min
+- Total execution time: 0.12 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundation | 1 | 3 min | 3 min |
+| 1. Foundation | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last plan: 01-01 (3 min)
-- Trend: Baseline (first plan)
+- Last plan: 01-02 (4 min)
+- Previous: 01-01 (3 min)
+- Trend: Stable velocity
 
 *Updated after each plan completion*
 
@@ -47,6 +48,9 @@ Recent decisions affecting current work:
 - **HashMap for category storage** (01-01): Use HashMap<String, Category> keyed by slug for direct access instead of Vec.
 - **Strict serde validation** (01-01): Apply #[serde(deny_unknown_fields)] to ALL registry structs to catch schema violations early.
 - **Per-module error enums** (01-01): Each module (registry, mcp, pubky) has its own thiserror-based error enum.
+- **Environment config with envy** (01-02): Use envy for type-safe environment variable deserialization with dotenvy for .env support.
+- **Structured logging with format switching** (01-02): Support LOG_FORMAT env var to switch between pretty (dev) and json (prod) logging.
+- **Fail-fast validation** (01-02): Load registry on startup and crash with descriptive errors if invalid, rather than serving bad data.
 
 ### Pending Todos
 
@@ -65,6 +69,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T04:26:43Z — Completed 01-01-PLAN.md execution
-Stopped at: Completed 01-01-PLAN.md (Rust scaffold), ready for 01-02-PLAN.md
+Last session: 2026-02-02T04:33:17Z — Completed 01-02-PLAN.md execution
+Stopped at: Completed 01-02-PLAN.md (Registry loader), ready for 01-03-PLAN.md
 Resume file: None
