@@ -32,12 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Registry schema validates correctly (version, curator, categories, sources with rank 1-3)
   4. All 10 seed categories present with 3 researched sources each
   5. Structured logging outputs startup and registry load events
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md -- Scaffold Rust project with types, module structure, and dependencies
+- [ ] 01-02-PLAN.md -- Implement registry loader, validation, config, and structured logging
+- [ ] 01-03-PLAN.md -- Create registry.json seed data with 10 categories and 30 sources
 
 ### Phase 2: Query Matching Engine
 **Goal**: Implement fuzzy query matching that maps user queries to categories
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Layer | 0/TBD | Not started | - |
+| 1. Foundation & Data Layer | 0/3 | Planned | - |
 | 2. Query Matching Engine | 0/TBD | Not started | - |
 | 3. MCP Protocol Implementation | 0/TBD | Not started | - |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
@@ -161,4 +161,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-01 after initialization*
+*Last updated: 2026-02-01 after Phase 1 planning*
