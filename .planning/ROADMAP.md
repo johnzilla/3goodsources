@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Data Layer** - Project scaffolding, registry schema, and local JSON loading
 - [x] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
-- [ ] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
+- [x] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
 - [ ] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
 - [ ] **Phase 5: Identity & Provenance** - PKARR keypair generation and provenance tools
 - [ ] **Phase 6: Infrastructure & Deployment** - Docker build and Render deployment
@@ -71,8 +71,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- MCP protocol foundation: JSON-RPC types, handler, initialize handshake, and dispatch
-- [ ] 03-02-PLAN.md -- TDD: Tool implementations (get_sources, list_categories, get_provenance, get_endorsements)
+- [x] 03-01-PLAN.md -- MCP protocol foundation: JSON-RPC types, handler, initialize handshake, and dispatch
+- [x] 03-02-PLAN.md -- TDD: Tool implementations (get_sources, list_categories, get_provenance, get_endorsements)
 
 ### Phase 4: HTTP Transport Layer
 **Goal**: Serve MCP protocol over HTTP POST with health/registry endpoints
@@ -152,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Layer | 3/3 | Complete | 2026-02-02 |
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
-| 3. MCP Protocol Implementation | 0/2 | Not started | - |
+| 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
 | 4. HTTP Transport Layer | 0/TBD | Not started | - |
 | 5. Identity & Provenance | 0/TBD | Not started | - |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
@@ -160,4 +160,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 2 execution complete*
+*Last updated: 2026-02-02 after Phase 3 execution complete*

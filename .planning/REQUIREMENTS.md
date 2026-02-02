@@ -10,13 +10,13 @@ Requirements for initial release. Each maps to roadmap phases.
 ### MCP Server
 
 - [ ] **MCP-01**: Server accepts JSON-RPC 2.0 requests via HTTP POST at `/mcp`
-- [ ] **MCP-02**: `initialize` method returns protocol version, server info, and capabilities
-- [ ] **MCP-03**: `tools/list` method returns all available tools with input schemas
-- [ ] **MCP-04**: `tools/call` method dispatches to the correct tool handler and returns MCP content format
-- [ ] **MCP-05**: `get_sources` tool accepts a query string, fuzzy matches against category query_patterns, and returns the matching category's three ranked sources plus registry version and curator pubkey
-- [ ] **MCP-06**: `list_categories` tool returns all category slugs with their domain tags
-- [ ] **MCP-07**: `get_provenance` tool returns curator name, PKARR pubkey, registry version, endorsements list, and verification instructions
-- [ ] **MCP-08**: `get_endorsements` tool returns endorsed curators, optionally filtered by scope/domain
+- [x] **MCP-02**: `initialize` method returns protocol version, server info, and capabilities
+- [x] **MCP-03**: `tools/list` method returns all available tools with input schemas
+- [x] **MCP-04**: `tools/call` method dispatches to the correct tool handler and returns MCP content format
+- [x] **MCP-05**: `get_sources` tool accepts a query string, fuzzy matches against category query_patterns, and returns the matching category's three ranked sources plus registry version and curator pubkey
+- [x] **MCP-06**: `list_categories` tool returns all category slugs with their domain tags
+- [x] **MCP-07**: `get_provenance` tool returns curator name, PKARR pubkey, registry version, endorsements list, and verification instructions
+- [x] **MCP-08**: `get_endorsements` tool returns endorsed curators, optionally filtered by scope/domain
 
 ### Registry
 
@@ -110,13 +110,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MCP-01 | Phase 3 | Pending |
-| MCP-02 | Phase 3 | Pending |
-| MCP-03 | Phase 3 | Pending |
-| MCP-04 | Phase 3 | Pending |
-| MCP-05 | Phase 3 | Pending |
-| MCP-06 | Phase 3 | Pending |
-| MCP-07 | Phase 3 | Pending |
-| MCP-08 | Phase 3 | Pending |
+| MCP-02 | Phase 3 | Complete |
+| MCP-03 | Phase 3 | Complete |
+| MCP-04 | Phase 3 | Complete |
+| MCP-05 | Phase 3 | Complete |
+| MCP-06 | Phase 3 | Complete |
+| MCP-07 | Phase 3 | Complete |
+| MCP-08 | Phase 3 | Complete |
 | REG-01 | Phase 1 | Complete |
 | REG-02 | Phase 1 | Complete |
 | REG-03 | Phase 1 | Complete |
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 2 execution complete*
+*Last updated: 2026-02-02 after Phase 3 execution complete*
