@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "updated": "2026-02-01",
+  "curator": {
+    "name": "Test Curator",
+    "pubkey": "test_pubkey_placeholder"
+  },
+  "endorsements": [],
+  "categories": {
+    "rust-learning": {
+      "name": "Rust Learning",
+      "description": "Essential resources for learning Rust programming language",
+      "query_patterns": [
+        "learn rust",
+        "rust tutorial",
+        "rust beginner"
+      ],
+      "sources": [
+        {
+          "rank": 1,
+          "name": "The Rust Book",
+          "url": "https://doc.rust-lang.org/book/",
+          "type": "documentation",
+          "why": "Official Rust book with comprehensive coverage from basics to advanced topics"
+        },
+        {
+          "rank": 2,
+          "name": "Rust by Example",
+          "url": "https://doc.rust-lang.org/rust-by-example/",
+          "type": "tutorial",
+          "why": "Learn through practical examples with interactive code samples"
+        },
+        {
+          "rank": 3,
+          "name": "Rustlings",
+          "url": "https://github.com/rust-lang/rustlings",
+          "type": "tool",
+          "why": "Interactive exercises to learn Rust syntax and concepts hands-on"
+        }
+      ]
+    }
+  }
+}

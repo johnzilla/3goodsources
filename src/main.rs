@@ -36,10 +36,9 @@ async fn main() -> anyhow::Result<()> {
     init_logging(&config.log_format);
 
     tracing::info!("Starting 3GS server");
-    tracing::info!(
-        registry_path = %config.registry_path.display(),
-        "Registry path configured"
-    );
+
+    // Load and validate registry
+    let _registry = registry::load(&config.registry_path).await?;
 
     Ok(())
 }
