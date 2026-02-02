@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 2 of 7 (Query Matching Engine)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-02 — Completed 02-01-PLAN.md (Matcher scaffolding)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-02 — Completed 02-02-PLAN.md (Scoring engine)
 
-Progress: [████████░░] 50% (1/2 Phase 2 plans)
+Progress: [██████████] 100% (2/2 Phase 2 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3 min
-- Total execution time: 0.17 hours
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 3 | 9 min | 3 min |
-| 2. Query Matching | 1 | 2 min | 2 min |
+| 2. Query Matching | 2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last plan: 02-01 (2 min)
-- Previous: 01-03 (2 min)
+- Last plan: 02-02 (4 min)
+- Previous: 02-01 (2 min)
 - Trend: Consistent fast execution
 
 *Updated after each plan completion*
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - **Source curation standards** (01-03): Prioritize official documentation and primary sources over blog posts, include practical tools, use natural language query patterns.
 - **Separate MatchConfig** (02-01): Keep matching configuration separate from Config struct — distinct concerns with clear boundaries.
 - **Text normalization order** (02-01): lowercase -> strip punctuation -> remove stop words -> normalize whitespace is the canonical pipeline order.
+- **Fuzzy scoring surfaces** (02-02): Match query against query_patterns (normalized), slug with hyphens replaced by spaces, and category name lowercased. Do NOT match against description (too noisy).
+- **Weighted sum not multiplicative** (02-02): Use `(fuzzy_weight * fuzzy) + (keyword_weight * keyword)` for score combination. Weighted sum allows independent signal tuning and prevents one zero from killing score.
+- **TDD with atomic commits** (02-02): RED-GREEN-REFACTOR cycle with separate commits (test/feat/refactor) ensures clear history and revertable changes.
 
 ### Pending Todos
 
@@ -73,8 +76,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02T05:15:10Z — Completed 02-01-PLAN.md execution
-Stopped at: Phase 2 in progress (1/2 plans), ready for 02-02
+Last session: 2026-02-02T05:22:08Z — Completed 02-02-PLAN.md execution
+Stopped at: Phase 2 complete (2/2 plans), ready for Phase 3
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -82,6 +85,6 @@ Resume file: None
 - 01-02: Registry loader ✓
 - 01-03: Seed registry data ✓
 
-**Phase 2 Status:** In progress
+**Phase 2 Status:** Complete ✓
 - 02-01: Matcher scaffolding ✓
-- 02-02: Scoring engine (next)
+- 02-02: Scoring engine ✓
