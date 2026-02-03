@@ -42,9 +42,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Multi-stage Dockerfile: `rust:1.84-slim` builder, `debian:bookworm-slim` runtime with ca-certificates, exposes port 3000
-- [ ] **INFRA-02**: `render.yaml` for Render free tier deployment with env vars for RUST_LOG, PKARR_SECRET_KEY, PUBKY_HOMESERVER
-- [ ] **INFRA-03**: Static landing page at root explaining what 3GS is, how to connect, how to verify
+- [x] **INFRA-01**: Multi-stage Dockerfile: `rust:1.84-slim` builder, `debian:bookworm-slim` runtime with ca-certificates, exposes port 3000
+- [x] **INFRA-02**: `render.yaml` for Render paid tier deployment with env vars for RUST_LOG, PKARR_SECRET_KEY
+- [x] **INFRA-03**: Static landing page at root explaining what 3GS is, how to connect, how to verify
 - [ ] **INFRA-04**: CORS middleware (permissive for MVP)
 - [ ] **INFRA-05**: Structured logging via tracing/tracing-subscriber
 
@@ -130,9 +130,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENDP-01 | Phase 4 | Complete |
 | ENDP-02 | Phase 4 | Complete |
 | ENDP-03 | Phase 4 | Complete |
-| INFRA-01 | Phase 6 | Pending |
-| INFRA-02 | Phase 6 | Pending |
-| INFRA-03 | Phase 6 | Pending |
+| INFRA-01 | Phase 6 | Complete |
+| INFRA-02 | Phase 6 | Complete |
+| INFRA-03 | Phase 6 | Complete |
 | INFRA-04 | Phase 4 | Complete |
 | INFRA-05 | Phase 1 | Complete |
 | DOCS-01 | Phase 7 | Pending |
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-03 after Phase 5 execution complete*
+*Last updated: 2026-02-03 after Phase 6 execution complete*

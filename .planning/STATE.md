@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 6 - Infrastructure & Deployment
+**Current focus:** Phase 6 - Infrastructure & Deployment (Complete)
 
 ## Current Position
 
 Phase: 6 of 7 (Infrastructure & Deployment)
-Plan: 1 of 2 in current phase - In progress
-Status: In progress
-Last activity: 2026-02-03 — Completed 06-01-PLAN.md (Docker build & Render deployment)
+Plan: 2 of 2 in current phase - Complete
+Status: Phase complete
+Last activity: 2026-02-03 — Completed 06-02-PLAN.md (Landing page & DNS setup)
 
-Progress: [█████████████████] 86% (12/14 plans completed)
+Progress: [██████████████████] 100% (13/13 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 2.6 min
-- Total execution time: 0.8 hours
+- Total plans completed: 13
+- Average duration: 2.7 min
+- Total execution time: 0.9 hours
 
 **By Phase:**
 
@@ -32,12 +32,12 @@ Progress: [█████████████████] 86% (12/14 plans
 | 3. MCP Protocol | 2 | 7 min | 3.5 min |
 | 4. HTTP Transport | 2 | 3 min | 1.5 min |
 | 5. Identity Layer | 2 | 9 min | 4.5 min |
-| 6. Infrastructure | 1 | 4 min | 4 min |
+| 6. Infrastructure | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last plan: 06-01 (4 min)
-- Previous: 05-02 (6 min)
-- Trend: Phase 6 in progress, Docker build and Render deployment complete
+- Last plan: 06-02 (3 min)
+- Previous: 06-01 (4 min)
+- Trend: Phase 6 complete, all infrastructure deployed
 
 *Updated after each plan completion*
 
@@ -86,6 +86,7 @@ Recent decisions affecting current work:
 - **Rust 1.85 for edition 2024** (06-01): Use lukemathwalker/cargo-chef:latest-rust-1.85 for Docker builds. Edition 2024 requires Rust 1.85+, not available in 1.84.
 - **debian:bookworm-slim over Alpine** (06-01): Accept 133MB image size with debian base for better glibc compatibility vs Alpine's ~25MB musl libc. Prioritize production stability over size optimization.
 - **Baked registry.json with disk mount override** (06-01): COPY registry.json to /app/registry.json in Docker image as fallback. Render disk mount at /data/registry.json overrides in production for runtime updates.
+- **Simple URL-based MCP config** (06-02): Use `"url": "https://api.3gs.ai/mcp"` for MCP client config — cleaner than node command wrapper for HTTP POST MCP servers.
 
 ### Pending Todos
 
@@ -98,14 +99,16 @@ None yet.
 - axum 0.8 + tokio stack is standard Rust pattern
 - MCP protocol implementation will be manual (no mature Rust MCP library)
 
-**For future phases:**
-- Phase 5 (Identity): curve25519-dalek patch is temporary - remove when pkarr updates to stable dependencies
-- Phase 6 (Infrastructure): Render free tier 512MB RAM limit — enforce 10MB max registry size in Phase 1
+**Human verification needed for Phase 6:**
+- Render service deployment (create service, set PKARR_SECRET_KEY, trigger deploy)
+- Production API at api.3gs.ai (configure custom domain in Render)
+- End-to-end MCP request flow in production
+- Landing page links to live API endpoints
 
 ## Session Continuity
 
-Last session: 2026-02-03T02:38:45Z — Completed 06-01-PLAN.md execution
-Stopped at: Completed 06-01-PLAN.md (Docker build & Render deployment)
+Last session: 2026-02-03 — Completed Phase 6 execution
+Stopped at: Phase 6 complete, pending human verification for production deployment
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -129,8 +132,10 @@ Resume file: None
 - 05-01: Identity module foundation ✓
 - 05-02: Server integration ✓
 
-**Phase 6 Status:** In progress
+**Phase 6 Status:** Complete ✓ (human verification pending for production)
 - 06-01: Docker build & Render deployment ✓
-- 06-02: Landing page & DNS setup (next)
+- 06-02: Landing page & DNS setup ✓
 
-**Next:** Phase 6-02 - Landing page and DNS configuration
+**Next Phase:** Phase 7 - Documentation & Testing
+- README.md, SCHEMA.md, METHODOLOGY.md, PUBKY.md
+- Query matching tests, MCP protocol tests, registry loading tests
