@@ -50,16 +50,28 @@ async fn main() -> anyhow::Result<()> {
         "Match configuration loaded"
     );
 
+    // Generate or load PKARR keypair for server identity
+    let keypair = crate::pubky::identity::generate_or_load_keypair(
+        config.pkarr_secret_key.as_deref()
+    )?;
+    let public_key = keypair.public_key();
+    tracing::info!(
+        pubkey = %public_key.to_z32(),
+        "Server identity initialized"
+    );
+
     // Load and validate registry
     let registry = Arc::new(registry::load(&config.registry_path).await?);
 
     // Create MCP handler with shared registry and match config
-    let mcp_handler = mcp::McpHandler::new(Arc::clone(&registry), match_config);
+    let pubkey_z32 = public_key.to_z32();
+    let mcp_handler = mcp::McpHandler::new(Arc::clone(&registry), match_config, pubkey_z32);
 
     // Build application state
     let app_state = Arc::new(server::AppState {
         mcp_handler,
         registry,
+        pubkey: public_key,
     });
 
     // Build router with routes and middleware
