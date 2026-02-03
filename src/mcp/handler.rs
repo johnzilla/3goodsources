@@ -10,14 +10,16 @@ pub struct McpHandler {
     initialized: Arc<AtomicBool>,
     registry: Arc<Registry>,
     match_config: MatchConfig,
+    pubkey_z32: String,
 }
 
 impl McpHandler {
-    pub fn new(registry: Arc<Registry>, match_config: MatchConfig) -> Self {
+    pub fn new(registry: Arc<Registry>, match_config: MatchConfig, pubkey_z32: String) -> Self {
         Self {
             initialized: Arc::new(AtomicBool::new(false)),
             registry,
             match_config,
+            pubkey_z32,
         }
     }
 
@@ -134,6 +136,7 @@ impl McpHandler {
             call_params.arguments,
             &self.registry,
             &self.match_config,
+            &self.pubkey_z32,
         ) {
             Ok(result) => Some(self.serialize_response(JsonRpcResponse::success(id, result))),
             Err(ToolCallError::UnknownTool) => {
@@ -170,7 +173,7 @@ mod tests {
             match_keyword_weight: 0.3,
         };
 
-        McpHandler::new(Arc::new(registry), match_config)
+        McpHandler::new(Arc::new(registry), match_config, "test-pubkey-z32".to_string())
     }
 
     #[test]

@@ -80,11 +80,12 @@ pub fn handle_tool_call(
     arguments: Option<Value>,
     registry: &Registry,
     match_config: &MatchConfig,
+    pubkey_z32: &str,
 ) -> Result<Value, ToolCallError> {
     match name {
         "get_sources" => tool_get_sources(arguments, registry, match_config),
         "list_categories" => tool_list_categories(arguments, registry),
-        "get_provenance" => tool_get_provenance(arguments, registry),
+        "get_provenance" => tool_get_provenance(arguments, registry, pubkey_z32),
         "get_endorsements" => tool_get_endorsements(arguments, registry),
         _ => Err(ToolCallError::UnknownTool),
     }
@@ -228,6 +229,7 @@ fn tool_list_categories(
 fn tool_get_provenance(
     arguments: Option<Value>,
     registry: &Registry,
+    pubkey_z32: &str,
 ) -> Result<Value, ToolCallError> {
     // Parse arguments if provided (should be empty object or None)
     if let Some(args) = arguments {
@@ -235,16 +237,10 @@ fn tool_get_provenance(
             serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?;
     }
 
-    let pubkey = if registry.curator.pubkey.is_empty() {
-        "Not yet configured".to_string()
-    } else {
-        registry.curator.pubkey.clone()
-    };
-
     let text = format!(
         "Curator: {}\nPublic Key: {}\nRegistry Version: {}\nLast Updated: {}\nEndorsements: {} endorsement(s)\n\nVerification:\nThis registry is curated by {}. Source authenticity can be verified\nusing the PKARR public key above. Each source is manually researched\nand vetted for quality. The registry is cryptographically signed to\nprevent tampering.",
         registry.curator.name,
-        pubkey,
+        pubkey_z32,
         registry.version,
         registry.updated,
         registry.endorsements.len(),
