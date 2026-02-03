@@ -30,9 +30,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Identity
 
-- [ ] **IDENT-01**: Server generates or loads a PKARR keypair on startup
-- [ ] **IDENT-02**: Private key stored via `PKARR_SECRET_KEY` environment variable, never committed to repo
-- [ ] **IDENT-03**: Public key included in provenance responses and health endpoint
+- [x] **IDENT-01**: Server generates or loads a PKARR keypair on startup
+- [x] **IDENT-02**: Private key stored via `PKARR_SECRET_KEY` environment variable, never committed to repo
+- [x] **IDENT-03**: Public key included in provenance responses and health endpoint
 
 ### Endpoints
 
@@ -124,9 +124,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REG-05 | Phase 2 | Complete |
 | REG-06 | Phase 2 | Complete |
 | REG-07 | Phase 2 | Complete |
-| IDENT-01 | Phase 5 | Pending |
-| IDENT-02 | Phase 5 | Pending |
-| IDENT-03 | Phase 5 | Pending |
+| IDENT-01 | Phase 5 | Complete |
+| IDENT-02 | Phase 5 | Complete |
+| IDENT-03 | Phase 5 | Complete |
 | ENDP-01 | Phase 4 | Complete |
 | ENDP-02 | Phase 4 | Complete |
 | ENDP-03 | Phase 4 | Complete |
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 4 execution complete*
+*Last updated: 2026-02-03 after Phase 5 execution complete*

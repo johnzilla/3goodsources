@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Query Matching Engine** - Fuzzy search with Levenshtein distance and keyword boosting
 - [x] **Phase 3: MCP Protocol Implementation** - JSON-RPC 2.0 handling and tool dispatch
 - [x] **Phase 4: HTTP Transport Layer** - axum server with endpoints and CORS middleware
-- [ ] **Phase 5: Identity & Provenance** - PKARR keypair generation and provenance tools
+- [x] **Phase 5: Identity & Provenance** - PKARR keypair generation and provenance tools
 - [ ] **Phase 6: Infrastructure & Deployment** - Docker build and Render deployment
 - [ ] **Phase 7: Documentation & Testing** - Final docs and comprehensive test suite
 
@@ -104,8 +104,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Identity module with keypair generation and Config secret key field
-- [ ] 05-02-PLAN.md -- Wire pubkey into AppState, health endpoint, and get_provenance tool
+- [x] 05-01-PLAN.md -- Identity module with keypair generation and Config secret key field
+- [x] 05-02-PLAN.md -- Wire pubkey into AppState, health endpoint, and get_provenance tool
 
 ### Phase 6: Infrastructure & Deployment
 **Goal**: Deploy to Render free tier with Docker and static landing page
@@ -155,10 +155,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Query Matching Engine | 2/2 | Complete | 2026-02-02 |
 | 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
 | 4. HTTP Transport Layer | 2/2 | Complete | 2026-02-02 |
-| 5. Identity & Provenance | 0/2 | Not started | - |
+| 5. Identity & Provenance | 2/2 | Complete | 2026-02-03 |
 | 6. Infrastructure & Deployment | 0/TBD | Not started | - |
 | 7. Documentation & Testing | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-02 after Phase 4 execution complete*
+*Last updated: 2026-02-03 after Phase 5 execution complete*
