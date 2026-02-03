@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use pkarr::PublicKey;
 use serde_json::json;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
@@ -14,6 +15,7 @@ use tower_http::cors::CorsLayer;
 pub struct AppState {
     pub mcp_handler: McpHandler,
     pub registry: Arc<Registry>,
+    pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
 }
 
 /// Build the axum router with all routes and middleware
@@ -46,10 +48,13 @@ async fn mcp_endpoint(
 }
 
 /// GET /health - Health check endpoint
-async fn health_endpoint() -> Json<serde_json::Value> {
+async fn health_endpoint(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     Json(json!({
         "status": "ok",
-        "version": env!("CARGO_PKG_VERSION")
+        "version": env!("CARGO_PKG_VERSION"),
+        "pubkey": state.pubkey.to_z32()
     }))
 }
 
