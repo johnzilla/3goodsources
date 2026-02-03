@@ -9,6 +9,8 @@ anyhow = "1.0.100"
 axum = "0.8"
 dotenvy = "0.15.7"
 envy = "0.4.2"
+hex = "0.4"
+pkarr = { version = "5.0", default-features = false, features = ["keys"] }
 regex = "1.12.2"
 schemars = { version = "1", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
@@ -20,6 +22,11 @@ tokio = { version = "1.49.0", features = ["full"] }
 tower-http = { version = "0.6", features = ["cors"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter", "json", "fmt"] }
+
+# Workaround for pkarr 5.0.2 dependency issues with pre-release curve25519-dalek
+# Patch to use compatible git version that compiles
+[patch.crates-io]
+curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", branch = "main" }
 
 [dev-dependencies]
 approx = "0.5"

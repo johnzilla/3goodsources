@@ -1,5 +1,8 @@
 #[derive(Debug, thiserror::Error)]
 pub enum PubkyError {
-    #[error("Pubky not implemented")]
-    NotImplemented,
+    #[error("Invalid secret key: {0}")]
+    InvalidSecretKey(&'static str),
+
+    #[error("Hex decode error: {0}")]
+    HexDecode(#[from] hex::FromHexError),
 }
