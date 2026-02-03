@@ -108,22 +108,21 @@ Plans:
 - [x] 05-02-PLAN.md -- Wire pubkey into AppState, health endpoint, and get_provenance tool
 
 ### Phase 6: Infrastructure & Deployment
-**Goal**: Deploy to Render free tier with Docker and static landing page
+**Goal**: Deploy to Render paid tier with Docker and static landing page at 3gs.ai
 **Depends on**: Phase 5
 **Requirements**: INFRA-01, INFRA-02, INFRA-03
 **Success Criteria** (what must be TRUE):
-  1. Multi-stage Dockerfile builds successfully (<20MB image)
+  1. Multi-stage Dockerfile builds successfully (<50MB image)
   2. Docker container runs locally and accepts MCP requests
-  3. render.yaml deploys to Render free tier
+  3. render.yaml deploys to Render paid tier
   4. Static landing page served at root (/) explains 3GS and connection
-  5. Production server responds at 3gs.ai domain
+  5. Production server responds at api.3gs.ai domain
   6. Health endpoint returns version and pubkey in production
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md -- Docker build infrastructure and Render deployment config
+- [ ] 06-02-PLAN.md -- Static landing page and DNS setup documentation
 
 ### Phase 7: Documentation & Testing
 **Goal**: Complete documentation and comprehensive test suite
@@ -156,9 +155,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. MCP Protocol Implementation | 2/2 | Complete | 2026-02-02 |
 | 4. HTTP Transport Layer | 2/2 | Complete | 2026-02-02 |
 | 5. Identity & Provenance | 2/2 | Complete | 2026-02-03 |
-| 6. Infrastructure & Deployment | 0/TBD | Not started | - |
+| 6. Infrastructure & Deployment | 0/2 | Not started | - |
 | 7. Documentation & Testing | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-03 after Phase 5 execution complete*
+*Last updated: 2026-02-02 after Phase 6 planning complete*
