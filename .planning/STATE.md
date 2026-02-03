@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 5 - Identity & Provenance Layer
+**Current focus:** Phase 6 - Infrastructure & Deployment
 
 ## Current Position
 
-Phase: 5 of 7 (Identity & Provenance Layer)
-Plan: 2 of 2 in current phase - Complete
-Status: Phase complete
-Last activity: 2026-02-03 — Completed 05-02-PLAN.md (Server identity integration)
+Phase: 6 of 7 (Infrastructure & Deployment)
+Plan: 1 of 2 in current phase - In progress
+Status: In progress
+Last activity: 2026-02-03 — Completed 06-01-PLAN.md (Docker build & Render deployment)
 
-Progress: [███████████████] 100% (11/11 plans completed)
+Progress: [█████████████████] 86% (12/14 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 2.5 min
-- Total execution time: 0.75 hours
+- Total plans completed: 12
+- Average duration: 2.6 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
@@ -32,11 +32,12 @@ Progress: [███████████████] 100% (11/11 plans comp
 | 3. MCP Protocol | 2 | 7 min | 3.5 min |
 | 4. HTTP Transport | 2 | 3 min | 1.5 min |
 | 5. Identity Layer | 2 | 9 min | 4.5 min |
+| 6. Infrastructure | 1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last plan: 05-02 (6 min)
-- Previous: 05-01 (3 min)
-- Trend: Phase 5 complete, all core functionality implemented
+- Last plan: 06-01 (4 min)
+- Previous: 05-02 (6 min)
+- Trend: Phase 6 in progress, Docker build and Render deployment complete
 
 *Updated after each plan completion*
 
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - **MCP layer pubkey isolation** (05-02): Pass pubkey as z-base-32 String through MCP layer instead of importing pkarr types. Keeps MCP protocol layer independent of cryptography implementation.
 - **Live server pubkey in get_provenance** (05-02): Replace registry.curator.pubkey with live server pubkey in get_provenance tool. Server identity matters for verification, not static registry metadata.
 - **Keypair generation in startup sequence** (05-02): Generate keypair after logging init (so warnings visible) but before Registry loading and McpHandler construction. Ensures identity available when building dependent components.
+- **Rust 1.85 for edition 2024** (06-01): Use lukemathwalker/cargo-chef:latest-rust-1.85 for Docker builds. Edition 2024 requires Rust 1.85+, not available in 1.84.
+- **debian:bookworm-slim over Alpine** (06-01): Accept 133MB image size with debian base for better glibc compatibility vs Alpine's ~25MB musl libc. Prioritize production stability over size optimization.
+- **Baked registry.json with disk mount override** (06-01): COPY registry.json to /app/registry.json in Docker image as fallback. Render disk mount at /data/registry.json overrides in production for runtime updates.
 
 ### Pending Todos
 
@@ -100,8 +104,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-03T01:30:02Z — Completed 05-02-PLAN.md execution
-Stopped at: Phase 5 complete, all core application functionality implemented
+Last session: 2026-02-03T02:38:45Z — Completed 06-01-PLAN.md execution
+Stopped at: Completed 06-01-PLAN.md (Docker build & Render deployment)
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -125,7 +129,8 @@ Resume file: None
 - 05-01: Identity module foundation ✓
 - 05-02: Server integration ✓
 
-**Next Phase:** Phase 6 - Infrastructure & Deployment
-- Docker containerization
-- Render deployment configuration
-- Production environment setup
+**Phase 6 Status:** In progress
+- 06-01: Docker build & Render deployment ✓
+- 06-02: Landing page & DNS setup (next)
+
+**Next:** Phase 6-02 - Landing page and DNS configuration
