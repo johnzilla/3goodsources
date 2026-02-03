@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 4 - HTTP Transport Layer
+**Current focus:** Phase 5 - Identity & Provenance Layer
 
 ## Current Position
 
-Phase: 4 of 7 (HTTP Transport Layer)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-02 — Completed 04-02-PLAN.md (Main integration and server startup)
+Phase: 5 of 7 (Identity & Provenance Layer)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-03 — Completed 05-01-PLAN.md (Identity module foundation)
 
-Progress: [█████████████] 90% (9/10 plans completed)
+Progress: [██████████████] 91% (10/11 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 2.2 min
+- Total plans completed: 10
+- Average duration: 2.3 min
 - Total execution time: 0.7 hours
 
 **By Phase:**
@@ -31,11 +31,12 @@ Progress: [█████████████] 90% (9/10 plans completed)
 | 2. Query Matching | 2 | 6 min | 3 min |
 | 3. MCP Protocol | 2 | 7 min | 3.5 min |
 | 4. HTTP Transport | 2 | 3 min | 1.5 min |
+| 5. Identity Layer | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last plan: 04-02 (2 min)
-- Previous: 04-01 (1 min)
-- Trend: Fast execution on infrastructure setup
+- Last plan: 05-01 (3 min)
+- Previous: 04-02 (2 min)
+- Trend: Consistent velocity across all phases
 
 *Updated after each plan completion*
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - **String extractor for request body** (04-01): POST /mcp handler uses String extractor for body instead of Json<Value> - McpHandler needs raw JSON for its own parsing logic.
 - **Arc wrapping for shared state** (04-02): Wrap registry in Arc immediately after loading, before constructing McpHandler. Enables shared ownership between AppState and handler without data cloning.
 - **Early logging for startup feedback** (04-02): Log "Server listening on {addr}" before TcpListener::bind for immediate user feedback. Port conflicts clearer when user sees intended port in logs.
+- **Use pkarr with curve25519-dalek patch** (05-01): Use pkarr crate with [patch.crates-io] to override curve25519-dalek with git main branch. Fixes pre-release dependency compilation issues while maintaining PKARR compatibility.
+- **Hex encoding for secret keys** (05-01): Use 64-character hex encoding for PKARR_SECRET_KEY environment variable. Human-readable, widely supported, easy to validate (exactly 2 chars per byte).
+- **Optional Config field with no validation** (05-01): Make pkarr_secret_key Option<String> with validation in identity module, not config module. Separation of concerns - Config loads env vars, identity validates and uses them.
 
 ### Pending Todos
 
@@ -87,13 +91,13 @@ None yet.
 - MCP protocol implementation will be manual (no mature Rust MCP library)
 
 **For future phases:**
-- Phase 5 (Identity): PKARR keypair generation — verify ed25519-dalek crate availability during Phase 4 planning
+- Phase 5 (Identity): curve25519-dalek patch is temporary - remove when pkarr updates to stable dependencies
 - Phase 6 (Infrastructure): Render free tier 512MB RAM limit — enforce 10MB max registry size in Phase 1
 
 ## Session Continuity
 
-Last session: 2026-02-02T14:46:04Z — Completed 04-02-PLAN.md execution
-Stopped at: Phase 4 complete, HTTP MCP server fully functional
+Last session: 2026-02-03T01:20:28Z — Completed 05-01-PLAN.md execution
+Stopped at: Phase 5 Plan 1 complete, identity module foundation ready
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -113,4 +117,8 @@ Resume file: None
 - 04-01: HTTP server foundation ✓
 - 04-02: Main integration and server startup ✓
 
-**Next Phase:** Phase 5 - Identity Layer (PKARR keypair generation and signing)
+**Phase 5 Status:** In progress
+- 05-01: Identity module foundation ✓
+- 05-02: Server integration (next)
+
+**Next Plan:** Phase 5 Plan 2 - Server integration with AppState and health endpoint
