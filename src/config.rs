@@ -13,6 +13,11 @@ pub struct Config {
     /// Server port. Defaults to 3000. Set via PORT env var (required by Render).
     #[serde(default = "default_port")]
     pub port: u16,
+
+    /// Optional PKARR secret key (64-char hex string = 32 bytes).
+    /// If not set, server generates an ephemeral keypair on startup.
+    /// Set via PKARR_SECRET_KEY environment variable for persistent identity.
+    pub pkarr_secret_key: Option<String>,
 }
 
 fn default_log_format() -> String {
