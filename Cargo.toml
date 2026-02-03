@@ -30,3 +30,10 @@ curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dal
 
 [dev-dependencies]
 approx = "0.5"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

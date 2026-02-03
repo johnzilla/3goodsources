@@ -1,0 +1,26 @@
+# Exclude build artifacts
+target/
+
+# Exclude version control
+.git/
+.gitignore
+
+# Exclude planning documents
+.planning/
+
+# Exclude environment files (secrets)
+.env
+.env.*
+
+# Exclude local development files
+*.swp
+*.swo
+*~
+
+# Exclude documentation
+README.md
+LICENSE
+docs/
+
+# Exclude test directories
+tests/
