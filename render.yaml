@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: three-good-sources-api
+    runtime: docker
+    region: oregon
+    plan: starter
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: REGISTRY_PATH
+        value: /data/registry.json
+      - key: LOG_FORMAT
+        value: json
+      - key: PORT
+        value: "3000"
+      - key: RUST_LOG
+        value: info
+      - key: PKARR_SECRET_KEY
+        sync: false
+    disk:
+      name: registry-data
+      mountPath: /data
+      sizeGB: 1
