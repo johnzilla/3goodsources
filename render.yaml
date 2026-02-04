@@ -2,7 +2,7 @@ services:
   - type: web
     name: three-good-sources-api
     runtime: docker
-    region: oregon
+    region: ohio
     plan: starter
     branch: main
     healthCheckPath: /health
