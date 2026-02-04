@@ -137,11 +137,13 @@ Plans:
   6. Query matching tests verify unrelated queries fail appropriately
   7. MCP protocol tests validate all JSON-RPC message formats
   8. Registry loading tests confirm correct parsing and validation
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md -- Comprehensive README.md (concept, quickstart, API, MCP tools, architecture)
+- [ ] 07-02-PLAN.md -- Deep-dive docs (SCHEMA.md, METHODOLOGY.md, PUBKY.md)
+- [ ] 07-03-PLAN.md -- Test infrastructure and registry loading integration tests
+- [ ] 07-04-PLAN.md -- MCP protocol and query matching integration tests
 
 ## Progress
 
@@ -156,8 +158,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. HTTP Transport Layer | 2/2 | Complete | 2026-02-02 |
 | 5. Identity & Provenance | 2/2 | Complete | 2026-02-03 |
 | 6. Infrastructure & Deployment | 2/2 | Complete | 2026-02-03 |
-| 7. Documentation & Testing | 0/TBD | Not started | - |
+| 7. Documentation & Testing | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-03 after Phase 6 execution complete*
+*Last updated: 2026-02-03 after Phase 7 planning complete*
