@@ -30,6 +30,7 @@ curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dal
 
 [dev-dependencies]
 approx = "0.5"
+reqwest = { version = "0.12", features = ["json"] }
 
 [profile.release]
 opt-level = "z"

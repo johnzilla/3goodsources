@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 6 - Infrastructure & Deployment (Complete)
+**Current focus:** Phase 7 - Documentation & Testing
 
 ## Current Position
 
-Phase: 6 of 7 (Infrastructure & Deployment)
-Plan: 2 of 2 in current phase - Complete
-Status: Phase complete
-Last activity: 2026-02-03 — Completed 06-02-PLAN.md (Landing page & DNS setup)
+Phase: 7 of 7 (Documentation & Testing)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-04 — Completed 07-01-PLAN.md (Comprehensive project README)
 
-Progress: [██████████████████] 100% (13/13 plans completed)
+Progress: [██████████████████▓] 93% (14/15 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 2.7 min
-- Total execution time: 0.9 hours
+- Total plans completed: 14
+- Average duration: 2.6 min
+- Total execution time: 0.95 hours
 
 **By Phase:**
 
@@ -33,11 +33,12 @@ Progress: [██████████████████] 100% (13/13 p
 | 4. HTTP Transport | 2 | 3 min | 1.5 min |
 | 5. Identity Layer | 2 | 9 min | 4.5 min |
 | 6. Infrastructure | 2 | 7 min | 3.5 min |
+| 7. Documentation | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last plan: 06-02 (3 min)
-- Previous: 06-01 (4 min)
-- Trend: Phase 6 complete, all infrastructure deployed
+- Last plan: 07-01 (2 min)
+- Previous: 06-02 (3 min)
+- Trend: Phase 7 started, documentation in progress
 
 *Updated after each plan completion*
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - **debian:bookworm-slim over Alpine** (06-01): Accept 133MB image size with debian base for better glibc compatibility vs Alpine's ~25MB musl libc. Prioritize production stability over size optimization.
 - **Baked registry.json with disk mount override** (06-01): COPY registry.json to /app/registry.json in Docker image as fallback. Render disk mount at /data/registry.json overrides in production for runtime updates.
 - **Simple URL-based MCP config** (06-02): Use `"url": "https://api.3gs.ai/mcp"` for MCP client config — cleaner than node command wrapper for HTTP POST MCP servers.
+- **Mermaid for architecture diagrams** (07-01): Use GitHub-native mermaid rendering in README.md for architecture visualization. No external images needed, version-controlled, renders in GitHub/GitLab/Obsidian.
+- **README is map, docs/ are territory** (07-01): README explains what/why/how briefly with links to SCHEMA.md/METHODOLOGY.md/PUBKY.md for complete documentation. Avoid duplication across docs.
 
 ### Pending Todos
 
@@ -107,8 +110,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-03 — Completed Phase 6 execution
-Stopped at: Phase 6 complete, pending human verification for production deployment
+Last session: 2026-02-04 — Phase 7 execution in progress
+Stopped at: Completed 07-01-PLAN.md (Comprehensive project README)
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -136,6 +139,8 @@ Resume file: None
 - 06-01: Docker build & Render deployment ✓
 - 06-02: Landing page & DNS setup ✓
 
-**Next Phase:** Phase 7 - Documentation & Testing
-- README.md, SCHEMA.md, METHODOLOGY.md, PUBKY.md
-- Query matching tests, MCP protocol tests, registry loading tests
+**Phase 7 Status:** In progress
+- 07-01: Comprehensive project README ✓
+- 07-02: Registry schema documentation (pending)
+- 07-03: Methodology documentation (pending)
+- 07-04: PUBKY documentation (pending)
