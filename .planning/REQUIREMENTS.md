@@ -20,13 +20,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Registry
 
-- [ ] **REG-01**: Server loads registry from local `registry.json` file on startup into immutable in-memory state
-- [ ] **REG-02**: Registry JSON follows defined schema: version, updated date, curator info, endorsements array, categories map with query_patterns and ranked sources
-- [ ] **REG-03**: Registry contains 10 seed categories with 3 real, researched sources each
-- [ ] **REG-04**: Each source has rank (1-3), name, URL, type (documentation/tutorial/video/article/tool/repo/forum/book/course/api), and why field
-- [ ] **REG-05**: Query matching uses normalized Levenshtein distance (strsim crate) against all category query_patterns
-- [ ] **REG-06**: Keyword matching boosts score when query contains terms from category slug or patterns
-- [ ] **REG-07**: Match threshold of 0.4 — below threshold returns error with available categories and suggestion to request new categories via GitHub
+- [x] **REG-01**: Server loads registry from local `registry.json` file on startup into immutable in-memory state
+- [x] **REG-02**: Registry JSON follows defined schema: version, updated date, curator info, endorsements array, categories map with query_patterns and ranked sources
+- [x] **REG-03**: Registry contains 10 seed categories with 3 real, researched sources each
+- [x] **REG-04**: Each source has rank (1-3), name, URL, type (documentation/tutorial/video/article/tool/repo/forum/book/course/api), and why field
+- [x] **REG-05**: Query matching uses normalized Levenshtein distance (strsim crate) against all category query_patterns
+- [x] **REG-06**: Keyword matching boosts score when query contains terms from category slug or patterns
+- [x] **REG-07**: Match threshold of 0.4 — below threshold returns error with available categories and suggestion to request new categories via GitHub
 
 ### Identity
 
@@ -36,31 +36,31 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Endpoints
 
-- [ ] **ENDP-01**: `POST /mcp` — MCP JSON-RPC endpoint handling all MCP methods
-- [ ] **ENDP-02**: `GET /health` — returns 200 OK with version and PKARR pubkey
-- [ ] **ENDP-03**: `GET /registry` — returns raw registry JSON for transparency/debugging
+- [x] **ENDP-01**: `POST /mcp` — MCP JSON-RPC endpoint handling all MCP methods
+- [x] **ENDP-02**: `GET /health` — returns 200 OK with version and PKARR pubkey
+- [x] **ENDP-03**: `GET /registry` — returns raw registry JSON for transparency/debugging
 
 ### Infrastructure
 
 - [x] **INFRA-01**: Multi-stage Dockerfile: `rust:1.84-slim` builder, `debian:bookworm-slim` runtime with ca-certificates, exposes port 3000
 - [x] **INFRA-02**: `render.yaml` for Render paid tier deployment with env vars for RUST_LOG, PKARR_SECRET_KEY
 - [x] **INFRA-03**: Static landing page at root explaining what 3GS is, how to connect, how to verify
-- [ ] **INFRA-04**: CORS middleware (permissive for MVP)
-- [ ] **INFRA-05**: Structured logging via tracing/tracing-subscriber
+- [x] **INFRA-04**: CORS middleware (permissive for MVP)
+- [x] **INFRA-05**: Structured logging via tracing/tracing-subscriber
 
 ### Documentation
 
-- [ ] **DOCS-01**: README.md — project description, how it works, how to run locally, how to connect MCP client, how to verify registry, how to request categories, domains listed
-- [ ] **DOCS-02**: docs/SCHEMA.md — detailed registry.json format documentation
-- [ ] **DOCS-03**: docs/METHODOLOGY.md — source selection criteria, quality over quantity, transparency, verification
-- [ ] **DOCS-04**: docs/PUBKY.md — why Pubky, how verification works, how endorsements work, future federated vision
+- [x] **DOCS-01**: README.md — project description, how it works, how to run locally, how to connect MCP client, how to verify registry, how to request categories, domains listed
+- [x] **DOCS-02**: docs/SCHEMA.md — detailed registry.json format documentation
+- [x] **DOCS-03**: docs/METHODOLOGY.md — source selection criteria, quality over quantity, transparency, verification
+- [x] **DOCS-04**: docs/PUBKY.md — why Pubky, how verification works, how endorsements work, future federated vision
 
 ### Testing
 
-- [ ] **TEST-01**: Query matching tests — queries hit expected categories (e.g., "learn rust" matches rust-learning)
-- [ ] **TEST-02**: Query matching tests — unrelated queries return no match (below threshold)
-- [ ] **TEST-03**: MCP protocol tests — initialize, tools/list, tools/call return correct JSON-RPC responses
-- [ ] **TEST-04**: Registry loading tests — local registry.json loads and parses correctly
+- [x] **TEST-01**: Query matching tests — queries hit expected categories (e.g., "learn rust" matches rust-learning)
+- [x] **TEST-02**: Query matching tests — unrelated queries return no match (below threshold)
+- [x] **TEST-03**: MCP protocol tests — initialize, tools/list, tools/call return correct JSON-RPC responses
+- [x] **TEST-04**: Registry loading tests — local registry.json loads and parses correctly
 
 ## v2 Requirements
 
@@ -135,14 +135,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-03 | Phase 6 | Complete |
 | INFRA-04 | Phase 4 | Complete |
 | INFRA-05 | Phase 1 | Complete |
-| DOCS-01 | Phase 7 | Pending |
-| DOCS-02 | Phase 7 | Pending |
-| DOCS-03 | Phase 7 | Pending |
-| DOCS-04 | Phase 7 | Pending |
-| TEST-01 | Phase 7 | Pending |
-| TEST-02 | Phase 7 | Pending |
-| TEST-03 | Phase 7 | Pending |
-| TEST-04 | Phase 7 | Pending |
+| DOCS-01 | Phase 7 | Complete |
+| DOCS-02 | Phase 7 | Complete |
+| DOCS-03 | Phase 7 | Complete |
+| DOCS-04 | Phase 7 | Complete |
+| TEST-01 | Phase 7 | Complete |
+| TEST-02 | Phase 7 | Complete |
+| TEST-03 | Phase 7 | Complete |
+| TEST-04 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 34 total
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-03 after Phase 6 execution complete*
+*Last updated: 2026-02-03 after Phase 7 execution complete — ALL REQUIREMENTS SATISFIED*
