@@ -9,7 +9,7 @@ services:
     autoDeploy: true
     envVars:
       - key: REGISTRY_PATH
-        value: /data/registry.json
+        value: /app/registry.json
       - key: LOG_FORMAT
         value: json
       - key: PORT
@@ -18,7 +18,3 @@ services:
         value: info
       - key: PKARR_SECRET_KEY
         sync: false
-    disk:
-      name: registry-data
-      mountPath: /data
-      sizeGB: 1
