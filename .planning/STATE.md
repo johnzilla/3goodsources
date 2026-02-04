@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 7 of 7 (Documentation & Testing)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-04 — Completed 07-01-PLAN.md (Comprehensive project README)
+Last activity: 2026-02-04 — Completed 07-03-PLAN.md (Test Infrastructure & Registry Integration Tests)
 
-Progress: [██████████████████▓] 93% (14/15 plans completed)
+Progress: [███████████████████▓] 98% (15/15 plans completed)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 2.6 min
-- Total execution time: 0.95 hours
+- Total execution time: 1.0 hours
 
 **By Phase:**
 
@@ -33,12 +33,12 @@ Progress: [██████████████████▓] 93% (14/15
 | 4. HTTP Transport | 2 | 3 min | 1.5 min |
 | 5. Identity Layer | 2 | 9 min | 4.5 min |
 | 6. Infrastructure | 2 | 7 min | 3.5 min |
-| 7. Documentation | 1 | 2 min | 2 min |
+| 7. Documentation | 3 | 6 min | 2 min |
 
 **Recent Trend:**
-- Last plan: 07-01 (2 min)
-- Previous: 06-02 (3 min)
-- Trend: Phase 7 started, documentation in progress
+- Last plan: 07-03 (2 min)
+- Previous: 07-01 (2 min)
+- Trend: Phase 7 nearing completion, testing infrastructure complete
 
 *Updated after each plan completion*
 
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - **Simple URL-based MCP config** (06-02): Use `"url": "https://api.3gs.ai/mcp"` for MCP client config — cleaner than node command wrapper for HTTP POST MCP servers.
 - **Mermaid for architecture diagrams** (07-01): Use GitHub-native mermaid rendering in README.md for architecture visualization. No external images needed, version-controlled, renders in GitHub/GitLab/Obsidian.
 - **README is map, docs/ are territory** (07-01): README explains what/why/how briefly with links to SCHEMA.md/METHODOLOGY.md/PUBKY.md for complete documentation. Avoid duplication across docs.
+- **reqwest 0.12 for integration tests** (07-03): Use reqwest 0.12 (not 0.13) to match axum 0.8's hyper 1.x dependency - ensures consistent HTTP stack across test and production code.
+- **Ephemeral test keypairs** (07-03): Test helper generates random keypair (no PKARR_SECRET_KEY env var) - test isolation without external state.
+- **compile-time registry loading in tests** (07-03): Use include_str!("../../registry.json") for test fixtures - eliminates filesystem dependency and ensures tests use exact registry from source tree.
 
 ### Pending Todos
 
@@ -111,7 +114,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-04 — Phase 7 execution in progress
-Stopped at: Completed 07-01-PLAN.md (Comprehensive project README)
+Stopped at: Completed 07-03-PLAN.md (Test Infrastructure & Registry Integration Tests)
 Resume file: None
 
 **Phase 1 Status:** Complete ✓
@@ -141,6 +144,6 @@ Resume file: None
 
 **Phase 7 Status:** In progress
 - 07-01: Comprehensive project README ✓
-- 07-02: Registry schema documentation (pending)
-- 07-03: Methodology documentation (pending)
-- 07-04: PUBKY documentation (pending)
+- 07-02: Registry schema documentation ✓
+- 07-03: Test Infrastructure & Registry Integration Tests ✓
+- 07-04: TBD (pending)
