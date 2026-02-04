@@ -43,7 +43,7 @@ graph LR
 **Run locally:**
 
 ```bash
-git clone https://github.com/yourusername/3goodsources.git
+git clone https://github.com/johnzilla/3goodsources.git
 cd 3goodsources
 
 # Configure (or use defaults from .env.example)

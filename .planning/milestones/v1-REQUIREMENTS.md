@@ -1,4 +1,12 @@
-# Requirements: Three Good Sources (3GS)
+# Requirements Archive: v1 MVP
+
+**Archived:** 2026-02-03
+**Status:** SHIPPED
+
+This is the archived requirements specification for v1.
+For current requirements, see `.planning/REQUIREMENTS.md` (created for next milestone).
+
+---
 
 **Defined:** 2026-02-01
 **Core Value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
@@ -38,7 +46,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **ENDP-01**: `POST /mcp` — MCP JSON-RPC endpoint handling all MCP methods
 - [x] **ENDP-02**: `GET /health` — returns 200 OK with version and PKARR pubkey
-- [x] **ENDP-03**: `GET /registry` — returns raw registry JSON for transparency/debugging
+- [x] **ENDP-03**: `GET /registry` — returns raw registry JSON for transparency
 
 ### Infrastructure
 
@@ -62,50 +70,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TEST-03**: MCP protocol tests — initialize, tools/list, tools/call return correct JSON-RPC responses
 - [x] **TEST-04**: Registry loading tests — local registry.json loads and parses correctly
 
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
-
-### Pubky Integration
-
-- **PUBKY-01**: Publish registry to Pubky homeserver at `/3gs/registry`
-- **PUBKY-02**: Registry automatically signed by PKARR key on publish
-- **PUBKY-03**: Endorsements published as Pubky trust relationships scoped by domain tag
-- **PUBKY-04**: Agents can traverse trust graph to find curators for specific domains
-- **PUBKY-05**: Fallback to local registry when homeserver unreachable
-
-### Transport
-
-- **TRANS-01**: stdio transport for Claude Desktop native integration
-- **TRANS-02**: SSE (Streamable HTTP) transport per newer MCP standard
-
-### Advanced Features
-
-- **ADV-01**: Agent feedback loop (did the source help?)
-- **ADV-02**: Community voting on sources via Nostr/Pubky events
-- **ADV-03**: Multiple registries with trust graph traversal
-- **ADV-04**: Domain-specific forks (3gs-woodworking, 3gs-homestead)
-
-## Out of Scope
-
-Explicitly excluded. Documented to prevent scope creep.
-
-| Feature | Reason |
-|---------|--------|
-| Algorithmic ranking | Defeats human curation purpose — curator manually ranks top 3 |
-| User voting/stars | Becomes popularity contest, gameable — trust the curator |
-| Automated source discovery | Brings in SEO spam — manual curation only |
-| Search engine integration | Defeats anti-SEO purpose — curated patterns only |
-| ML recommendations | Black box, not transparent — explicit curator choices |
-| Dynamic content scraping | Fragile, maintenance nightmare — static URLs only |
-| Analytics/tracking | Privacy violation — no user tracking |
-| Source comments/discussion | Scope creep, moderation burden — curator picks sources |
-| Mobile app | Web landing page sufficient for MVP |
-| Routstr integration | Future pricing transparency, not MVP |
-
 ## Traceability
-
-Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -144,20 +109,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-03 | Phase 7 | Complete |
 | TEST-04 | Phase 7 | Complete |
 
-**Coverage:**
-- v1 requirements: 34 total
-- Mapped to phases: 34
-- Unmapped: 0 (complete coverage)
+## Milestone Summary
 
-**By Phase:**
-- Phase 1 (Foundation & Data Layer): 5 requirements (REG-01, REG-02, REG-03, REG-04, INFRA-05)
-- Phase 2 (Query Matching Engine): 3 requirements (REG-05, REG-06, REG-07)
-- Phase 3 (MCP Protocol Implementation): 8 requirements (MCP-01 through MCP-08)
-- Phase 4 (HTTP Transport Layer): 4 requirements (ENDP-01, ENDP-02, ENDP-03, INFRA-04)
-- Phase 5 (Identity & Provenance): 3 requirements (IDENT-01, IDENT-02, IDENT-03)
-- Phase 6 (Infrastructure & Deployment): 3 requirements (INFRA-01, INFRA-02, INFRA-03)
-- Phase 7 (Documentation & Testing): 8 requirements (DOCS-01 through DOCS-04, TEST-01 through TEST-04)
+**Shipped:** 34 of 34 v1 requirements
+**Adjusted:**
+- INFRA-01: Used Rust 1.85 (not 1.84) due to edition 2024 requirement
+- INFRA-02: Used Render paid tier (starter) instead of free tier to avoid cold starts; omitted PUBKY_HOMESERVER (not used in v1)
+
+**Dropped:** None
 
 ---
-*Requirements defined: 2026-02-01*
-*Last updated: 2026-02-03 after Phase 7 execution complete — ALL REQUIREMENTS SATISFIED*
+*Archived: 2026-02-03 as part of v1 milestone completion*
