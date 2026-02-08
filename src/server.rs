@@ -2,13 +2,14 @@ use crate::mcp::McpHandler;
 use crate::registry::Registry;
 use axum::{
     extract::State,
-    http::{header, StatusCode},
+    http::{header, HeaderName, HeaderValue, Method, StatusCode},
     routing::{get, post},
     Json, Router,
 };
 use pkarr::PublicKey;
 use serde_json::json;
 use std::sync::Arc;
+use std::time::Duration;
 use tower_http::cors::CorsLayer;
 
 /// Application state shared across all route handlers
@@ -20,11 +21,24 @@ pub struct AppState {
 
 /// Build the axum router with all routes and middleware
 pub fn build_router(state: Arc<AppState>) -> Router {
+    let cors = CorsLayer::new()
+        .allow_origin([
+            "https://3gs.ai".parse::<HeaderValue>().unwrap(),
+            "https://api.3gs.ai".parse::<HeaderValue>().unwrap(),
+        ])
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
+        .expose_headers([
+            HeaderName::from_static("mcp-session-id"),
+            HeaderName::from_static("x-request-id"),
+        ])
+        .max_age(Duration::from_secs(3600));
+
     Router::new()
         .route("/mcp", post(mcp_endpoint))
         .route("/health", get(health_endpoint))
         .route("/registry", get(registry_endpoint))
-        .layer(CorsLayer::permissive())
+        .layer(cors)
         .with_state(state)
 }
 
