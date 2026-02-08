@@ -121,7 +121,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 10-01-PLAN.md -- DO app spec, Ansible provisioning playbook, and deployment verification
+- [x] 10-01-PLAN.md -- DO app spec, Ansible provisioning playbook, and deployment verification
 
 #### Phase 11: DNS Cutover & Decommission
 **Goal**: 3gs.ai and api.3gs.ai served from DigitalOcean
@@ -157,5 +157,5 @@ Phases execute in numeric order: 8 → 9 → 10 → 11
 | 7. Documentation & Deployment | v1.0 | 3/3 | Complete | 2026-02-03 |
 | 8. Tech Debt Cleanup | v1.1 | 2/2 | Complete | 2026-02-08 |
 | 9. CORS Hardening | v1.1 | 1/1 | Complete | 2026-02-08 |
-| 10. DigitalOcean Provisioning | v1.1 | 0/1 | Not started | - |
+| 10. DigitalOcean Provisioning | v1.1 | 1/1 | Complete | 2026-02-08 |
 | 11. DNS Cutover & Decommission | v1.1 | 0/1 | Not started | - |

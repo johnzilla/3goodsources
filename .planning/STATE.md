@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 10 - DigitalOcean Provisioning
+**Current focus:** Phase 11 - DNS Cutover & Decommission
 
 ## Current Position
 
-Phase: 9 of 11 (CORS Hardening)
+Phase: 10 of 11 (DigitalOcean Provisioning)
 Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-02-08 — Phase 9 complete (CORS hardened, all tests pass)
+Last activity: 2026-02-08 — Phase 10 complete (DO deployed, health verified)
 
-Progress: [█████████░░░░░░░░░░] 20/21 plans complete (95%)
+Progress: [█████████████████░░] 21/22 plans complete (95%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20 (v1.0: 17, v1.1: 3)
-- Average duration: ~191s (v1.1 average)
+- Total plans completed: 21 (v1.0: 17, v1.1: 4)
+- Average duration: ~179s (v1.1 average)
 - Total execution time: ~3 days (v1.0: 2026-02-01 → 2026-02-03)
 
 **By Phase (v1.0):**
@@ -42,12 +42,14 @@ Progress: [█████████░░░░░░░░░░] 20/21 plan
 | 8. Tech Debt Cleanup | 08-01 | 250s | 2 | 7 | Dead code removed, 0 warnings |
 | 8. Tech Debt Cleanup | 08-02 | 90s | 1 | 0 | Patch removal failed, documented |
 | 9. CORS Hardening | 09-01 | 143s | 2 | 2 | CORS hardened, 6 tests added |
+| 10. DO Provisioning | 10-01 | ~15min | 2 | 5 | DO deployed, health verified |
 
 **Recent Trend:**
 - v1.0 shipped in 3 days (17 plans)
-- v1.1 in progress: 3 plans complete (Phase 8 and 9 done)
+- v1.1 in progress: 4 plans complete (Phase 8, 9, and 10 done)
 - Phase 8 total: 340s (5.7 minutes)
 - Phase 9 total: 143s (2.4 minutes)
+- Phase 10 total: ~15min (interactive checkpoint)
 
 ## Accumulated Context
 
@@ -59,7 +61,7 @@ Recent decisions affecting current work:
 - Migrate from Render to DigitalOcean App Platform — consolidate infrastructure
 - Use Ansible for DO provisioning — consistent with existing DO project
 - Tech debt first, migration second — validate code changes on Render before infra migration
-- Keep Render alive during entire migration — rollback target
+- ~~Keep Render alive during entire migration — rollback target~~ Render decommissioned after DO proven healthy
 
 **Phase 08-01 decisions:**
 - Preserve score field with #[allow(dead_code)] - used in tests and valuable for debugging
@@ -77,6 +79,14 @@ Recent decisions affecting current work:
 - Use HeaderName for expose_headers (not HeaderValue) - tower-http 0.6 API requirement
 - Test expose-headers on actual requests, not preflight - correct CORS protocol behavior
 
+**Phase 10-01 decisions:**
+- DO source build from Dockerfile — simpler than GHCR, no registry setup needed
+- DO token in vault vars file instead of env var — matches existing Ansible workflow
+- PKARR_SECRET_KEY omitted from app spec — server generates ephemeral keypair
+- App named three-good-sources-api — DO naming constraints (no leading digits)
+- No vault encryption — gitignore sufficient for local-only secrets
+- Render decommissioned early — DO deployment proven healthy
+
 ### Pending Todos
 
 None yet.
@@ -92,16 +102,18 @@ None yet.
 - ✅ 6 integration tests validating CORS behavior added
 - ✅ Phase 9 complete - ready for DigitalOcean migration
 
-**Phase 10 (DO Provisioning):**
-- DNS provider for 3gs.ai unknown — need to confirm for cutover instructions
-- Ansible playbook needs DO API token — must handle secrets safely
+**Phase 10 (DO Provisioning) - RESOLVED:**
+- ✅ DO app deployed and healthy at three-good-sources-api-238s5.ondigitalocean.app
+- ✅ Ansible provisioning working with vault-based secrets
+- ✅ Render decommissioned (user deleted before phase completion)
 
 **Phase 11 (DNS Cutover):**
-- DNS propagation delays — lower TTL to 300s 24 hours before cutover
+- DNS provider for 3gs.ai unknown — need to confirm for cutover instructions
+- Render already decommissioned — skip decommission steps, focus on DNS + render.yaml cleanup
 
 ## Session Continuity
 
-Last session: 2026-02-08 (phase 9 execution)
-Stopped at: Phase 9 complete - CORS hardened and tested
+Last session: 2026-02-08 (phase 10 execution)
+Stopped at: Phase 10 complete - DO deployed and verified
 Resume file: None
-Next step: /gsd:plan-phase 10
+Next step: /gsd:plan-phase 11
