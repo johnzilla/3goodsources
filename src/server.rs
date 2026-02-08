@@ -12,6 +12,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
 
+const LANDING_HTML: &str = include_str!("../docs/index.html");
+
 /// Application state shared across all route handlers
 pub struct AppState {
     pub mcp_handler: McpHandler,
@@ -35,6 +37,7 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .max_age(Duration::from_secs(3600));
 
     Router::new()
+        .route("/", get(landing_page_endpoint))
         .route("/mcp", post(mcp_endpoint))
         .route("/health", get(health_endpoint))
         .route("/registry", get(registry_endpoint))
@@ -88,4 +91,9 @@ async fn registry_endpoint(
             format!(r#"{{"error":"Failed to serialize registry: {}"}}"#, e),
         ),
     }
+}
+
+/// GET / - Landing page endpoint
+async fn landing_page_endpoint() -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], &'static str) {
+    (StatusCode::OK, [(header::CONTENT_TYPE, "text/html; charset=utf-8")], LANDING_HTML)
 }
