@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 
 ## Current Position
 
-Phase: 10 of 11 (DigitalOcean Provisioning)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 — Phase 10 complete (DO deployed, health verified)
+Phase: 11 of 11 (DNS Cutover & Decommission)
+Plan: 2 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-08 — Plan 11-01 complete (landing page + domain prep)
 
-Progress: [█████████████████░░] 21/22 plans complete (95%)
+Progress: [█████████████████░░] 22/22 plans complete (100%)
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [█████████████████░░] 21/22 plan
 | 8. Tech Debt Cleanup | 08-02 | 90s | 1 | 0 | Patch removal failed, documented |
 | 9. CORS Hardening | 09-01 | 143s | 2 | 2 | CORS hardened, 6 tests added |
 | 10. DO Provisioning | 10-01 | ~15min | 2 | 5 | DO deployed, health verified |
+| 11. DNS Cutover | 11-01 | 165s | 2 | 3 | Landing page + domain prep |
 
 **Recent Trend:**
 - v1.0 shipped in 3 days (17 plans)
@@ -87,6 +88,11 @@ Recent decisions affecting current work:
 - No vault encryption — gitignore sufficient for local-only secrets
 - Render decommissioned early — DO deployment proven healthy
 
+**Phase 11-01 decisions:**
+- Compile-time HTML embedding with include_str! — same pattern as registry.json in tests, no runtime file I/O
+- DO app spec domains: api.3gs.ai (PRIMARY), 3gs.ai (ALIAS) — DO auto-provisions Let's Encrypt SSL
+- Remove render.yaml — Render decommissioned in Phase 10, config file no longer needed
+
 ### Pending Todos
 
 None yet.
@@ -113,7 +119,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-08 (phase 10 execution)
-Stopped at: Phase 10 complete - DO deployed and verified
+Last session: 2026-02-08 (phase 11 execution)
+Stopped at: Plan 11-01 complete - landing page and domain prep done
 Resume file: None
-Next step: /gsd:plan-phase 11
+Next step: Execute plan 11-02 (DNS cutover implementation)
