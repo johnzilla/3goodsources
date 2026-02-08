@@ -1,0 +1,40 @@
+name: three-good-sources-api
+region: nyc
+services:
+  - name: api
+    dockerfile_path: Dockerfile
+    github:
+      repo: johnzilla/3goodsources
+      branch: main
+      deploy_on_push: true
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 10
+      timeout_seconds: 3
+      success_threshold: 1
+      failure_threshold: 9
+    envs:
+      - key: REGISTRY_PATH
+        value: /app/registry.json
+        scope: RUN_TIME
+        type: GENERAL
+      - key: LOG_FORMAT
+        value: json
+        scope: RUN_TIME
+        type: GENERAL
+      - key: PORT
+        value: "3000"
+        scope: RUN_TIME
+        type: GENERAL
+      - key: RUST_LOG
+        value: info
+        scope: RUN_TIME
+        type: GENERAL
+      - key: PKARR_SECRET_KEY
+        value: PLACEHOLDER_SET_VIA_ANSIBLE
+        scope: RUN_TIME
+        type: SECRET

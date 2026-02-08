@@ -1,2 +1,5 @@
 /target
 .env
+
+# Ansible vault secrets (only .example is committed)
+ansible/vars/do-secrets.yml

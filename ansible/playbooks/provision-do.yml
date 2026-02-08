@@ -1,0 +1,56 @@
+---
+- name: Provision DigitalOcean App Platform application
+  hosts: localhost
+  connection: local
+  vars_files:
+    - ../vars/do-secrets.yml
+  tasks:
+    - name: Load app spec from file
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/../../.do/app.yaml"
+      register: app_spec_file
+
+    - name: Parse app spec YAML
+      ansible.builtin.set_fact:
+        app_spec: "{{ app_spec_file.content | b64decode | from_yaml }}"
+
+    - name: Inject secret environment variables
+      ansible.builtin.set_fact:
+        updated_envs: >-
+          {{
+            app_spec.services[0].envs | map('combine', {'value': pkarr_secret_key} if item.key == 'PKARR_SECRET_KEY' else {})
+          }}
+      loop: "{{ app_spec.services[0].envs }}"
+      loop_control:
+        loop_var: item
+
+    - name: Build final app spec with injected secrets
+      ansible.builtin.set_fact:
+        app_spec_with_secrets: >-
+          {{
+            app_spec | combine({
+              'services': [
+                app_spec.services[0] | combine({
+                  'envs': app_spec.services[0].envs | map('combine', {'value': pkarr_secret_key} if item.key == 'PKARR_SECRET_KEY' else {}) | list
+                })
+              ]
+            }, recursive=true)
+          }}
+      vars:
+        item: "{{ {} }}"
+
+    - name: Create or update App Platform application
+      digitalocean.cloud.app:
+        token: "{{ lookup('env', 'DIGITALOCEAN_TOKEN') }}"
+        state: present
+        spec: "{{ app_spec_with_secrets }}"
+        timeout: 600
+      register: app_result
+
+    - name: Display app deployment details
+      ansible.builtin.debug:
+        msg:
+          - "App deployed successfully!"
+          - "App ID: {{ app_result.app.id }}"
+          - "App URL: {{ app_result.app.default_ingress }}"
+          - "Status: {{ app_result.app.active_deployment.phase if app_result.app.active_deployment is defined else 'Deploying' }}"
