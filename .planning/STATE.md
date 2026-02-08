@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 8 - Tech Debt Cleanup
+**Current focus:** Phase 9 - CORS Hardening
 
 ## Current Position
 
-Phase: 8 of 11 (Tech Debt Cleanup)
-Plan: 2 of 2 in current phase
-Status: Complete
-Last activity: 2026-02-08 — Completed 08-02: curve25519-dalek patch removal attempt (documented failure, patch retained)
+Phase: 9 of 11 (CORS Hardening)
+Plan: 0 of 1 in current phase
+Status: Ready to plan
+Last activity: 2026-02-08 — Phase 8 complete (verification passed)
 
 Progress: [█████████░░░░░░░░░░] 19/21 plans complete (90%)
 
@@ -90,7 +90,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-08 (plan execution)
-Stopped at: Completed 08-02-PLAN.md (curve25519-dalek patch removal attempt)
+Last session: 2026-02-08 (phase 8 execution)
+Stopped at: Phase 8 verified and complete
 Resume file: None
-Next step: Phase 8 complete - proceed to Phase 09 (DigitalOcean App Platform configuration)
+Next step: /gsd:plan-phase 9

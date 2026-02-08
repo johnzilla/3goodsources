@@ -87,8 +87,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Dead code cleanup (unused imports, fields, functions, McpError enum, unused deps)
-- [ ] 08-02-PLAN.md -- Dependency patch removal (curve25519-dalek [patch.crates-io] single attempt)
+- [x] 08-01-PLAN.md -- Dead code cleanup (unused imports, fields, functions, McpError enum, unused deps)
+- [x] 08-02-PLAN.md -- Dependency patch removal (curve25519-dalek [patch.crates-io] single attempt — failed, patch retained)
 
 #### Phase 9: CORS Hardening
 **Goal**: Production-ready CORS configuration
@@ -155,7 +155,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11
 | 5. MCP Tools | v1.0 | 2/2 | Complete | 2026-02-02 |
 | 6. PKARR Identity | v1.0 | 2/2 | Complete | 2026-02-03 |
 | 7. Documentation & Deployment | v1.0 | 3/3 | Complete | 2026-02-03 |
-| 8. Tech Debt Cleanup | v1.1 | 0/2 | Not started | - |
+| 8. Tech Debt Cleanup | v1.1 | 2/2 | Complete | 2026-02-08 |
 | 9. CORS Hardening | v1.1 | 0/1 | Not started | - |
 | 10. DigitalOcean Provisioning | v1.1 | 0/1 | Not started | - |
 | 11. DNS Cutover & Decommission | v1.1 | 0/1 | Not started | - |
