@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Planning next milestone
+**Current focus:** v1.1 — Migrate to DigitalOcean + Tech Debt
 
 ## Current Position
 
-Phase: v1 complete (7 phases, 17 plans)
-Plan: Not started
-Status: Ready to plan next milestone
-Last activity: 2026-02-03 — v1 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-08 — Milestone v1.1 started
 
-Progress: [████████████████████] 100% v1 shipped
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0% v1.1
 
 ## Accumulated Context
 
@@ -40,8 +40,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-03 — v1 milestone archived
-Stopped at: Milestone completion
+Last session: 2026-02-08 — v1.1 milestone started
+Stopped at: Requirements definition
 Resume file: None
-
-**v1 SHIPPED. Next: /gsd:new-milestone for v2 planning.**

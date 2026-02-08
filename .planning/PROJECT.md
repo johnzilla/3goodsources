@@ -29,7 +29,16 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 
 ### Active
 
-(None — next milestone requirements defined via /gsd:new-milestone)
+## Current Milestone: v1.1 Migrate to DigitalOcean + Tech Debt
+
+**Goal:** Migrate live deployment from Render to DigitalOcean App Platform via DO API, clean up v1 tech debt (CORS, dependency patch, dead code).
+
+**Target features:**
+- DigitalOcean App Platform deployment via DO API (replace Render)
+- Live migration with DNS cutover for 3gs.ai and api.3gs.ai
+- Production-grade CORS configuration (replace permissive)
+- Fix curve25519-dalek fragile git patch dependency
+- Remove McpError dead code
 
 ### Out of Scope
 
@@ -52,13 +61,13 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - **Curator**: John Turner. Domains of expertise: security, bitcoin, maker, self-hosting.
 - **Source types**: documentation, tutorial, video, article, tool, repo, forum, book, course, api.
 - **Seed categories**: bitcoin-node-setup, self-hosted-email, rust-learning, home-automation-private, password-management, linux-hardening, threat-modeling, nostr-development, pubky-development, mcp-development.
-- **Current state**: v1 shipped. 3,016 lines of Rust. 72 tests passing. 10 categories, 30 sources. Docker + Render deployment ready. Landing page live.
+- **Current state**: v1 shipped and live. 3,016 lines of Rust. 72 tests passing. 10 categories, 30 sources. Live at 3gs.ai (landing) and api.3gs.ai (API), currently on Render.
 
 ## Constraints
 
 - **Language**: Rust — non-negotiable, this is a Rust project
 - **Framework**: axum 0.8 for HTTP, tokio for async runtime
-- **Deployment**: Render starter tier via Docker
+- **Deployment**: DigitalOcean App Platform via Docker (migrating from Render)
 - **MCP Transport**: HTTP POST only (no stdio, no SSE for MVP)
 - **Sources per category**: Always exactly 3 — quality over quantity, this is a hard rule
 - **Rust version**: 1.85+ required for edition 2024
@@ -78,5 +87,7 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 | Plain text MCP tool responses | Better agent parsing than markdown | ✓ Good — works well |
 | Permissive CORS for MVP | CorsLayer::permissive() allows all origins | ⚠️ Revisit — tighten for production |
 
+| Migrate from Render to DigitalOcean App Platform | Consolidate infrastructure — already running another project on DO | — Pending |
+
 ---
-*Last updated: 2026-02-03 after v1 milestone*
+*Last updated: 2026-02-08 after v1.1 milestone start*
