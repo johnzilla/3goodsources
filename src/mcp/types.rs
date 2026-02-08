@@ -98,12 +98,16 @@ pub struct JsonRpcError {
 }
 
 /// MCP initialize request parameters
+/// Fields are part of MCP protocol spec and used by serde deserialization
 #[derive(Debug, Clone, Deserialize)]
 pub struct InitializeParams {
     #[serde(rename = "protocolVersion")]
+    #[allow(dead_code)]
     pub protocol_version: String,
+    #[allow(dead_code)]
     pub capabilities: Value,
     #[serde(rename = "clientInfo")]
+    #[allow(dead_code)]
     pub client_info: Value,
 }
 
