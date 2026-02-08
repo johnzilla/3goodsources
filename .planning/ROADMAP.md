@@ -100,10 +100,10 @@ Plans:
   3. CorsLayer::permissive() removed from code
   4. Browser OPTIONS preflight requests succeed
   5. API deployed to Render with hardened CORS (validates before migration)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md -- Replace permissive CORS with explicit origin allowlist and add integration tests
 
 #### Phase 10: DigitalOcean Provisioning
 **Goal**: Working DO App Platform deployment in parallel with Render
@@ -156,6 +156,6 @@ Phases execute in numeric order: 8 → 9 → 10 → 11
 | 6. PKARR Identity | v1.0 | 2/2 | Complete | 2026-02-03 |
 | 7. Documentation & Deployment | v1.0 | 3/3 | Complete | 2026-02-03 |
 | 8. Tech Debt Cleanup | v1.1 | 2/2 | Complete | 2026-02-08 |
-| 9. CORS Hardening | v1.1 | 0/1 | Not started | - |
+| 9. CORS Hardening | v1.1 | 0/1 | Planning | - |
 | 10. DigitalOcean Provisioning | v1.1 | 0/1 | Not started | - |
 | 11. DNS Cutover & Decommission | v1.1 | 0/1 | Not started | - |
