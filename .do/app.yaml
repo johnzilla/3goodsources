@@ -34,7 +34,3 @@ services:
         value: info
         scope: RUN_TIME
         type: GENERAL
-      - key: PKARR_SECRET_KEY
-        value: PLACEHOLDER_SET_VIA_ANSIBLE
-        scope: RUN_TIME
-        type: SECRET
