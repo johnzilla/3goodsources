@@ -136,10 +136,11 @@ Plans:
   6. Render deployment decommissioned (resources deleted)
   7. render.yaml removed from git
   8. Git history verified clean of secrets
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md -- Add landing page route, update DO app spec with domains, remove render.yaml
+- [ ] 11-02-PLAN.md -- Deploy to DO, DNS cutover, verify SSL and endpoints, git secret scan
 
 ## Progress
 
@@ -158,4 +159,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11
 | 8. Tech Debt Cleanup | v1.1 | 2/2 | Complete | 2026-02-08 |
 | 9. CORS Hardening | v1.1 | 1/1 | Complete | 2026-02-08 |
 | 10. DigitalOcean Provisioning | v1.1 | 1/1 | Complete | 2026-02-08 |
-| 11. DNS Cutover & Decommission | v1.1 | 0/1 | Not started | - |
+| 11. DNS Cutover & Decommission | v1.1 | 0/2 | Not started | - |
