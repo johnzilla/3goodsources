@@ -85,18 +85,6 @@ impl JsonRpcResponse {
             "Server not initialized. Call initialize first.".to_string(),
         )
     }
-
-    /// MCP tool result with content array
-    pub fn tool_result(id: Value, text: String, is_error: bool) -> Self {
-        let result = serde_json::json!({
-            "content": [{
-                "type": "text",
-                "text": text
-            }],
-            "isError": is_error
-        });
-        Self::success(id, result)
-    }
 }
 
 /// JSON-RPC 2.0 error object
