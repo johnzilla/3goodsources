@@ -53,20 +53,20 @@ None deferred from this milestone.
 
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| DEPLOY-01 | — | — | pending |
-| DEPLOY-02 | — | — | pending |
-| DEPLOY-03 | — | — | pending |
-| DEPLOY-04 | — | — | pending |
-| DEPLOY-05 | — | — | pending |
-| DNS-01 | — | — | pending |
-| DNS-02 | — | — | pending |
-| DNS-03 | — | — | pending |
-| DNS-04 | — | — | pending |
-| CORS-01 | — | — | pending |
-| CORS-02 | — | — | pending |
-| DEPS-01 | — | — | pending |
-| DEPS-02 | — | — | pending |
-| CLEAN-01 | — | — | pending |
-| SEC-01 | — | — | pending |
-| SEC-02 | — | — | pending |
-| SEC-03 | — | — | pending |
+| DEPLOY-01 | Phase 10 | — | pending |
+| DEPLOY-02 | Phase 10 | — | pending |
+| DEPLOY-03 | Phase 10 | — | pending |
+| DEPLOY-04 | Phase 10 | — | pending |
+| DEPLOY-05 | Phase 10 | — | pending |
+| DNS-01 | Phase 11 | — | pending |
+| DNS-02 | Phase 11 | — | pending |
+| DNS-03 | Phase 11 | — | pending |
+| DNS-04 | Phase 11 | — | pending |
+| CORS-01 | Phase 9 | — | pending |
+| CORS-02 | Phase 9 | — | pending |
+| DEPS-01 | Phase 8 | — | pending |
+| DEPS-02 | Phase 8 | — | pending |
+| CLEAN-01 | Phase 8 | — | pending |
+| SEC-01 | Phase 10 | — | pending |
+| SEC-02 | Phase 10 | — | pending |
+| SEC-03 | Phase 11 | — | pending |
