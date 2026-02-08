@@ -16,10 +16,6 @@ pub enum RegistryError {
         column: usize,
     },
 
-    /// Duplicate category slug detected
-    #[error("Duplicate category slug: {0}")]
-    DuplicateSlug(String),
-
     /// Invalid category slug format
     #[error("Invalid category slug '{slug}': must be lowercase alphanumeric with hyphens")]
     InvalidSlug { slug: String },
