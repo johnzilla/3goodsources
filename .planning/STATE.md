@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 ## Current Position
 
 Phase: 9 of 11 (CORS Hardening)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-02-08 — Phase 8 complete (verification passed)
+Plan: 1 of 1 in current phase
+Status: Phase complete
+Last activity: 2026-02-08 — Phase 9 complete (CORS hardened, all tests pass)
 
-Progress: [█████████░░░░░░░░░░] 19/21 plans complete (90%)
+Progress: [█████████░░░░░░░░░░] 20/21 plans complete (95%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17 (v1.0 complete)
-- Average duration: Unknown (v1.1 starting)
+- Total plans completed: 20 (v1.0: 17, v1.1: 3)
+- Average duration: ~191s (v1.1 average)
 - Total execution time: ~3 days (v1.0: 2026-02-01 → 2026-02-03)
 
 **By Phase (v1.0):**
@@ -41,11 +41,13 @@ Progress: [█████████░░░░░░░░░░] 19/21 plan
 |-------|------|----------|-------|-------|--------|
 | 8. Tech Debt Cleanup | 08-01 | 250s | 2 | 7 | Dead code removed, 0 warnings |
 | 8. Tech Debt Cleanup | 08-02 | 90s | 1 | 0 | Patch removal failed, documented |
+| 9. CORS Hardening | 09-01 | 143s | 2 | 2 | CORS hardened, 6 tests added |
 
 **Recent Trend:**
 - v1.0 shipped in 3 days (17 plans)
-- v1.1 in progress: 2 plans complete (Phase 8 done)
+- v1.1 in progress: 3 plans complete (Phase 8 and 9 done)
 - Phase 8 total: 340s (5.7 minutes)
+- Phase 9 total: 143s (2.4 minutes)
 
 ## Accumulated Context
 
@@ -70,6 +72,11 @@ Recent decisions affecting current work:
 - Patch removal failed at compile time - crypto_common module not found in digest crate
 - Rollback successful - patch restored, all 72 tests passing with git dependency
 
+**Phase 09-01 decisions:**
+- Use explicit origin allowlist instead of permissive CORS - security hardening for production
+- Use HeaderName for expose_headers (not HeaderValue) - tower-http 0.6 API requirement
+- Test expose-headers on actual requests, not preflight - correct CORS protocol behavior
+
 ### Pending Todos
 
 None yet.
@@ -80,17 +87,21 @@ None yet.
 - ✅ curve25519-dalek patch removal attempted - build failed, patch retained
 - ✅ Phase 8 complete - all tech debt tasks finished
 
+**Phase 9 (CORS Hardening) - RESOLVED:**
+- ✅ CORS hardened with explicit origin allowlist (3gs.ai, api.3gs.ai)
+- ✅ 6 integration tests validating CORS behavior added
+- ✅ Phase 9 complete - ready for DigitalOcean migration
+
 **Phase 10 (DO Provisioning):**
 - DNS provider for 3gs.ai unknown — need to confirm for cutover instructions
 - Ansible playbook needs DO API token — must handle secrets safely
 
 **Phase 11 (DNS Cutover):**
 - DNS propagation delays — lower TTL to 300s 24 hours before cutover
-- CORS must work before cutover — Phase 9 critical
 
 ## Session Continuity
 
-Last session: 2026-02-08 (phase 8 execution)
-Stopped at: Phase 8 verified and complete
+Last session: 2026-02-08 (phase 9 execution)
+Stopped at: Phase 9 complete - CORS hardened and tested
 Resume file: None
-Next step: /gsd:plan-phase 9
+Next step: /gsd:plan-phase 10
