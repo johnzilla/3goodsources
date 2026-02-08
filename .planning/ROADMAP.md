@@ -118,10 +118,10 @@ Plans:
   6. Auto-deploy triggers on push to main branch
   7. No secrets committed to git (PKARR_SECRET_KEY, DO API token)
   8. Render deployment still running (rollback target)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md -- DO app spec, Ansible provisioning playbook, and deployment verification
 
 #### Phase 11: DNS Cutover & Decommission
 **Goal**: 3gs.ai and api.3gs.ai served from DigitalOcean
