@@ -11,6 +11,8 @@ pub struct MatchResult {
     /// The matched category slug
     pub slug: String,
     /// The match score (0.0 to 1.0)
+    /// Used in tests and available for debugging/logging
+    #[allow(dead_code)]
     pub score: f64,
     /// Clone of the matched category
     pub category: Category,
