@@ -96,6 +96,7 @@ Recent decisions affecting current work:
 - Remove render.yaml — Render decommissioned in Phase 10, config file no longer needed
 - [Phase 11]: Manual DNS cutover at checkpoint — DNS provider changes and SSL provisioning require human verification
 - [Phase 11]: Four-scan security audit — comprehensive git history scan for DO tokens, PKARR keys, and credentials (SEC-03 satisfied)
+- [Phase 11]: 3gs.ai promoted to PRIMARY domain, api.3gs.ai demoted to ALIAS — no need for separate subdomain when everything runs on same DO app
 
 ### Pending Todos
 

@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-03)
-- 🚧 **v1.1 Migrate to DigitalOcean + Tech Debt** - Phases 8-11 (in progress)
+- ✅ **v1.1 Migrate to DigitalOcean + Tech Debt** - Phases 8-11 (shipped 2026-02-09)
 
 ## Phases
 
@@ -71,7 +71,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.1 Migrate to DigitalOcean + Tech Debt (In Progress)
+### ✅ v1.1 Migrate to DigitalOcean + Tech Debt (Shipped 2026-02-09)
 
 **Milestone Goal:** Migrate live deployment from Render to DigitalOcean App Platform via Ansible, clean up v1 tech debt (CORS, dependency patch, dead code).
 
@@ -139,8 +139,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md -- Add landing page route, update DO app spec with domains, remove render.yaml
-- [ ] 11-02-PLAN.md -- Deploy to DO, DNS cutover, verify SSL and endpoints, git secret scan
+- [x] 11-01-PLAN.md -- Add landing page route, update DO app spec with domains, remove render.yaml
+- [x] 11-02-PLAN.md -- Deploy to DO, DNS cutover, verify SSL and endpoints, git secret scan
 
 ## Progress
 
@@ -159,4 +159,4 @@ Phases execute in numeric order: 8 → 9 → 10 → 11
 | 8. Tech Debt Cleanup | v1.1 | 2/2 | Complete | 2026-02-08 |
 | 9. CORS Hardening | v1.1 | 1/1 | Complete | 2026-02-08 |
 | 10. DigitalOcean Provisioning | v1.1 | 1/1 | Complete | 2026-02-08 |
-| 11. DNS Cutover & Decommission | v1.1 | 0/2 | Not started | - |
+| 11. DNS Cutover & Decommission | v1.1 | 2/2 | Complete | 2026-02-09 |
