@@ -221,7 +221,7 @@ Configure via environment variables (loaded from `.env` if present):
 | Variable             | Required | Default  | Description                                                              |
 |----------------------|----------|----------|--------------------------------------------------------------------------|
 | REGISTRY_PATH        | Yes      | —        | Path to registry.json file                                               |
-| PORT                 | No       | 3000     | Server port (required by Render deployment)                              |
+| PORT                 | No       | 3000     | Server port                                                              |
 | LOG_FORMAT           | No       | pretty   | Logging format: `pretty` (colored, dev) or `json` (structured, prod)     |
 | PKARR_SECRET_KEY     | No       | —        | 64-char hex string (32 bytes) for persistent identity. Generates ephemeral keypair if not set |
 | MATCH_THRESHOLD      | No       | 0.4      | Minimum match score (0.0-1.0) to return a result                         |
@@ -328,7 +328,7 @@ docker run -p 3000:3000 \
 
 The Dockerfile uses a multi-stage build (Rust 1.85 builder, debian:bookworm-slim runtime) optimized for production deployment.
 
-For deployment to Render, see `render.yaml` for service configuration.
+Deployed on DigitalOcean App Platform. See `.do/app.yaml` for app spec.
 
 ## License
 
