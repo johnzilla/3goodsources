@@ -100,7 +100,7 @@ openssl rand -hex 32
 
 **Store securely:**
 - In `.env` file (excluded from git via .gitignore)
-- In environment variables on production platform (e.g., Render)
+- In environment variables on production platform (e.g., DigitalOcean App Platform)
 - Never commit to version control
 
 ## Verification Guide
@@ -339,7 +339,7 @@ The PKARR foundation in v1 enables this future without committing to the full co
 
 **Production:**
 1. Generate secret key: `openssl rand -hex 32`
-2. Set `PKARR_SECRET_KEY=<output>` in Render environment
+2. Set `PKARR_SECRET_KEY=<output>` in production environment
 3. Deploy server
 4. Check `/health` → pubkey should be stable across deploys
 

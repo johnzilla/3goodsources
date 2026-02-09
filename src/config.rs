@@ -10,7 +10,7 @@ pub struct Config {
     #[serde(default = "default_log_format")]
     pub log_format: String,
 
-    /// Server port. Defaults to 3000. Set via PORT env var (required by Render).
+    /// Server port. Defaults to 3000. Set via PORT env var.
     #[serde(default = "default_port")]
     pub port: u16,
 
