@@ -17,10 +17,9 @@ target/
 *.swo
 *~
 
-# Exclude documentation
+# Exclude documentation (keep docs/index.html for include_str! in server.rs)
 README.md
 LICENSE
-docs/
 
 # Exclude test directories
 tests/

@@ -5,6 +5,7 @@ FROM lukemathwalker/cargo-chef:latest-rust-1.85 AS planner
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY src/ src/
+COPY docs/ docs/
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Stage 2: Builder - cache dependencies and build
@@ -53,7 +54,7 @@ USER appuser
 # Document exposed port
 EXPOSE 3000
 
-# Default environment variable (overridden by Render)
+# Default environment variable
 ENV REGISTRY_PATH=/app/registry.json
 
 # Run application
