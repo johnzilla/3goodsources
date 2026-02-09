@@ -1,10 +1,10 @@
 name: three-good-sources-api
 region: nyc
 domains:
-  - domain: api.3gs.ai
+  - domain: 3gs.ai
     type: PRIMARY
     minimum_tls_version: "1.2"
-  - domain: 3gs.ai
+  - domain: api.3gs.ai
     type: ALIAS
     minimum_tls_version: "1.2"
 services:
