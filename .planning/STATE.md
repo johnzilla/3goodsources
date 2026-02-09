@@ -2,17 +2,16 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-08)
+See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results — three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 11 - DNS Cutover & Decommission
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 11 of 11 (DNS Cutover & Decommission)
-Plan: 2 of 2 in current phase
-Status: Complete
-Last activity: 2026-02-09 — Plan 11-02 complete (DNS cutover & security verification) — Phase 11 COMPLETE
+Milestone: v1.1 complete (2026-02-09)
+Status: All milestones shipped — planning next
+Last activity: 2026-02-09 — v1.1 milestone archived, PROJECT.md evolved
 
 Progress: [████████████████████] 22/22 plans complete (100%)
 
