@@ -1,672 +1,629 @@
-# Domain Pitfalls: Rust MCP Server with Pubky Integration
+# Domain Pitfalls: v2.0 Community Curation Features
 
-**Domain:** MCP server (Rust) with decentralized identity (Pubky/PKARR)
-**Researched:** 2026-02-01
-**Confidence:** MEDIUM (based on MCP specification knowledge, Rust deployment patterns, and decentralized identity system design principles)
+**Domain:** Adding audit log, identity linking, and community contributions to existing Rust MCP server
+**Researched:** 2026-03-07
+**Confidence:** MEDIUM-HIGH (based on codebase analysis, cryptographic signing patterns, JSON storage pitfalls, and community system design)
 
 ## Critical Pitfalls
 
-Mistakes that cause complete failure, rewrites, or security breaches.
+Mistakes that cause data corruption, security breaches, or require rewrites.
 
-### Pitfall 1: JSON-RPC Protocol Violations Breaking MCP Clients
+### Pitfall 1: `deny_unknown_fields` Breaking Schema Evolution
 
-**What goes wrong:** MCP clients (Claude Desktop, IDEs) silently fail or reject the server because JSON-RPC responses don't match the spec.
+**What goes wrong:** The existing codebase uses `#[serde(deny_unknown_fields)]` on every struct in `registry/types.rs`. Any new JSON data files (audit_log.json, identities.json, contributions.json) using the same pattern will be unable to evolve their schemas without breaking deserialization of existing data.
 
 **Why it happens:**
-- Missing required `jsonrpc: "2.0"` field in every response
-- Returning `result` AND `error` in the same response (spec requires exactly one)
-- Using custom error codes instead of JSON-RPC standard codes (-32700 to -32603)
-- Not handling `id: null` for notifications properly
-- Missing required fields in capability negotiation (`protocolVersion`, `capabilities`, `serverInfo`)
+- Developer copies the pattern from existing types without considering forward compatibility
+- New fields added to audit log entries cause older entries (without those fields) to fail validation -- or worse, newer files with additional fields fail on older server versions
+- `deny_unknown_fields` is correct for the existing registry (strict contract), but wrong for append-only logs that accumulate entries over time
 
 **Consequences:**
-- Server appears "broken" in Claude Desktop but works in curl tests
-- No error messages (client just doesn't load the server)
-- Impossible to debug without packet capture
-- MVP completely fails to integrate with target clients
+- Adding a field to an audit log entry type means rewriting all historical entries or the server refuses to start
+- Cannot deploy a new server version until all JSON files are manually migrated
+- Append-only property violated (you must modify old entries to add new fields)
 
 **Prevention:**
 ```rust
-// WRONG: Missing jsonrpc field
-json!({ "result": data, "id": id })
-
-// RIGHT: Always include all required fields
-json!({
-    "jsonrpc": "2.0",
-    "result": data,
-    "id": id
-})
-
-// WRONG: Returning both result and error
-json!({ "jsonrpc": "2.0", "result": null, "error": {...}, "id": id })
-
-// RIGHT: Only one of result or error
-json!({ "jsonrpc": "2.0", "error": {...}, "id": id })
-```
-
-**Detection:**
-- Claude Desktop doesn't show server in list
-- MCP inspector tools show "invalid response"
-- Wireshark/tcpdump shows responses missing fields
-- Integration tests with real MCP clients fail
-
-**Phase mapping:** Must be addressed in Phase 1 (Core MCP). Create integration tests with real MCP client libraries, not just curl.
-
-### Pitfall 2: Private Key Leakage in Version Control
-
-**What goes wrong:** PKARR private keys (seed phrases or raw keys) get committed to git and pushed to GitHub.
-
-**Why it happens:**
-- Storing keys in `.env` files without proper `.gitignore`
-- Hardcoding test keys in source code
-- Logging key material during debugging
-- Accidentally committing `.env.example` with real keys instead of placeholders
-- Docker build copying all files including local key storage
-
-**Consequences:**
-- Anyone can impersonate the server's Pubky identity
-- Registry data can be modified by attackers
-- Complete loss of trust/reputation
-- No way to revoke (PKARR keys can't be rotated without new identity)
-
-**Prevention:**
-```bash
-# .gitignore - Add BEFORE creating any key files
-.env
-.env.local
-*.key
-*.pem
-keys/
-secrets/
-
-# Use environment variables, never hardcode
-# WRONG:
-const PRIVATE_KEY: &str = "a1b2c3...";
-
-# RIGHT:
-let private_key = env::var("PKARR_PRIVATE_KEY")
-    .expect("PKARR_PRIVATE_KEY must be set");
-```
-
-**Additional safeguards:**
-- Use git-secrets or gitleaks pre-commit hooks
-- Store keys in Render environment variables, not in code
-- Document key generation separately from deployment
-- Use different keys for development and production
-- Never log full keys (only last 4 chars for debugging)
-
-**Detection:**
-- Run `git log -p | grep -i "private\|key\|seed"` to scan history
-- Use GitHub secret scanning (will alert if keys pushed)
-- Check `.gitignore` before generating any keys
-
-**Phase mapping:** Address in Phase 0 (project setup). Create `.gitignore` and key management docs before writing any Pubky code.
-
-### Pitfall 3: Unbounded Registry Data Causing Memory Exhaustion
-
-**What goes wrong:** Server loads entire registry.json into memory, then crashes when file grows beyond available RAM (512MB on Render free tier).
-
-**Why it happens:**
-- Deserializing full JSON into heap-allocated structures
-- Not implementing streaming/pagination
-- Keeping all category data in memory for fuzzy matching
-- Render free tier has strict 512MB limit
-- Cold starts already consume 100-200MB for Rust binary
-
-**Consequences:**
-- Server crashes under load
-- OOM killer terminates process
-- No graceful degradation
-- MVP fails at modest scale (100+ categories, 1000+ sources)
-
-**Prevention:**
-```rust
-// WRONG: Load everything
-let registry: Registry = serde_json::from_str(&file_contents)?;
-
-// RIGHT: Implement size limits and streaming
-const MAX_REGISTRY_SIZE: usize = 10 * 1024 * 1024; // 10MB
-if file_contents.len() > MAX_REGISTRY_SIZE {
-    return Err("Registry too large");
-}
-
-// Consider lazy loading or pagination for large datasets
-// Keep only indexes in memory, load full data on demand
-```
-
-**Memory budget planning:**
-- Rust binary: ~100-150MB
-- Registry data: limit to 50MB parsed
-- Request buffers: 20MB
-- Remaining: 292MB for heap/stack
-- **Total: Stay under 512MB**
-
-**Detection:**
-- Monitor `mem_usage` in Render metrics
-- Load test with large registry files locally
-- Set up alerts for >400MB usage
-- Test with `ulimit -v 512000` locally
-
-**Phase mapping:** Address in Phase 1 (Core MCP). Implement size limits and streaming before deploying to Render.
-
-### Pitfall 4: Pubky SDK Breaking Changes Without Versioning
-
-**What goes wrong:** Pubky SDK releases breaking API changes, server code stops compiling or behaves incorrectly.
-
-**Why it happens:**
-- Pubky is pre-1.0, no semver guarantees
-- Homeserver protocol changes break clients
-- Rust SDK might reorganize modules or change function signatures
-- No LTS releases or compatibility guarantees
-
-**Consequences:**
-- `cargo update` breaks builds
-- Deployed server can't communicate with homeservers
-- No clear migration path
-- Feature development blocked by SDK issues
-
-**Prevention:**
-
-**Pin exact versions in Cargo.toml:**
-```toml
-# WRONG: Allow patch updates
-pubky = "0.1"
-
-# RIGHT: Pin exact version
-pubky = "=0.1.3"
-```
-
-**Create abstraction layer:**
-```rust
-// Isolate Pubky SDK behind a trait
-pub trait IdentityProvider {
-    fn verify_identity(&self, id: &str) -> Result<bool>;
-    fn publish_data(&self, data: &[u8]) -> Result<()>;
-}
-
-// Implement for Pubky
-pub struct PubkyIdentity { /* ... */ }
-impl IdentityProvider for PubkyIdentity { /* ... */ }
-
-// Implement local fallback
-pub struct LocalIdentity { /* ... */ }
-impl IdentityProvider for LocalIdentity { /* ... */ }
-```
-
-**Benefits:**
-- SDK changes only affect one module
-- Easy to swap implementations
-- Can test without Pubky infrastructure
-- Graceful degradation if Pubky unavailable
-
-**Detection:**
-- Pin versions and only update intentionally
-- Subscribe to Pubky SDK changelog/releases
-- Test against SDK updates in separate branch first
-- Monitor homeserver status pages
-
-**Phase mapping:** Address in Phase 2 (Pubky Integration). Create abstraction layer from the start, don't tightly couple to SDK.
-
-### Pitfall 5: CORS Misconfiguration Blocking Browser Clients
-
-**What goes wrong:** Browser-based MCP clients can't connect because CORS headers are missing or wrong.
-
-**Why it happens:**
-- Assuming MCP is server-to-server only (but some clients are browser-based)
-- Setting `Access-Control-Allow-Origin: *` but missing other required headers
-- Not handling OPTIONS preflight requests
-- Blocking `Content-Type: application/json` in preflight
-
-**Consequences:**
-- Browser clients show "CORS error" in console
-- Server logs show 200 OK but client never receives data
-- curl works fine but browsers fail
-- Impossible to use web-based MCP tools
-
-**Prevention:**
-```rust
-// Required CORS headers for MCP
-response.headers_mut().insert(
-    "Access-Control-Allow-Origin",
-    "*".parse().unwrap() // Or specific origins if needed
-);
-response.headers_mut().insert(
-    "Access-Control-Allow-Methods",
-    "POST, OPTIONS".parse().unwrap()
-);
-response.headers_mut().insert(
-    "Access-Control-Allow-Headers",
-    "Content-Type".parse().unwrap()
-);
-
-// Handle OPTIONS preflight
-if request.method() == Method::OPTIONS {
-    return Ok(Response::builder()
-        .status(204)
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        .header("Access-Control-Allow-Headers", "Content-Type")
-        .body(Body::empty())?);
-}
-```
-
-**Detection:**
-- Test with browser fetch() API, not just curl
-- Check browser DevTools console for CORS errors
-- Verify OPTIONS requests return 204 with correct headers
-- Use online CORS checkers
-
-**Phase mapping:** Address in Phase 1 (Core MCP). Add CORS from the start, easier than retrofitting.
-
-## Moderate Pitfalls
-
-Mistakes that cause delays, technical debt, or degraded UX.
-
-### Pitfall 6: Fuzzy Matching Too Aggressive (False Positives)
-
-**What goes wrong:** Query "cat" matches "authentication" and "communication" because both contain "cat".
-
-**Why it happens:**
-- Using simple substring matching instead of word boundaries
-- Levenshtein distance threshold too high
-- Not weighting match position (prefix vs suffix vs middle)
-- Not considering query intent
-
-**Consequences:**
-- Users get irrelevant categories
-- Trust in recommendations decreases
-- "It's faster to browse than search" (search becomes useless)
-
-**Prevention:**
-```rust
-// WRONG: Simple substring
-category.name.contains(&query)
-
-// BETTER: Word boundary aware
-let words: Vec<&str> = category.name.split_whitespace().collect();
-words.iter().any(|w| w.starts_with(&query))
-
-// BEST: Weighted scoring
-fn match_score(query: &str, category: &str) -> f32 {
-    if category.starts_with(query) { return 1.0; }
-    if category.contains(&format!(" {}", query)) { return 0.8; }
-    if category.contains(query) { return 0.5; }
-    // Levenshtein distance for fuzzy matching
-    let distance = levenshtein(query, category);
-    if distance <= 2 { return 0.3; }
-    0.0
-}
-```
-
-**Detection:**
-- Test with common queries (cat, car, test, data)
-- Ask users "Was this relevant?" feedback
-- Monitor match score distribution
-- A/B test different thresholds
-
-**Phase mapping:** Address in Phase 3 (Fuzzy Matching). Start with simple prefix matching, iterate based on usage.
-
-### Pitfall 7: Cold Start Times Exceeding 30 Seconds on Render
-
-**What goes wrong:** First request after idle takes 30+ seconds, users think server is down.
-
-**Why it happens:**
-- Render free tier spins down after 15 minutes idle
-- Rust binary size is large (20-50MB)
-- Docker image pull is slow
-- Registry loading happens synchronously on startup
-
-**Consequences:**
-- Poor UX for first user of the day
-- Timeout errors in MCP clients
-- Appears unreliable/broken
-
-**Prevention:**
-
-**Optimize Docker image size:**
-```dockerfile
-# Use multi-stage build
-FROM rust:1.75 AS builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
-
-# Use minimal runtime
-FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/server /usr/local/bin/
-CMD ["server"]
-```
-
-**Lazy load registry:**
-```rust
-// WRONG: Load on startup
-let registry = load_registry().await?;
-server.start(registry).await?;
-
-// RIGHT: Load on first request
-lazy_static! {
-    static ref REGISTRY: Mutex<Option<Registry>> = Mutex::new(None);
-}
-
-async fn get_registry() -> &'static Registry {
-    let mut reg = REGISTRY.lock().unwrap();
-    if reg.is_none() {
-        *reg = Some(load_registry().await);
-    }
-    reg.as_ref().unwrap()
-}
-```
-
-**External keep-alive:**
-- Set up UptimeRobot or similar to ping every 5 minutes
-- Prevents Render from spinning down
-- Free tier allows this
-
-**Detection:**
-- Measure time from container start to first successful request
-- Monitor Render deployment logs for startup time
-- Test after 20+ minutes of no traffic
-
-**Phase mapping:** Address in Phase 4 (Render Deployment). Optimize only after core functionality works.
-
-### Pitfall 8: Missing Error Context in JSON-RPC Errors
-
-**What goes wrong:** Client receives `{"error": {"code": -32603, "message": "Internal error"}}` with no actionable information.
-
-**Why it happens:**
-- Catching all errors and returning generic message
-- Not including `error.data` field with details
-- Afraid to leak internal details (overly defensive)
-
-**Consequences:**
-- Debugging is impossible without server logs
-- Users can't fix client-side issues
-- Support burden increases
-
-**Prevention:**
-```rust
-// WRONG: Generic error
-Err(Error {
-    code: -32603,
-    message: "Internal error".into(),
-    data: None,
-})
-
-// RIGHT: Specific error with context
-Err(Error {
-    code: -32602, // Invalid params
-    message: "Query parameter too long".into(),
-    data: Some(json!({
-        "max_length": 200,
-        "actual_length": query.len(),
-        "field": "query"
-    })),
-})
-```
-
-**Balance security and debuggability:**
-- Include constraints (max length, allowed values)
-- Don't include stack traces or file paths
-- Log full error server-side, return sanitized version to client
-
-**Detection:**
-- Trigger each error condition and check response
-- Verify `error.data` provides actionable information
-- Test error messages with non-developer users
-
-**Phase mapping:** Address in Phase 1 (Core MCP). Define error types early, easier than retrofitting.
-
-### Pitfall 9: Registry Malformed JSON Not Validated on Load
-
-**What goes wrong:** Server loads registry.json with missing fields or invalid data, then crashes on first query.
-
-**Why it happens:**
-- Trusting `serde_json` to validate everything
-- Not checking business rules (unique slugs, valid URLs)
-- Assuming human-edited JSON is always correct
-
-**Consequences:**
-- Server starts successfully but crashes on queries
-- Difficult to debug (error happens far from root cause)
-- No clear error message about which entry is malformed
-
-**Prevention:**
-```rust
+// WRONG for evolving data: strict rejection
 #[derive(Deserialize)]
-struct Category {
-    slug: String,
-    name: String,
-    sources: Vec<Source>,
+#[serde(deny_unknown_fields)]
+pub struct AuditEntry {
+    pub timestamp: String,
+    pub action: String,
 }
 
-fn validate_registry(registry: &Registry) -> Result<(), ValidationError> {
-    // Check for duplicate slugs
-    let mut seen_slugs = HashSet::new();
-    for category in &registry.categories {
-        if !seen_slugs.insert(&category.slug) {
-            return Err(ValidationError::DuplicateSlug(category.slug.clone()));
-        }
+// RIGHT for append-only data: use defaults for new optional fields
+#[derive(Deserialize)]
+pub struct AuditEntry {
+    pub timestamp: String,
+    pub action: String,
+    #[serde(default)]  // Old entries without this field still load
+    pub metadata: Option<serde_json::Value>,
+}
 
-        // Validate slug format
-        if !category.slug.chars().all(|c| c.is_alphanumeric() || c == '-') {
-            return Err(ValidationError::InvalidSlug(category.slug.clone()));
-        }
+// Keep deny_unknown_fields ONLY on registry types (stable schema)
+```
 
-        // Validate source URLs
-        for source in &category.sources {
-            Url::parse(&source.url)
-                .map_err(|_| ValidationError::InvalidUrl(source.url.clone()))?;
+**Detection:** Add integration tests that load audit log fixtures from "v1" and "v2" schema versions to verify backward compatibility.
+
+**Phase mapping:** Address in the first phase that defines new data types. Decision must be made before any JSON files are written to disk.
+
+---
+
+### Pitfall 2: Audit Log Signatures Not Actually Verifiable
+
+**What goes wrong:** The server claims audit entries are "signed with PKARR" but the signature doesn't cover a well-defined, canonicalized payload, making verification impossible or trivially forgeable.
+
+**Why it happens:**
+- Signing the pretty-printed JSON string (whitespace changes = different signature)
+- Not defining a canonical serialization order (serde_json HashMap iteration order is non-deterministic)
+- Signing only part of the entry (timestamp but not content, or content but not timestamp)
+- Using the existing `pkarr` crate which currently only has the `keys` feature enabled -- it provides `Keypair` and `PublicKey` but signing arbitrary messages requires `ed25519-dalek` directly or enabling additional features
+- The current codebase claims "cryptographically signed to prevent tampering" in MCP tool responses but no actual signing is implemented
+
+**Consequences:**
+- Signatures verify on the server that created them but fail on any other implementation
+- Third parties cannot independently verify the audit log
+- The "signed" claim becomes security theater, undermining the entire trust model
+- If JSON field ordering changes between serde versions, all existing signatures break
+
+**Prevention:**
+```rust
+// Define a canonical format for signing
+// Option A: Sort keys, compact JSON (no whitespace)
+fn canonicalize(entry: &AuditEntry) -> Vec<u8> {
+    // Use serde_json with sorted keys
+    let value = serde_json::to_value(entry).unwrap();
+    let sorted = sort_json_keys(&value);
+    serde_json::to_vec(&sorted).unwrap()  // Compact, no pretty print
+}
+
+// Option B: Sign a specific concatenation of fields (simpler, more robust)
+fn sign_payload(entry: &AuditEntry) -> Vec<u8> {
+    format!("{}|{}|{}|{}", entry.version, entry.timestamp, entry.action, entry.target)
+        .into_bytes()
+}
+
+// Use ed25519-dalek directly for signing (pkarr wraps it)
+use ed25519_dalek::{Signer, SigningKey};
+let signature = signing_key.sign(&canonicalize(&entry));
+```
+
+**Detection:** Write a verification test that serializes, signs, deserializes, re-serializes, and verifies. If this round-trip test fails, canonicalization is broken.
+
+**Phase mapping:** Must be addressed in the audit log phase. Define the signing format specification BEFORE writing any entries. Document the canonical format so third parties can verify.
+
+---
+
+### Pitfall 3: Hash Chain Gaps Destroying Audit Log Integrity
+
+**What goes wrong:** The append-only audit log uses a hash chain (each entry references the hash of the previous entry) but gaps or out-of-order entries silently corrupt the chain.
+
+**Why it happens:**
+- Curator edits the JSON file manually and accidentally deletes an entry or reorders them
+- JSON array ordering not preserved during manual editing (copy-paste errors)
+- No validation that the hash chain is contiguous on startup
+- Server starts with a broken chain and serves corrupted audit data without warning
+
+**Consequences:**
+- Anyone verifying the hash chain detects tampering (but it was actually an accident)
+- Loss of trust in the audit log (even if the data is actually correct)
+- No way to repair the chain without re-signing everything from the break point forward
+- If not caught early, the break propagates and requires full chain reconstruction
+
+**Prevention:**
+```rust
+fn validate_hash_chain(entries: &[AuditEntry]) -> Result<(), AuditError> {
+    for i in 1..entries.len() {
+        let expected_prev_hash = hash_entry(&entries[i - 1]);
+        if entries[i].prev_hash != expected_prev_hash {
+            return Err(AuditError::BrokenChain {
+                entry_index: i,
+                expected: expected_prev_hash,
+                actual: entries[i].prev_hash.clone(),
+            });
         }
     }
     Ok(())
 }
 
-// Load with validation
-let registry: Registry = serde_json::from_str(&contents)?;
-validate_registry(&registry)?; // Fail fast if invalid
+// Validate on EVERY startup, fail loud
+let audit_log = load_audit_log(&path).await?;
+validate_hash_chain(&audit_log.entries)?;
 ```
 
-**Detection:**
-- Create test registry with known bad data
-- Verify each validation rule triggers correct error
-- Test with empty arrays, null fields, extra fields
+**Detection:** Startup validation that checks the full chain and refuses to start if broken, with a clear error message identifying the exact break point.
 
-**Phase mapping:** Address in Phase 1 (Core MCP). Validation prevents entire class of runtime errors.
+**Phase mapping:** Implement hash chain validation in the same phase as the audit log. Never ship the audit log endpoint without chain validation.
 
-### Pitfall 10: Not Handling Batch JSON-RPC Requests
+---
 
-**What goes wrong:** Client sends batch request `[{...}, {...}]`, server returns 400 Bad Request.
+### Pitfall 4: Identity Linking Without Proof Creates Impersonation Vectors
+
+**What goes wrong:** The identities.json file maps PKARR pubkeys to X/Nostr/GitHub handles, but without any verification proof stored alongside the claim, anyone who edits the file can claim any identity.
 
 **Why it happens:**
-- Only implementing single-request handler
-- Not checking if JSON is array vs object
-- Assuming MCP clients never batch
+- v2.0 explicitly defers automated verification (OAuth, signature challenges) to later
+- Manual verification by curator is the intended workflow, but the JSON file doesn't record HOW the identity was verified
+- No proof artifact stored (e.g., a signed message from the linked account, a specific tweet URL, a Nostr event ID)
+- Anyone with file access can add arbitrary identity claims
 
 **Consequences:**
-- Some MCP clients fail to use server
-- Server appears non-compliant with JSON-RPC 2.0
-- Confusing errors for batch-capable clients
+- A compromised or careless file edit links a PKARR key to the wrong X/GitHub account
+- No way to audit whether identities were actually verified or just added
+- If the curator changes, the new curator has no way to re-verify past claims
+- Trust model collapses: "The file says so" is not verification
 
 **Prevention:**
 ```rust
-// Check if request is array (batch) or object (single)
-let json_value: serde_json::Value = serde_json::from_slice(&body)?;
+#[derive(Serialize, Deserialize)]
+pub struct IdentityLink {
+    pub pkarr_pubkey: String,
+    pub platform: Platform,
+    pub handle: String,
+    pub verified_at: String,  // ISO 8601
+    pub verification_method: VerificationMethod,
+    pub proof_url: Option<String>,  // Tweet URL, Gist URL, Nostr event ID
+    pub verified_by: String,  // Curator pubkey who verified
+}
 
-match json_value {
-    Value::Array(requests) => {
-        // Handle batch
-        let responses: Vec<_> = requests
-            .into_iter()
-            .map(|req| handle_request(req))
-            .collect();
-        Ok(json_response(responses))
-    }
-    Value::Object(_) => {
-        // Handle single request
-        let response = handle_request(json_value)?;
-        Ok(json_response(response))
-    }
-    _ => Err(Error::InvalidRequest),
+#[derive(Serialize, Deserialize)]
+pub enum VerificationMethod {
+    TweetVerification,   // User posted their pubkey in a tweet
+    GistVerification,    // User created a gist with their pubkey
+    NostrEventProof,     // User published a Nostr event with their pubkey
+    ManualVerification,  // Curator verified out-of-band (document how)
 }
 ```
 
-**Detection:**
-- Test with batch request: `[{"jsonrpc":"2.0","method":"list","id":1},{"jsonrpc":"2.0","method":"search","params":{"query":"test"},"id":2}]`
-- Verify response is array with matching IDs
-- Check that partial failures in batch are handled correctly
+**Detection:** Every identity link must have a non-empty `verification_method` and ideally a `proof_url`. Validation on startup should warn about entries with `ManualVerification` and no `proof_url`.
 
-**Phase mapping:** Can defer to post-MVP if no clients use batching. Add if MCP spec requires or clients request it.
+**Phase mapping:** Address in the identity linking phase. Design the schema with proof fields from day one, even if automated verification comes later.
+
+---
+
+## Moderate Pitfalls
+
+Mistakes that cause technical debt, performance issues, or degraded trust.
+
+### Pitfall 5: AppState Bloat from Adding Multiple Data Stores
+
+**What goes wrong:** The existing `AppState` holds `McpHandler`, `Registry`, and `PublicKey`. Adding audit log, identities, and contributions means stuffing more `Arc<T>` fields into AppState, making the struct unwieldy and creating coupling between unrelated data.
+
+**Why it happens:**
+- The current pattern is straightforward for one data store (registry)
+- Adding 3 more data stores by copy-pasting the pattern creates a god struct
+- All handlers get access to all data whether they need it or not
+- Testing requires constructing the full AppState even for single-endpoint tests
+
+**Consequences:**
+- Every new endpoint handler depends on the full application state
+- Compile times increase as changes to any data type recompile all handlers
+- Integration tests become brittle (must construct full state for any test)
+- No clear ownership boundaries
+
+**Prevention:**
+```rust
+// WRONG: God struct
+pub struct AppState {
+    pub mcp_handler: McpHandler,
+    pub registry: Arc<Registry>,
+    pub audit_log: Arc<AuditLog>,
+    pub identities: Arc<Identities>,
+    pub contributions: Arc<Contributions>,
+    pub pubkey: PublicKey,
+}
+
+// RIGHT: Compose from focused state objects
+pub struct AppState {
+    pub mcp_handler: McpHandler,
+    pub registry: Arc<Registry>,
+    pub community: Arc<CommunityState>,  // Groups new v2.0 data
+    pub pubkey: PublicKey,
+}
+
+pub struct CommunityState {
+    pub audit_log: AuditLog,
+    pub identities: Identities,
+    pub contributions: Contributions,
+}
+```
+
+**Detection:** If adding a new JSON file requires modifying `AppState`, `main.rs`, `McpHandler::new()`, and test helpers simultaneously, the coupling is too tight.
+
+**Phase mapping:** Refactor AppState in the first v2.0 phase, before adding any new data stores.
+
+---
+
+### Pitfall 6: Human vs Bot Vote Separation Becoming an Arms Race
+
+**What goes wrong:** The system tries to classify votes as "human" or "bot" but the classification logic becomes increasingly complex and never fully reliable.
+
+**Why it happens:**
+- Simple heuristics (user-agent, rate limiting) are trivially bypassed
+- Sophisticated bots mimic human voting patterns (timing jitter, varied user agents)
+- No ground truth for training detection algorithms
+- The harder you make detection, the more you penalize legitimate users
+
+**Consequences:**
+- Bot votes leak into human vote counts, corrupting signal
+- False positives flag real users as bots, damaging trust
+- Ongoing maintenance burden as bot techniques evolve
+- Classification code becomes the most complex part of the system
+
+**Prevention:** Do NOT try to detect bots automatically. Instead, design the system so bot votes are useful but distinct:
+
+```rust
+#[derive(Serialize, Deserialize)]
+pub struct Vote {
+    pub voter_pubkey: String,
+    pub voter_type: VoterType,  // Self-declared
+    pub proposal_id: String,
+    pub vote: VoteValue,
+    pub timestamp: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum VoterType {
+    Human,      // Voter with verified identity link
+    Agent,      // MCP client/bot (self-identified)
+    Unknown,    // No identity verification
+}
+```
+
+Classification by identity status (verified identity = human signal, no identity = unknown signal, self-declared agent = bot signal) rather than behavioral detection. This is the approach PROJECT.md implies -- votes are separated by type, not detected.
+
+**Detection:** If you find yourself writing regex to parse user-agent strings or implementing rate-based heuristics, you are going down the wrong path.
+
+**Phase mapping:** Address in the contributions/voting phase. Define vote types by identity verification status, not behavioral analysis.
+
+---
+
+### Pitfall 7: Startup Time Regression from Loading Multiple JSON Files
+
+**What goes wrong:** v1.0 loads one file (registry.json) on startup. v2.0 adds audit_log.json, identities.json, and contributions.json. Startup time increases linearly, and a validation failure in any file prevents the server from starting.
+
+**Why it happens:**
+- Sequential loading: load registry, then audit log, then identities, then contributions
+- Full hash chain validation on the audit log at startup
+- Signature verification on all audit entries at startup
+- Any single file being malformed crashes the entire server
+
+**Consequences:**
+- Startup time grows from ~1 second to 5-10+ seconds as data accumulates
+- A typo in contributions.json prevents the registry from being served
+- Health check timeouts on DigitalOcean during startup
+- Deployments become fragile (any file issue = complete outage)
+
+**Prevention:**
+```rust
+// Load files in parallel
+let (registry, audit_log, identities, contributions) = tokio::try_join!(
+    registry::load(&config.registry_path),
+    audit::load(&config.audit_log_path),
+    identity::load(&config.identities_path),
+    contribution::load(&config.contributions_path),
+)?;
+
+// Graceful degradation: core registry always loads, new features are optional
+let registry = registry::load(&config.registry_path).await?;  // Required
+let audit_log = audit::load(&config.audit_log_path).await
+    .unwrap_or_else(|e| {
+        tracing::warn!("Audit log failed to load: {}, serving without audit", e);
+        AuditLog::empty()
+    });
+// Same pattern for identities and contributions
+```
+
+**Detection:** Measure startup time in CI with realistic data sizes. Alert if startup exceeds 5 seconds.
+
+**Phase mapping:** Implement parallel loading and graceful degradation in the first phase that adds a second data file.
+
+---
+
+### Pitfall 8: New MCP Tools Breaking Existing Tool Discovery
+
+**What goes wrong:** Adding `get_identity`, `list_proposals`, and `get_proposal` MCP tools causes existing clients to break because the `tools/list` response changes.
+
+**Why it happens:**
+- MCP clients may cache the tool list and not expect it to change
+- New tools with required parameters cause `tools/list` response to exceed size limits in some clients
+- Tool names or parameter schemas conflict with existing tools
+- Capability negotiation doesn't account for new features
+
+**Consequences:**
+- Existing MCP clients that work with v1.0 break on v2.0
+- Agents that parse `tools/list` responses fail on unexpected new tools
+- No way for clients to opt into v2.0 features gradually
+
+**Prevention:**
+```rust
+// Ensure new tools follow the same naming convention
+// Existing: get_sources, list_categories, get_provenance, get_endorsements
+// New:      get_identity, list_proposals, get_proposal (consistent pattern)
+
+// Test that existing tool calls still produce identical responses
+#[test]
+fn v1_tool_responses_unchanged() {
+    let handler = create_handler_with_v2_data();
+    let response = handler.handle("get_sources", params);
+    // Response format must be identical to v1.0
+    assert_eq!(response.format, v1_expected_format);
+}
+```
+
+**Detection:** Run the full v1.0 integration test suite against the v2.0 server without modification. All 78 existing tests must pass unchanged.
+
+**Phase mapping:** Every phase that adds a new MCP tool must run the existing test suite as a regression gate.
+
+---
+
+### Pitfall 9: Audit Log JSON File Unbounded Growth
+
+**What goes wrong:** The audit log is append-only and loaded entirely into memory on startup. Over months/years, this file grows without bound, eventually causing the memory and startup-time problems from Pitfall 3 in the v1.0 research.
+
+**Why it happens:**
+- Every registry change, identity verification, and contribution action creates an audit entry
+- Append-only means entries are never removed
+- JSON arrays with thousands of entries become slow to parse (serde_json `from_str` parses the entire string before returning)
+- Memory usage for `serde_json::Value` is roughly 2-4x the file size on disk
+
+**Consequences:**
+- After 1,000+ entries, startup adds noticeable delay
+- After 10,000+ entries, memory usage becomes a concern on DigitalOcean (512MB-1GB instances)
+- JSON file becomes unwieldy to manually edit (curator workflow breaks)
+- `serde_json::from_str` on a 20MB file is measurably slow (100ms+)
+
+**Prevention:**
+```rust
+// Set a size limit and plan for rotation
+const MAX_AUDIT_FILE_SIZE: usize = 5 * 1024 * 1024; // 5MB
+
+// For v2.0 scale (manual curation), this is probably fine:
+// - 100 audit entries/month * 500 bytes/entry = 50KB/month
+// - 5MB limit = ~8 years of data at this rate
+
+// But document the plan for when it matters:
+// Future: audit_log_2026.json, audit_log_2027.json (yearly rotation)
+// Future: summary endpoint with pagination, not full dump
+```
+
+At the current scale (manual curation, ~100 entries/month), this is not an immediate problem. But the design should not preclude rotation later.
+
+**Detection:** Log the audit file size and entry count on startup. Alert if approaching 1MB (years away at current scale).
+
+**Phase mapping:** Implement size monitoring in the audit log phase. Defer rotation to a future milestone but do not design the schema in a way that prevents it.
+
+---
+
+### Pitfall 10: Contribution Proposals Without Lifecycle State Machine
+
+**What goes wrong:** Proposals exist as entries in a JSON file but have no defined state transitions, leading to proposals stuck in limbo, duplicate approvals, or rejected proposals being re-submitted.
+
+**Why it happens:**
+- Starting with just "proposed" and "accepted/rejected" states seems simple enough
+- No enforcement of valid transitions (can a rejected proposal be re-opened?)
+- No tracking of who changed the state and when
+- Multiple proposals for the same change with no deduplication
+
+**Consequences:**
+- Proposals in undefined states ("approved but not applied", "rejected but re-submitted")
+- No audit trail of proposal lifecycle (ironic given the audit log exists)
+- Curator confusion about which proposals need attention
+- API returns proposals in inconsistent states
+
+**Prevention:**
+```rust
+#[derive(Serialize, Deserialize)]
+pub enum ProposalStatus {
+    Submitted,   // Initial state
+    UnderReview,  // Curator acknowledged
+    Approved,    // Curator approved, pending application
+    Applied,     // Changes applied to registry
+    Rejected,    // Curator rejected with reason
+    Withdrawn,   // Proposer withdrew
+}
+
+// Valid transitions (enforce in validation)
+// Submitted -> UnderReview | Rejected | Withdrawn
+// UnderReview -> Approved | Rejected | Withdrawn
+// Approved -> Applied | Withdrawn
+// Applied -> (terminal)
+// Rejected -> (terminal, but can submit NEW proposal)
+// Withdrawn -> (terminal)
+
+fn validate_transition(from: &ProposalStatus, to: &ProposalStatus) -> bool {
+    matches!((from, to),
+        (ProposalStatus::Submitted, ProposalStatus::UnderReview) |
+        (ProposalStatus::Submitted, ProposalStatus::Rejected) |
+        (ProposalStatus::Submitted, ProposalStatus::Withdrawn) |
+        (ProposalStatus::UnderReview, ProposalStatus::Approved) |
+        (ProposalStatus::UnderReview, ProposalStatus::Rejected) |
+        (ProposalStatus::UnderReview, ProposalStatus::Withdrawn) |
+        (ProposalStatus::Approved, ProposalStatus::Applied) |
+        (ProposalStatus::Approved, ProposalStatus::Withdrawn)
+    )
+}
+```
+
+**Detection:** Write tests for every valid transition and every invalid transition. Verify that JSON fixtures with invalid state sequences fail validation.
+
+**Phase mapping:** Address in the contributions phase. Define the state machine before implementing any proposal endpoints.
+
+---
 
 ## Minor Pitfalls
 
-Mistakes that cause annoyance but are easily fixed.
+Mistakes that cause annoyance or minor issues but are easily fixed.
 
-### Pitfall 11: Not Trimming/Normalizing User Queries
+### Pitfall 11: CORS Not Updated for New Endpoints
 
-**What goes wrong:** Query " Test " doesn't match "test" due to leading/trailing whitespace and case sensitivity.
+**What goes wrong:** New endpoints (`/audit`, `/identities`, `/proposals`) work via curl but fail from browser clients because the CORS allowlist only covers `/mcp`, `/health`, `/registry`, and `/`.
+
+**Why it happens:** The CORS middleware is applied at the router level (which covers all routes), but if new routes are added via nested routers or separate middleware stacks, they may not inherit the CORS layer.
+
+**Prevention:** Verify that `build_router` applies the CORS layer after all routes are defined. The current implementation applies CORS to the full router, which is correct. Maintain this pattern -- do not nest sub-routers with separate middleware.
+
+**Phase mapping:** Verify in every phase that adds new routes.
+
+---
+
+### Pitfall 12: Inconsistent Timestamp Formats Across JSON Files
+
+**What goes wrong:** Registry uses `"2026-02-01"` (date only), audit log uses `"2026-03-07T14:30:00Z"` (ISO 8601 with time), identities use `"March 7, 2026"` (human readable). Filtering by date range across files becomes impossible.
 
 **Prevention:**
 ```rust
-let normalized_query = query.trim().to_lowercase();
-```
+// Standardize on RFC 3339 (ISO 8601 with timezone) for all new files
+// Format: "2026-03-07T14:30:00Z"
+use chrono::{DateTime, Utc};
 
-**Phase mapping:** Phase 3 (Fuzzy Matching).
-
-### Pitfall 12: Missing Health Check Endpoint
-
-**What goes wrong:** Render can't determine if server is ready, marks it unhealthy prematurely.
-
-**Prevention:**
-```rust
-// Add GET /health endpoint
-if request.uri().path() == "/health" {
-    return Ok(Response::new(Body::from("OK")));
+pub fn now_rfc3339() -> String {
+    Utc::now().to_rfc3339()
 }
+
+// The existing registry.updated field uses "2026-02-01" format
+// Do NOT change this (backward compatibility), but all new files use RFC 3339
 ```
 
-**Phase mapping:** Phase 4 (Render Deployment).
+**Phase mapping:** Establish the timestamp convention in the first v2.0 phase and document it.
 
-### Pitfall 13: Hardcoded PORT Instead of Reading Environment
+---
 
-**What goes wrong:** Server listens on 3000, Render assigns 10000, server unreachable.
+### Pitfall 13: Serving Stale Data After JSON File Updates
+
+**What goes wrong:** The curator updates a JSON file on disk (e.g., adds a new audit entry), but the server continues serving the old in-memory data until restarted.
+
+**Why it happens:** All JSON files are loaded once on startup into `Arc<T>` and served from memory. There is no file watcher or reload mechanism.
+
+**Prevention:** This is actually the correct design for v2.0 (curator deploys new files via git push, which triggers a redeploy on DigitalOcean App Platform). But it must be documented clearly:
+
+```
+IMPORTANT: After editing any JSON data file, you must redeploy the server.
+The server loads all data at startup and does not watch for file changes.
+
+Workflow:
+1. Edit registry.json / audit_log.json / identities.json / contributions.json
+2. Commit and push to main
+3. DigitalOcean auto-deploys from main branch
+4. New server instance loads updated files
+```
+
+**Detection:** Document this in the curator workflow. Do not add file watching complexity for v2.0.
+
+**Phase mapping:** Document in the first v2.0 phase.
+
+---
+
+### Pitfall 14: Missing Pagination on New List Endpoints
+
+**What goes wrong:** `/audit` returns the entire audit log as a single JSON response. At 1,000+ entries, this becomes a 500KB+ response that is slow to transfer and parse.
 
 **Prevention:**
 ```rust
-let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());
-let addr = format!("0.0.0.0:{}", port).parse()?;
+// Support optional query parameters from day one
+// GET /audit?limit=50&offset=0&action=registry_update
+// GET /proposals?status=submitted&limit=20
+
+// Default limit prevents unbounded responses
+const DEFAULT_LIMIT: usize = 50;
+const MAX_LIMIT: usize = 200;
 ```
 
-**Phase mapping:** Phase 4 (Render Deployment).
+**Phase mapping:** Implement pagination parameters when adding list endpoints. Even if the data is small now, the API contract should support pagination from the start.
 
-### Pitfall 14: Not Logging Request IDs for Debugging
+---
 
-**What goes wrong:** Can't correlate errors in logs with specific requests.
+### Pitfall 15: ed25519 Signature Malleability
 
-**Prevention:**
-```rust
-info!("Handling request id={} method={}", id, method);
-```
+**What goes wrong:** Ed25519 signatures can be trivially malleable unless the scalar component `s` is constrained to `0 <= s < L`. An attacker can create valid alternate signatures from existing ones.
 
-**Phase mapping:** Phase 1 (Core MCP).
+**Why it happens:** Different Ed25519 implementations have different validation strictness. The `ed25519-dalek` crate (which pkarr depends on) defaults to strict validation, but if signatures are verified by other implementations (JavaScript clients, Nostr relays), they may accept or reject differently.
 
-### Pitfall 15: Case-Sensitive Category Slug Matching
+**Prevention:** Use `ed25519-dalek`'s strict verification (the default) and document which verification rules the system uses. If third parties will verify signatures, specify: "Signatures conform to ed25519-dalek strict mode (RFC 8032 with cofactored verification disabled, s < L enforced)."
 
-**What goes wrong:** Query references "Machine-Learning" but registry has "machine-learning", no match.
+**Phase mapping:** Document verification semantics when implementing the audit log signing. This matters most if external parties verify signatures.
 
-**Prevention:**
-```rust
-let slug_lower = slug.to_lowercase();
-categories.iter().find(|c| c.slug.to_lowercase() == slug_lower)
-```
-
-**Phase mapping:** Phase 3 (Fuzzy Matching).
+---
 
 ## Phase-Specific Warnings
 
-| Phase | Likely Pitfall | Mitigation |
-|-------|---------------|------------|
-| Phase 0: Project Setup | Key leakage (Pitfall 2) | Create .gitignore FIRST, document key management |
-| Phase 1: Core MCP | JSON-RPC violations (Pitfall 1) | Integration test with real MCP client, validate all responses |
-| Phase 1: Core MCP | Missing error context (Pitfall 8) | Define error types early, include validation details |
-| Phase 1: Core MCP | Registry validation (Pitfall 9) | Validate on load, fail fast with clear errors |
-| Phase 2: Pubky Integration | SDK breaking changes (Pitfall 4) | Pin versions, create abstraction layer |
-| Phase 2: Pubky Integration | CORS blocking browsers (Pitfall 5) | Add CORS headers from start, test with browser |
-| Phase 3: Fuzzy Matching | Too aggressive matching (Pitfall 6) | Start simple (prefix), iterate with user feedback |
-| Phase 4: Render Deployment | Cold start times (Pitfall 7) | Multi-stage Docker, lazy loading, external keepalive |
-| Phase 4: Render Deployment | Memory exhaustion (Pitfall 3) | Test with 512MB limit locally, implement size limits |
-| Phase 4: Render Deployment | Port binding (Pitfall 13) | Read PORT env var, test with different ports |
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Data type definitions | `deny_unknown_fields` breaking evolution (Pitfall 1) | Use `#[serde(default)]` for new types, keep `deny_unknown_fields` only on registry types |
+| Audit log implementation | Signature canonicalization (Pitfall 2) | Define and document canonical format before writing first entry |
+| Audit log implementation | Hash chain integrity (Pitfall 3) | Validate full chain on startup, fail loud on breaks |
+| Audit log implementation | Unbounded growth (Pitfall 9) | Monitor size, plan for rotation, set size limits |
+| Identity linking | Missing verification proofs (Pitfall 4) | Store proof artifacts (URLs, event IDs) alongside claims |
+| Identity linking | Impersonation without proof (Pitfall 4) | Require verification_method field on every link |
+| MCP tool additions | Breaking existing clients (Pitfall 8) | Run full v1.0 test suite as regression gate |
+| Community contributions | Bot vote arms race (Pitfall 6) | Classify by identity status, not behavioral detection |
+| Community contributions | Proposal state machine (Pitfall 10) | Define valid transitions before implementing endpoints |
+| All new endpoints | Startup time regression (Pitfall 7) | Parallel loading, graceful degradation for non-core data |
+| All new endpoints | Stale data confusion (Pitfall 13) | Document reload-requires-redeploy in curator workflow |
+| All new routes | CORS inheritance (Pitfall 11) | Verify CORS applies to all routes after adding new ones |
+| All new data files | Timestamp inconsistency (Pitfall 12) | Standardize on RFC 3339 for all new files |
+| All list endpoints | Missing pagination (Pitfall 14) | Add limit/offset parameters from the start |
+| Server architecture | AppState bloat (Pitfall 5) | Group v2.0 data under CommunityState, not flat fields |
 
 ## Domain-Specific Testing Checklist
 
-Before deploying to production, verify:
+Before deploying v2.0, verify:
 
-**MCP Protocol Compliance:**
-- [ ] Every response includes `jsonrpc: "2.0"`
-- [ ] Responses have exactly one of `result` or `error`
-- [ ] Error codes match JSON-RPC spec (-32700 to -32603)
-- [ ] Capability negotiation includes all required fields
-- [ ] OPTIONS requests return 204 with CORS headers
-- [ ] Integration test with Claude Desktop succeeds
+**Backward Compatibility:**
+- [ ] All 78 existing tests pass without modification
+- [ ] Existing MCP tool responses are byte-identical to v1.0
+- [ ] `/health`, `/registry`, `/mcp` endpoints unchanged
+- [ ] Registry with `deny_unknown_fields` still loads correctly
 
-**Pubky Integration:**
-- [ ] Private keys never committed to git
-- [ ] Keys stored in environment variables only
-- [ ] Abstraction layer isolates SDK dependencies
-- [ ] Local fallback works when Pubky unavailable
-- [ ] SDK version pinned in Cargo.toml
+**Audit Log Integrity:**
+- [ ] Signatures verify after serialize-deserialize round-trip
+- [ ] Hash chain validates on startup
+- [ ] Broken chain detected and reported with entry index
+- [ ] Canonical format documented for third-party verification
 
-**Resource Limits:**
-- [ ] Registry file size under 10MB
-- [ ] Memory usage under 400MB under load
-- [ ] Cold start time under 15 seconds
-- [ ] Health check responds within 1 second
+**Identity Linking:**
+- [ ] Every identity link has a verification_method
+- [ ] Proof URLs are valid and documented
+- [ ] No identity claims without proof artifacts
 
-**Data Validation:**
-- [ ] Registry JSON validated on load
-- [ ] Duplicate slugs detected and rejected
-- [ ] Invalid URLs rejected with clear error
-- [ ] Query length limits enforced
-- [ ] Empty/null queries handled gracefully
+**Contribution System:**
+- [ ] All state transitions tested (valid and invalid)
+- [ ] Terminal states cannot be re-opened
+- [ ] Vote types classified by identity status
+
+**Performance:**
+- [ ] Startup time with all JSON files < 3 seconds
+- [ ] Memory usage with realistic data < 300MB
+- [ ] No unbounded JSON responses (all list endpoints paginated)
 
 ## Confidence Assessment
 
-**Overall confidence:** MEDIUM
+**Overall confidence:** MEDIUM-HIGH
 
-**High confidence areas:**
-- JSON-RPC protocol requirements (standard spec)
-- Rust deployment patterns (well-documented)
-- Memory limits on Render free tier (documented)
-- CORS configuration (web standard)
-
-**Medium confidence areas:**
-- Pubky SDK maturity and breaking changes (pre-1.0, limited documentation)
-- Specific MCP client validation behavior (Claude Desktop internals not public)
-- Registry data scale limits (depends on schema complexity)
-
-**Low confidence areas:**
-- Exact Pubky homeserver reliability characteristics
-- Future MCP protocol changes or extensions
-- Render free tier performance characteristics under real load
-
-**Recommendation:** Start with high-confidence preventions (JSON-RPC compliance, key management, resource limits). Validate medium-confidence areas through testing. Monitor low-confidence areas and adapt as issues arise.
+| Area | Confidence | Reason |
+|------|------------|--------|
+| `deny_unknown_fields` pitfall | HIGH | Verified in codebase -- all types use it, serde behavior is well-documented |
+| Signature canonicalization | HIGH | Well-known problem in cryptographic signing, documented extensively |
+| Hash chain integrity | HIGH | Standard append-only log pattern, well-understood failure modes |
+| Identity verification proofs | MEDIUM | Design recommendation based on decentralized identity patterns; specific PKARR identity linking is novel territory |
+| Bot vote separation | MEDIUM | Based on community voting system research; v2.0 manual curation context reduces risk |
+| AppState architecture | HIGH | Direct codebase analysis of current structure |
+| Startup time regression | MEDIUM | Estimated based on serde_json benchmarks; actual impact depends on data sizes |
+| MCP backward compatibility | HIGH | Existing test suite provides concrete regression gate |
 
 ## Sources
 
-**Methodology:** Due to tool access limitations, this research is based on:
-- JSON-RPC 2.0 specification (standard protocol)
-- Model Context Protocol design principles (from training data)
-- Rust deployment best practices (production experience patterns)
-- Decentralized identity system design (PKARR/Pubky architecture)
-- Render platform documentation (deployment constraints)
-
-**Validation needed:**
-- MCP specification for current required fields and error codes
-- Pubky SDK documentation for API stability and versioning
-- Render free tier limits (memory, cold start, network)
-- Claude Desktop MCP integration requirements
-
-**Recommended verification:**
-- Review official MCP spec at spec.modelcontextprotocol.io
-- Check Pubky SDK changelog for breaking changes
-- Test deployed server with real MCP clients
-- Monitor Render metrics during beta testing
+- [serde deny_unknown_fields backward compatibility issues](https://github.com/serde-rs/serde/issues/2634)
+- [serde_json memory usage with large files](https://github.com/serde-rs/json/issues/635)
+- [serde_json slow parsing of 20MB files](https://github.com/serde-rs/json/issues/160)
+- [Ed25519 validation criteria inconsistencies](https://hdevalence.ca/blog/2020-10-04-its-25519am/)
+- [Ed25519 signature quirks and verification](https://slowli.github.io/ed25519-quirks/basics/)
+- [Ed25519 deep dive on signatures](https://cendyne.dev/posts/2022-03-06-ed25519-signatures.html)
+- [Immutable audit log architecture patterns](https://www.emergentmind.com/topics/immutable-audit-log)
+- [Immutable audit trail best practices](https://www.hubifi.com/blog/immutable-audit-log-basics)
+- [Append-only log enforcement patterns](https://www.designgurus.io/answers/detail/how-do-you-enforce-immutability-and-appendonly-audit-trails)
+- [Votebots and automated voting detection challenges](https://fraudblocker.com/articles/bots/votebots-how-to-make-em-and-how-to-stop-em)
+- [Decentralized identity verification patterns](https://www.dock.io/post/decentralized-identity)
+- [pkarr crate on crates.io](https://crates.io/crates/pkarr) (v5.0.3, keys feature)
+- Codebase analysis: `src/registry/types.rs`, `src/server.rs`, `src/main.rs`, `src/pubky/identity.rs`, `src/mcp/tools.rs`, `Cargo.toml`

@@ -1,1419 +1,789 @@
-# Architecture Patterns: Rust MCP Server with Pubky Integration
+# Architecture Patterns: v2.0 Integration
 
-**Project:** Three Good Sources (3GS)
-**Researched:** 2026-02-01
-**Confidence:** MEDIUM (based on Rust ecosystem patterns, MCP spec, and axum 0.8 best practices)
+**Project:** Three Good Sources (3GS) -- v2.0 Community Curation
+**Researched:** 2026-03-07
+**Confidence:** HIGH (based on direct analysis of all existing source files)
 
-## Executive Summary
+## Existing Architecture Summary
 
-A Rust MCP server with Pubky integration follows a layered architecture with clear separation between protocol handling (MCP JSON-RPC), business logic (registry matching), and data loading (Pubky/local). The architecture uses axum 0.8's state management for shared resources, trait-based abstraction for pluggable data sources, and a unidirectional data flow from HTTP request to JSON-RPC response.
-
-**Key architectural decisions:**
-1. **HTTP-first transport**: Single POST endpoint at `/mcp` handling JSON-RPC 2.0
-2. **Immutable registry**: Load once at startup, use `Arc<Registry>` (no RwLock overhead)
-3. **Trait-based loaders**: `RegistryLoader` trait with `PubkyLoader` and `LocalLoader` implementations
-4. **Stateless handlers**: All state in `AppState`, handlers are pure functions
-5. **Error mapping**: Domain errors (`thiserror`) map to JSON-RPC error codes
-
-## Recommended Architecture
+The current codebase (2,179 lines, 20 `.rs` files) follows a clean modular pattern:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         HTTP Layer                          │
-│                    axum 0.8 Router                          │
-│                  POST /mcp (JSON-RPC)                       │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      MCP Protocol Layer                     │
-│  - JSON-RPC 2.0 parsing/validation                         │
-│  - Method dispatch (initialize, tools/list, tools/call)    │
-│  - Error mapping to JSON-RPC format                        │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     Business Logic Layer                    │
-│  - Query matching (fuzzy search, scoring, ranking)         │
-│  - Intent pattern matching                                 │
-│  - Result filtering and limiting                           │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       Data Layer                            │
-│  - Registry (in-memory, Arc-wrapped)                       │
-│  - RegistryLoader trait (Pubky or Local)                   │
-│  - Pubky SDK client wrapper                                │
-└─────────────────────────────────────────────────────────────┘
+main.rs          -- Config load, keypair init, registry load, state assembly, server start
+server.rs        -- AppState struct, build_router(), route handlers (/, /mcp, /health, /registry)
+lib.rs           -- Module declarations only (pub mod for each top-level module)
+config.rs        -- Env-based config via envy (REGISTRY_PATH, PORT, LOG_FORMAT, PKARR_SECRET_KEY)
+mcp/handler.rs   -- JSON-RPC dispatch (initialize, tools/list, tools/call)
+mcp/tools.rs     -- Tool implementations (get_sources, list_categories, get_provenance, get_endorsements)
+mcp/types.rs     -- JSON-RPC request/response types, CallToolParams, InitializeParams
+registry/loader.rs -- Async file read + serde + validation
+registry/types.rs  -- Registry, Category, Source, Curator, Endorsement structs
+registry/mod.rs    -- Re-exports: RegistryError, load(), Registry
+pubky/identity.rs  -- Keypair generation/loading from hex secret
+pubky/mod.rs       -- Re-exports: error, identity
+matcher/           -- Fuzzy matching engine (config, scorer, normalize)
 ```
 
-## Component Boundaries
+**Established loading pattern:** JSON file -> `tokio::fs::read_to_string` -> `serde_json::from_str` -> `validate()` -> `Arc::new()` -> stored in `AppState`.
 
-### 1. HTTP Layer (main.rs + axum router)
-
-**Responsibility:**
-- Accept HTTP POST requests at `/mcp`
-- Extract JSON body
-- Pass to MCP protocol handler
-- Return HTTP 200 with JSON-RPC response
-
-**Communicates with:**
-- MCP Protocol Layer (calls `handle_mcp_request`)
-
-**State:**
-- Owns `AppState` (Arc-wrapped, cloned into handlers)
-
-**Key pattern:**
+**Current AppState:**
 ```rust
-// axum 0.8 pattern with State extractor
-async fn mcp_handler(
-    State(state): State<AppState>,
-    Json(request): Json<JsonRpcRequest>,
-) -> Json<JsonRpcResponse>
-```
-
----
-
-### 2. MCP Protocol Layer (src/mcp/)
-
-**Modules:**
-- `mod.rs` - Public interface
-- `protocol.rs` - JSON-RPC types (Request, Response, Error)
-- `handlers.rs` - Method dispatch logic
-
-**Responsibility:**
-- Parse JSON-RPC 2.0 requests
-- Validate `jsonrpc: "2.0"` field
-- Dispatch to method handlers based on `method` field
-- Map domain errors to JSON-RPC error codes
-- Construct JSON-RPC responses
-
-**Communicates with:**
-- HTTP Layer (called by axum handler)
-- Business Logic Layer (calls registry matching)
-
-**State:**
-- Stateless (receives AppState via function parameters)
-
-**JSON-RPC 2.0 Message Formats:**
-
-#### Request Format
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "search_sources",
-    "arguments": {
-      "query": "rust async programming"
-    }
-  }
+pub struct AppState {
+    pub mcp_handler: McpHandler,
+    pub registry: Arc<Registry>,
+    pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
 }
 ```
 
-#### Success Response Format
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "..."
-      }
-    ]
-  }
-}
-```
-
-#### Error Response Format
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32602,
-    "message": "Invalid params",
-    "data": {
-      "details": "Query must be non-empty"
-    }
-  }
-}
-```
-
-**Standard JSON-RPC error codes:**
-- `-32700`: Parse error (invalid JSON)
-- `-32600`: Invalid Request (missing required fields)
-- `-32601`: Method not found
-- `-32602`: Invalid params
-- `-32603`: Internal error
-
-**MCP-specific methods:**
-
-1. **initialize**
-   - Request params: `{ "protocolVersion": "2024-11-05", "capabilities": {} }`
-   - Response result: `{ "protocolVersion": "2024-11-05", "capabilities": { "tools": {} }, "serverInfo": { "name": "3gs", "version": "0.1.0" } }`
-
-2. **tools/list**
-   - Request params: `{}`
-   - Response result: `{ "tools": [{ "name": "search_sources", "description": "...", "inputSchema": {...} }] }`
-
-3. **tools/call**
-   - Request params: `{ "name": "search_sources", "arguments": { "query": "..." } }`
-   - Response result: `{ "content": [{ "type": "text", "text": "..." }] }`
-
----
-
-### 3. Business Logic Layer (src/registry/)
-
-**Modules:**
-- `mod.rs` - Public interface, Registry struct
-- `loader.rs` - RegistryLoader trait and implementations
-- `matcher.rs` - Query matching pipeline
-
-**Responsibility:**
-- Store registry data in memory (Arc-wrapped)
-- Load registry from Pubky or local JSON at startup
-- Match queries against intent patterns
-- Score, rank, and filter results
-- Return top 3 sources
-
-**Communicates with:**
-- MCP Protocol Layer (called by tools/call handler)
-- Data Layer (uses RegistryLoader at startup)
-
-**State:**
-- Registry data (Vec of Source entries)
-- Wrapped in `Arc<Registry>` (immutable after load)
-
-**Data structures:**
+**Current McpHandler fields:**
 ```rust
-pub struct Registry {
-    sources: Vec<Source>,
-}
-
-pub struct Source {
-    pub id: String,
-    pub name: String,
-    pub url: String,
-    pub description: String,
-    pub categories: Vec<String>,
-    pub keywords: Vec<String>,
-    pub trust_score: f32,
-}
-
-pub struct MatchResult {
-    pub source: Source,
-    pub score: f32,
-    pub match_reasons: Vec<String>,
+pub struct McpHandler {
+    initialized: Arc<AtomicBool>,
+    registry: Arc<Registry>,
+    match_config: MatchConfig,
+    pubkey_z32: String,
 }
 ```
 
-**Query matching pipeline:**
-1. **Preprocess query**: Lowercase, strip punctuation, tokenize
-2. **Fuzzy matching**: Levenshtein distance on keywords/categories
-3. **Keyword boosting**: Exact keyword matches get higher scores
-4. **Threshold filtering**: Only keep matches above 0.3 score
-5. **Ranking**: Sort by score descending, then trust_score
-6. **Limiting**: Return top 3 results
-
----
-
-### 4. Data Layer (src/pubky/)
-
-**Modules:**
-- `mod.rs` - Public interface
-- `client.rs` - Pubky SDK wrapper
-- `identity.rs` - Identity/keypair management
-
-**Responsibility:**
-- Abstract data loading behind `RegistryLoader` trait
-- Implement PubkyLoader (fetch from homeserver)
-- Implement LocalLoader (read from JSON file)
-- Handle Pubky SDK initialization and client management
-
-**Communicates with:**
-- Business Logic Layer (called by Registry::load_from)
-
-**State:**
-- Pubky client (if using PubkyLoader)
-- File path (if using LocalLoader)
-
-**Trait abstraction:**
+**Current tool dispatch signature (tools.rs):**
 ```rust
-#[async_trait]
-pub trait RegistryLoader: Send + Sync {
-    async fn load(&self) -> Result<Vec<Source>, LoadError>;
-}
-
-pub struct PubkyLoader {
-    client: PubkyClient,
-    homeserver_url: String,
-    identity_key: String,
-}
-
-pub struct LocalLoader {
-    file_path: PathBuf,
-}
-
-#[async_trait]
-impl RegistryLoader for PubkyLoader {
-    async fn load(&self) -> Result<Vec<Source>, LoadError> {
-        // Fetch from Pubky homeserver
-    }
-}
-
-#[async_trait]
-impl RegistryLoader for LocalLoader {
-    async fn load(&self) -> Result<Vec<Source>, LoadError> {
-        // Read from local JSON file
-    }
-}
+pub fn handle_tool_call(
+    name: &str,
+    arguments: Option<Value>,
+    registry: &Registry,
+    match_config: &MatchConfig,
+    pubkey_z32: &str,
+) -> Result<Value, ToolCallError>
 ```
 
----
+**Current tools/list count:** 4 tools. v2.0 adds 3 more (7 total).
 
-### 5. Error Layer (src/error.rs)
+## Recommended Architecture for v2.0
 
-**Responsibility:**
-- Define domain-specific errors using `thiserror`
-- Provide conversions to JSON-RPC error codes
-- Centralize error handling logic
+### Design Principle: Parallel Modules, Not Nested
 
-**Error types:**
+Each new data domain gets its own top-level module following the exact pattern established by `src/registry/`. This keeps concerns separated and avoids bloating the registry module with unrelated data.
+
+### New Module Structure
+
+```
+src/
+  audit/                    # NEW MODULE
+    mod.rs                  -- pub use re-exports
+    types.rs                -- AuditLog, AuditEntry, AuditAction enum
+    loader.rs               -- load() + validate()
+    error.rs                -- AuditError
+  identity/                 # NEW MODULE (note: distinct from pubky/identity.rs)
+    mod.rs                  -- pub use re-exports
+    types.rs                -- IdentityRegistry, Identity, IdentityClaim, Platform enum
+    loader.rs               -- load() + validate()
+    error.rs                -- IdentityError
+  contributions/            # NEW MODULE
+    mod.rs                  -- pub use re-exports
+    types.rs                -- ContributionRegistry, Proposal, ProposalStatus, Vote, VoterType
+    loader.rs               -- load() + validate()
+    error.rs                -- ContributionError
+```
+
+**Naming note:** `src/identity/` is about identity *linking* (PKARR pubkey to X/Nostr/GitHub handles). `src/pubky/identity.rs` is about PKARR *keypair management*. These are different concerns. The existing `pubky/identity.rs` stays as-is.
+
+### Component Boundaries
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `src/audit/` | Load, validate, serve audit log entries | AppState (read), server routes |
+| `src/identity/` | Load, validate, serve identity claims | AppState (read), server routes, MCP tools |
+| `src/contributions/` | Load, validate, serve contribution proposals | AppState (read), server routes, MCP tools |
+| `src/server.rs` | Extended AppState, new routes, router | All new modules via AppState |
+| `src/mcp/tools.rs` | New tool implementations | All new data via McpHandler |
+| `src/mcp/handler.rs` | Extended McpHandler construction | tools.rs |
+| `src/config.rs` | New file path configs | main.rs startup |
+| `src/main.rs` | Load new data files at startup | All new loaders |
+
+### Extended AppState
+
 ```rust
-#[derive(Debug, thiserror::Error)]
-pub enum AppError {
-    #[error("Registry load failed: {0}")]
-    RegistryLoad(String),
-
-    #[error("Invalid query: {0}")]
-    InvalidQuery(String),
-
-    #[error("Pubky client error: {0}")]
-    PubkyClient(String),
-
-    #[error("JSON parse error: {0}")]
-    JsonParse(String),
-}
-
-impl AppError {
-    pub fn to_jsonrpc_error(&self) -> (i32, String) {
-        match self {
-            AppError::InvalidQuery(msg) => (-32602, msg.clone()),
-            AppError::RegistryLoad(msg) => (-32603, msg.clone()),
-            AppError::PubkyClient(msg) => (-32603, msg.clone()),
-            AppError::JsonParse(_) => (-32700, "Parse error".into()),
-        }
-    }
+pub struct AppState {
+    pub mcp_handler: McpHandler,
+    pub registry: Arc<Registry>,
+    pub audit_log: Arc<AuditLog>,              // NEW
+    pub identities: Arc<IdentityRegistry>,      // NEW
+    pub contributions: Arc<ContributionRegistry>, // NEW
+    pub pubkey: PublicKey,
 }
 ```
 
----
+### Extended McpHandler
+
+```rust
+pub struct McpHandler {
+    initialized: Arc<AtomicBool>,
+    registry: Arc<Registry>,
+    audit_log: Arc<AuditLog>,              // NEW
+    identities: Arc<IdentityRegistry>,      // NEW
+    contributions: Arc<ContributionRegistry>, // NEW
+    match_config: MatchConfig,
+    pubkey_z32: String,
+}
+```
+
+### Tool Dispatch Refactor
+
+The current `handle_tool_call` takes 5 parameters. Adding 3 more data sources would push it to 8 parameters. Two options:
+
+**Option A: Just add the parameters.** Simple, matches existing style, 8 params is manageable for an internal function.
+
+**Option B: Introduce a context struct.**
+```rust
+pub struct ToolContext<'a> {
+    pub registry: &'a Registry,
+    pub audit_log: &'a AuditLog,
+    pub identities: &'a IdentityRegistry,
+    pub contributions: &'a ContributionRegistry,
+    pub match_config: &'a MatchConfig,
+    pub pubkey_z32: &'a str,
+}
+```
+
+**Recommendation: Option A for now.** The codebase avoids premature abstraction (no traits with single impls, no unnecessary wrappers). Adding a struct for 8 parameters is reasonable but not necessary. If a v3.0 adds more data domains, refactor then.
+
+However, the individual `tool_*` functions should only receive what they need. For example, `tool_get_identity` only needs `&IdentityRegistry`, not the full parameter list. This is already the established pattern -- `tool_get_sources` takes `registry` and `match_config` but not `pubkey_z32`.
 
 ## Data Flow
 
-### Startup Flow
+### Startup (main.rs) -- Extended
 
 ```
-1. main.rs reads config (CLI args or env vars)
-   ↓
-2. Determine loader type (Pubky vs Local)
-   ↓
-3. Create PubkyLoader or LocalLoader
-   ↓
-4. Registry::load_from(loader).await
-   ↓
-5. Wrap Registry in Arc<Registry>
-   ↓
-6. Create AppState { registry: Arc<Registry>, config }
-   ↓
-7. Build axum router with State(app_state)
-   ↓
-8. Start HTTP server on configured port
+1. Config::load()  -- now includes audit_log_path, identities_path, contributions_path
+2. init_logging()  -- unchanged
+3. MatchConfig::load() + validate()  -- unchanged
+4. generate_or_load_keypair()  -- unchanged
+5. registry::load(&config.registry_path)  -- existing
+6. audit::load(&config.audit_log_path)  -- NEW
+7. identity::load(&config.identities_path)  -- NEW
+8. contributions::load(&config.contributions_path)  -- NEW
+9. McpHandler::new(registry, audit_log, identities, contributions, match_config, pubkey_z32)
+10. AppState { mcp_handler, registry, audit_log, identities, contributions, pubkey }
+11. build_router(app_state)
 ```
 
-### Request Flow
+All loads are independent and could theoretically run concurrently with `tokio::try_join!`, but sequential is fine for 4 small JSON files at startup.
+
+### Request Handling -- New Endpoints
 
 ```
-1. HTTP POST /mcp arrives at axum router
-   ↓
-2. axum extracts State(AppState) and Json(JsonRpcRequest)
-   ↓
-3. mcp_handler calls dispatch_method(request, state)
-   ↓
-4. dispatch_method matches on request.method:
-   - "initialize" → handle_initialize()
-   - "tools/list" → handle_tools_list()
-   - "tools/call" → handle_tools_call(params, registry)
-   ↓
-5. handle_tools_call extracts query from params.arguments
-   ↓
-6. Calls registry.search(query)
-   ↓
-7. registry.search runs matching pipeline:
-   - Preprocess query
-   - Fuzzy match against all sources
-   - Score and rank
-   - Return top 3
-   ↓
-8. Format results as MCP tool response content
-   ↓
-9. Wrap in JsonRpcResponse with id from request
-   ↓
-10. axum serializes to JSON and returns HTTP 200
+GET /audit?action=add_source&since=2026-01-01
+  -> State(state) -> state.audit_log -> filter entries -> JSON response
+
+GET /identities
+  -> State(state) -> state.identities -> serialize all -> JSON response
+
+GET /identities/{pubkey}
+  -> State(state) -> state.identities -> lookup by pubkey -> JSON or 404
+
+GET /proposals
+  -> State(state) -> state.contributions -> filter by ?status -> JSON response
+
+GET /proposals/{id}
+  -> State(state) -> state.contributions -> lookup by id -> JSON or 404
+
+POST /mcp (tools/call: get_identity)
+  -> McpHandler -> handle_tool_call -> tool_get_identity(identities) -> MCP response
+
+POST /mcp (tools/call: list_proposals)
+  -> McpHandler -> handle_tool_call -> tool_list_proposals(contributions) -> MCP response
+
+POST /mcp (tools/call: get_proposal)
+  -> McpHandler -> handle_tool_call -> tool_get_proposal(contributions) -> MCP response
 ```
 
----
+## New Data File Schemas
 
-## State Management (axum 0.8 AppState pattern)
+### audit_log.json
 
-### AppState Structure
-
-```rust
-#[derive(Clone)]
-pub struct AppState {
-    pub registry: Arc<Registry>,
-    pub config: Arc<Config>,
-}
-
-pub struct Config {
-    pub pubky_enabled: bool,
-    pub homeserver_url: Option<String>,
-    pub fallback_path: PathBuf,
-    pub match_threshold: f32,
-}
-```
-
-### Why Arc<Registry> (not Arc<RwLock<Registry>>)
-
-**Decision: Use `Arc<Registry>` (immutable after load)**
-
-**Rationale:**
-- Registry is loaded once at startup
-- No runtime updates needed (hot-reload not required for MVP)
-- Avoids RwLock overhead on every query
-- Simpler reasoning (no lock contention)
-- Better performance (read-only Arc is lock-free)
-
-**Future consideration:**
-- If hot-reload needed later, add reload endpoint that swaps Arc (atomic pointer swap)
-- Pattern: `Arc<ArcSwap<Registry>>` from arc-swap crate
-
-### State Access Pattern
-
-```rust
-// axum 0.8 State extractor (auto-clones Arc)
-async fn mcp_handler(
-    State(state): State<AppState>,
-    Json(request): Json<JsonRpcRequest>,
-) -> Result<Json<JsonRpcResponse>, JsonRpcError> {
-    // state.registry is Arc<Registry> (cheap clone)
-    let results = state.registry.search(&query).await?;
-    // ...
-}
-```
-
-**Key points:**
-- `State(state)` in axum 0.8 auto-clones the Arc (cheap)
-- No explicit `.clone()` needed
-- Each handler invocation gets its own Arc pointer (reference count increment)
-- Registry data itself is never copied
-
----
-
-## Module Layout Analysis
-
-### Proposed Structure
-
-```
-src/
-  main.rs              # Entry point, server setup
-  mcp/
-    mod.rs             # Public interface
-    handlers.rs        # Method dispatch, handler functions
-    protocol.rs        # JSON-RPC types
-  registry/
-    mod.rs             # Registry struct, public interface
-    loader.rs          # RegistryLoader trait + impls
-    matcher.rs         # Query matching pipeline
-  pubky/
-    mod.rs             # Public interface
-    client.rs          # Pubky SDK wrapper
-    identity.rs        # Identity/keypair management
-  error.rs             # Error types and conversions
-```
-
-### Idiomatic Assessment: GOOD
-
-**Strengths:**
-- Clear separation of concerns (protocol vs logic vs data)
-- Each module has single responsibility
-- Trait-based abstraction in correct module (loader.rs)
-- Error handling centralized
-
-**Suggested improvements:**
-
-1. **Add types.rs in registry module** for shared types:
-   ```
-   src/registry/
-     mod.rs
-     types.rs         # Source, MatchResult, QueryMatch
-     loader.rs        # RegistryLoader trait
-     matcher.rs       # Matching pipeline
-   ```
-
-2. **Consider config.rs at root** if configuration grows:
-   ```
-   src/
-     config.rs        # Config struct, CLI parsing
-   ```
-
-3. **Add tests/ subdirs** for integration tests:
-   ```
-   src/mcp/
-     handlers.rs
-     protocol.rs
-     tests.rs         # Unit tests for protocol parsing
-   ```
-
-### Alternative Layout (if Pubky becomes complex)
-
-```
-src/
-  main.rs
-  server/             # HTTP and routing
-    mod.rs
-    handlers.rs
-  protocol/           # MCP JSON-RPC
-    mod.rs
-    types.rs
-    dispatch.rs
-  domain/             # Business logic
-    registry.rs
-    matcher.rs
-    types.rs
-  adapters/           # External integrations
-    pubky.rs
-    local.rs
-  error.rs
-```
-
-**When to use:** If project grows beyond MVP and follows hexagonal architecture
-
-**For MVP:** Stick with proposed layout (simpler, less indirection)
-
----
-
-## Error Handling Strategy
-
-### Layer-specific error handling
-
-```rust
-// Domain errors (thiserror for structure)
-#[derive(Debug, thiserror::Error)]
-pub enum RegistryError {
-    #[error("Source not found: {0}")]
-    NotFound(String),
-
-    #[error("Invalid query: {0}")]
-    InvalidQuery(String),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum LoadError {
-    #[error("Pubky fetch failed: {0}")]
-    PubkyFetch(String),
-
-    #[error("JSON parse failed: {0}")]
-    JsonParse(#[from] serde_json::Error),
-
-    #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
-}
-
-// Top-level app error (enum of domain errors)
-#[derive(Debug, thiserror::Error)]
-pub enum AppError {
-    #[error("Registry error: {0}")]
-    Registry(#[from] RegistryError),
-
-    #[error("Load error: {0}")]
-    Load(#[from] LoadError),
-
-    #[error("Protocol error: {0}")]
-    Protocol(String),
-}
-```
-
-### Mapping to JSON-RPC errors
-
-```rust
-impl AppError {
-    pub fn to_jsonrpc_error_code(&self) -> i32 {
-        match self {
-            AppError::Registry(RegistryError::InvalidQuery(_)) => -32602,
-            AppError::Registry(_) => -32603,
-            AppError::Load(_) => -32603,
-            AppError::Protocol(_) => -32600,
-        }
+```json
+{
+  "version": "1.0.0",
+  "entries": [
+    {
+      "id": "audit-001",
+      "timestamp": "2026-03-07T12:00:00Z",
+      "action": "add_source",
+      "category": "rust-learning",
+      "details": "Added 'The Rust Programming Language' as source #1",
+      "curator_pubkey": "pk:...",
+      "signature": "sig:..."
     }
-
-    pub fn to_jsonrpc_response(&self, id: serde_json::Value) -> JsonRpcResponse {
-        JsonRpcResponse {
-            jsonrpc: "2.0".into(),
-            id,
-            result: None,
-            error: Some(JsonRpcError {
-                code: self.to_jsonrpc_error_code(),
-                message: self.to_string(),
-                data: None,
-            }),
-        }
-    }
+  ]
 }
 ```
 
-### Error flow
+**Type definitions:**
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AuditLog {
+    pub version: String,
+    pub entries: Vec<AuditEntry>,
+}
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AuditEntry {
+    pub id: String,
+    pub timestamp: String,  // ISO 8601 string, parsed for filtering
+    pub action: AuditAction,
+    pub category: Option<String>,  // Some actions are category-specific
+    pub details: String,
+    pub curator_pubkey: String,
+    pub signature: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AuditAction {
+    AddSource,
+    RemoveSource,
+    UpdateSource,
+    AddCategory,
+    RemoveCategory,
+    UpdateCategory,
+}
 ```
-Domain error occurs
-  ↓
-Converted to AppError (via From trait)
-  ↓
-Handler catches Result<T, AppError>
-  ↓
-Maps to JsonRpcError with code + message
-  ↓
-Wrapped in JsonRpcResponse
-  ↓
-Serialized to JSON by axum
+
+**Validation rules:**
+- Entry IDs must be unique
+- Timestamps must parse as valid ISO 8601 (validate with simple regex, no chrono dependency needed)
+- Action must be a known enum variant (serde handles this)
+
+### identities.json
+
+```json
+{
+  "version": "1.0.0",
+  "identities": [
+    {
+      "pubkey": "pk:...",
+      "display_name": "John Turner",
+      "claims": [
+        {
+          "platform": "x",
+          "handle": "@johnturner",
+          "proof_url": "https://x.com/johnturner/status/...",
+          "verified_at": "2026-03-07T12:00:00Z"
+        },
+        {
+          "platform": "github",
+          "handle": "jturner",
+          "proof_url": "https://gist.github.com/jturner/...",
+          "verified_at": "2026-03-07T12:00:00Z"
+        },
+        {
+          "platform": "nostr",
+          "handle": "npub1...",
+          "proof_url": null,
+          "verified_at": "2026-03-07T12:00:00Z"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-**Key principle:** Errors bubble up as strongly-typed enums, converted to JSON-RPC format only at protocol boundary
+**Type definitions:**
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct IdentityRegistry {
+    pub version: String,
+    pub identities: Vec<Identity>,
+}
 
----
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Identity {
+    pub pubkey: String,
+    pub display_name: String,
+    pub claims: Vec<IdentityClaim>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct IdentityClaim {
+    pub platform: Platform,
+    pub handle: String,
+    pub proof_url: Option<String>,
+    pub verified_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Platform {
+    X,
+    Github,
+    Nostr,
+}
+```
+
+**Validation rules:**
+- Each identity must have a unique pubkey
+- At least one claim per identity
+- Platform is enum-constrained (serde handles this)
+
+### contributions.json
+
+```json
+{
+  "version": "1.0.0",
+  "proposals": [
+    {
+      "id": "prop-001",
+      "submitted_at": "2026-03-07T12:00:00Z",
+      "proposer": {
+        "pubkey": "pk:...",
+        "display_name": "Alice"
+      },
+      "type": "new_category",
+      "title": "Add Docker Security category",
+      "description": "Three sources for hardening Docker containers",
+      "status": "open",
+      "votes": [
+        {
+          "voter_pubkey": "pk:...",
+          "voter_type": "human",
+          "vote": "approve",
+          "comment": "Great sources, well researched",
+          "voted_at": "2026-03-07T14:00:00Z"
+        }
+      ],
+      "resolution": null,
+      "resolved_at": null
+    }
+  ]
+}
+```
+
+**Type definitions:**
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContributionRegistry {
+    pub version: String,
+    pub proposals: Vec<Proposal>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Proposal {
+    pub id: String,
+    pub submitted_at: String,
+    pub proposer: Proposer,
+    #[serde(rename = "type")]
+    pub proposal_type: ProposalType,
+    pub title: String,
+    pub description: String,
+    pub status: ProposalStatus,
+    pub votes: Vec<Vote>,
+    pub resolution: Option<String>,
+    pub resolved_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Proposer {
+    pub pubkey: String,
+    pub display_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Vote {
+    pub voter_pubkey: String,
+    pub voter_type: VoterType,
+    pub vote: VoteChoice,
+    pub comment: Option<String>,
+    pub voted_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ProposalType {
+    NewCategory,
+    NewSource,
+    UpdateSource,
+    RemoveSource,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ProposalStatus {
+    Open,
+    Accepted,
+    Rejected,
+    Withdrawn,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VoterType {
+    Human,
+    Bot,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VoteChoice {
+    Approve,
+    Reject,
+}
+```
+
+**Validation rules:**
+- Each proposal must have a unique ID
+- Status/type/vote enums are serde-constrained
+- VoterType separation enables human vs bot signal analysis
+
+## New Routes
+
+### REST Endpoints
+
+| Route | Method | Handler | Query Params | Returns |
+|-------|--------|---------|-------------|---------|
+| `/audit` | GET | `audit_endpoint` | `?action=X`, `?since=YYYY-MM-DD`, `?category=X` | Filtered audit entries |
+| `/identities` | GET | `identities_endpoint` | none | All identities |
+| `/identities/{pubkey}` | GET | `identity_by_pubkey_endpoint` | none | Single identity or 404 |
+| `/proposals` | GET | `proposals_endpoint` | `?status=open` | Filtered proposals |
+| `/proposals/{id}` | GET | `proposal_by_id_endpoint` | none | Single proposal or 404 |
+
+**Router extension:**
+```rust
+Router::new()
+    .route("/", get(landing_page_endpoint))
+    .route("/mcp", post(mcp_endpoint))
+    .route("/health", get(health_endpoint))
+    .route("/registry", get(registry_endpoint))
+    .route("/audit", get(audit_endpoint))                    // NEW
+    .route("/identities", get(identities_endpoint))           // NEW
+    .route("/identities/{pubkey}", get(identity_by_pubkey_endpoint))  // NEW
+    .route("/proposals", get(proposals_endpoint))             // NEW
+    .route("/proposals/{id}", get(proposal_by_id_endpoint))   // NEW
+    .layer(cors)
+    .with_state(state)
+```
+
+Note: axum 0.8 uses `{param}` syntax for path parameters (not `:param`).
+
+### New MCP Tools (3 additions, 7 total)
+
+| Tool | Parameters | Returns |
+|------|-----------|---------|
+| `get_identity` | `{ pubkey: string }` | Identity claims for a PKARR pubkey |
+| `list_proposals` | `{ status?: string }` | All proposals, optionally filtered |
+| `get_proposal` | `{ id: string }` | Single proposal details |
+
+These follow the established pattern: `*Params` struct with `#[derive(Deserialize, JsonSchema)]` + `#[serde(deny_unknown_fields)]`, entry in `get_tools_list()` JSON, match arm in `handle_tool_call()`, `tool_*` implementation function.
 
 ## Patterns to Follow
 
-### Pattern 1: Stateless Handlers with Shared State
+### Pattern 1: Module Loader (replicate registry/loader.rs exactly)
 
-**What:** All handlers are stateless functions that receive AppState as parameter
+Every new module must follow this established pattern:
 
-**When:** Always in axum web services
-
-**Why:**
-- Handlers are easy to test (pure functions)
-- State is explicitly threaded through (no hidden globals)
-- axum handles Arc cloning automatically
-
-**Example:**
 ```rust
-async fn handle_tools_call(
-    params: ToolCallParams,
-    state: &AppState,
-) -> Result<ToolCallResult, AppError> {
-    // Access shared state
-    let results = state.registry.search(&params.arguments.query).await?;
+// src/audit/loader.rs
+use super::{AuditLog, AuditError};
+use std::path::Path;
+use tokio::fs;
 
-    // Pure transformation
-    Ok(format_results(results))
+pub async fn load(path: impl AsRef<Path>) -> Result<AuditLog, AuditError> {
+    let path = path.as_ref();
+    let path_str = path.display().to_string();
+
+    tracing::info!(path = %path.display(), "Loading audit log");
+
+    let contents = fs::read_to_string(path)
+        .await
+        .map_err(|e| AuditError::FileRead {
+            path: path_str.clone(),
+            error: e.to_string(),
+        })?;
+
+    let audit_log: AuditLog = serde_json::from_str(&contents)
+        .map_err(|e| AuditError::JsonParse {
+            path: path_str.clone(),
+            error: e.to_string(),
+            line: e.line(),
+            column: e.column(),
+        })?;
+
+    validate(&audit_log)?;
+
+    tracing::info!(
+        version = %audit_log.version,
+        entries = audit_log.entries.len(),
+        "Audit log loaded successfully"
+    );
+
+    Ok(audit_log)
 }
 ```
 
----
+### Pattern 2: Error Enum (replicate registry/error.rs exactly)
 
-### Pattern 2: Trait-Based Abstraction for Data Sources
-
-**What:** Define behavior as trait, implement for different backends
-
-**When:** Multiple data sources with same interface (Pubky vs Local)
-
-**Why:**
-- Easy to swap implementations (config-driven)
-- Testable (mock implementations)
-- No runtime conditionals in business logic
-
-**Example:**
 ```rust
-// Define trait
-#[async_trait]
-pub trait RegistryLoader: Send + Sync {
-    async fn load(&self) -> Result<Vec<Source>, LoadError>;
-}
+// src/audit/error.rs
+use thiserror::Error;
 
-// Factory function
-pub fn create_loader(config: &Config) -> Box<dyn RegistryLoader> {
-    if config.pubky_enabled {
-        Box::new(PubkyLoader::new(config))
-    } else {
-        Box::new(LocalLoader::new(&config.fallback_path))
-    }
-}
+#[derive(Debug, Error)]
+pub enum AuditError {
+    #[error("Failed to read audit log file at {path}: {error}")]
+    FileRead { path: String, error: String },
 
-// Usage (business logic doesn't care which)
-let loader = create_loader(&config);
-let registry = Registry::load_from(loader).await?;
+    #[error("Failed to parse audit log JSON from {path} at line {line}, column {column}: {error}")]
+    JsonParse {
+        path: String,
+        error: String,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Duplicate audit entry ID '{id}'")]
+    DuplicateId { id: String },
+}
 ```
 
----
+### Pattern 3: Query Parameter Filtering (new pattern for project)
 
-### Pattern 3: Newtype Wrappers for Domain Types
+The project currently has no query parameter support. New endpoints introduce it via axum's `Query` extractor:
 
-**What:** Wrap primitive types in domain-specific newtypes
-
-**When:** IDs, URLs, queries have validation or special behavior
-
-**Why:**
-- Type safety (can't mix up SourceId vs UserId)
-- Centralized validation
-- Self-documenting code
-
-**Example:**
 ```rust
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SourceId(String);
+use axum::extract::Query;
 
-impl SourceId {
-    pub fn new(s: String) -> Result<Self, AppError> {
-        if s.is_empty() {
-            return Err(AppError::Protocol("SourceId cannot be empty".into()));
+#[derive(Debug, Deserialize)]
+pub struct AuditQuery {
+    pub action: Option<String>,
+    pub since: Option<String>,
+    pub category: Option<String>,
+}
+
+async fn audit_endpoint(
+    State(state): State<Arc<AppState>>,
+    Query(params): Query<AuditQuery>,
+) -> Json<serde_json::Value> {
+    let entries: Vec<_> = state.audit_log.entries.iter()
+        .filter(|e| {
+            params.action.as_ref().map_or(true, |a| {
+                // Compare action string to enum variant
+                format!("{:?}", e.action).to_lowercase().contains(&a.to_lowercase())
+            })
+        })
+        .filter(|e| {
+            params.since.as_ref().map_or(true, |s| e.timestamp.as_str() >= s.as_str())
+        })
+        .filter(|e| {
+            params.category.as_ref().map_or(true, |c| {
+                e.category.as_ref().map_or(false, |ec| ec == c)
+            })
+        })
+        .collect();
+
+    Json(json!({ "entries": entries, "count": entries.len() }))
+}
+```
+
+### Pattern 4: Path Parameter Extraction (new pattern for project)
+
+For `/identities/{pubkey}` and `/proposals/{id}`:
+
+```rust
+use axum::extract::Path;
+
+async fn identity_by_pubkey_endpoint(
+    State(state): State<Arc<AppState>>,
+    Path(pubkey): Path<String>,
+) -> (StatusCode, [(HeaderName, &'static str); 1], String) {
+    match state.identities.identities.iter().find(|i| i.pubkey == pubkey) {
+        Some(identity) => {
+            let json = serde_json::to_string_pretty(identity).unwrap();
+            (StatusCode::OK, [(header::CONTENT_TYPE, "application/json")], json)
         }
-        Ok(SourceId(s))
-    }
-
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl std::fmt::Display for SourceId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        None => (
+            StatusCode::NOT_FOUND,
+            [(header::CONTENT_TYPE, "application/json")],
+            format!(r#"{{"error":"Identity not found for pubkey: {}"}}"#, pubkey),
+        ),
     }
 }
 ```
 
----
+### Pattern 5: Config Extension (env vars via envy)
 
-### Pattern 4: Builder Pattern for Complex Responses
+The project uses `envy` to map env vars to struct fields. Field names map to env var names via SCREAMING_SNAKE_CASE automatically:
 
-**What:** Use builder for constructing MCP responses with many optional fields
-
-**When:** Creating tool responses with content arrays
-
-**Example:**
 ```rust
-pub struct ToolResponseBuilder {
-    content: Vec<ContentItem>,
+pub struct Config {
+    pub registry_path: PathBuf,           // REGISTRY_PATH (existing)
+    pub audit_log_path: PathBuf,          // AUDIT_LOG_PATH (new)
+    pub identities_path: PathBuf,         // IDENTITIES_PATH (new)
+    pub contributions_path: PathBuf,      // CONTRIBUTIONS_PATH (new)
+    #[serde(default = "default_log_format")]
+    pub log_format: String,
+    #[serde(default = "default_port")]
+    pub port: u16,
+    pub pkarr_secret_key: Option<String>,
 }
-
-impl ToolResponseBuilder {
-    pub fn new() -> Self {
-        Self { content: Vec::new() }
-    }
-
-    pub fn add_text(mut self, text: String) -> Self {
-        self.content.push(ContentItem::Text { text });
-        self
-    }
-
-    pub fn add_image(mut self, url: String, alt: String) -> Self {
-        self.content.push(ContentItem::Image { url, alt });
-        self
-    }
-
-    pub fn build(self) -> ToolCallResult {
-        ToolCallResult {
-            content: self.content,
-        }
-    }
-}
-
-// Usage
-let response = ToolResponseBuilder::new()
-    .add_text("Found 3 sources:".into())
-    .add_text(format_source(&source1))
-    .add_text(format_source(&source2))
-    .add_text(format_source(&source3))
-    .build();
 ```
 
----
+These are required fields (not Option), so the server will fail to start if they are missing, matching the existing behavior for `registry_path`.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Global Mutable State
+### Anti-Pattern 1: Nesting New Data Inside Registry
 
-**What goes wrong:** Using `lazy_static!` or `OnceCell` for mutable global registry
+**What:** Adding audit_log, identities, contributions fields to `Registry` struct or `registry.json`.
+**Why bad:** Violates single responsibility. Registry has `#[serde(deny_unknown_fields)]` which would reject unknown fields anyway. Makes independent loading/validation impossible. Breaks all existing tests.
+**Instead:** Separate modules, separate files, separate types. They share `AppState` but nothing else.
 
-**Why it happens:** Seems easier than threading state through functions
+### Anti-Pattern 2: Dynamic File Reloading
 
-**Consequences:**
-- Hard to test (tests interfere with each other)
-- Unclear ownership and lifetimes
-- Difficult to mock or inject dependencies
+**What:** Adding file watchers or hot-reload for JSON files.
+**Why bad:** Premature complexity. Existing pattern is load-once-on-startup. All data is curator-managed and committed to repo. Changes deploy via Docker rebuild. The read-only server philosophy is explicit in PROJECT.md.
+**Instead:** Keep load-on-startup. Redeploy to update data.
 
-**Instead:** Use axum's State extractor with Arc-wrapped state
+### Anti-Pattern 3: Runtime Signing
 
-**Detection:**
-- `static mut REGISTRY: ...`
-- `lazy_static! { static ref REGISTRY: Mutex<...> }`
+**What:** Having the server sign audit entries at runtime.
+**Why bad:** The server is read-only. No write API in v2.0. Signing at runtime means the server needs write access to data files.
+**Instead:** Signatures are pre-computed offline by the curator and stored in the JSON files. The server loads and serves pre-signed data.
 
----
+### Anti-Pattern 4: Adding chrono Dependency for Date Filtering
 
-### Anti-Pattern 2: Stringly-Typed APIs
+**What:** Adding the `chrono` crate just to parse ISO 8601 strings for the `?since=` filter.
+**Why bad:** Heavy dependency for simple string comparison. ISO 8601 strings in `YYYY-MM-DDTHH:MM:SSZ` format sort lexicographically.
+**Instead:** Use string comparison (`timestamp >= since_str`) for filtering. Validate format with a regex at load time. Only add chrono if actual date math is needed later.
 
-**What goes wrong:** Using plain `String` for typed values (IDs, method names)
+## Signing Integration with Existing PKARR
 
-**Why bad:**
-- No compile-time validation
-- Easy to mix up parameters
-- Runtime errors instead of compile errors
+The existing PKARR keypair serves two purposes today:
+1. **Identity display** -- pubkey shown in `/health` and `get_provenance` tool
+2. **Keypair storage** -- loaded from `PKARR_SECRET_KEY` env var or generated ephemerally
 
-**Instead:** Use enums for known values, newtypes for IDs
+For v2.0, the `signature` field in audit entries is **pre-computed offline by the curator**. The server does not sign at runtime.
 
-**Example:**
-```rust
-// BAD
-fn dispatch_method(method: &str) -> Result<Response> {
-    match method {
-        "tools/call" => ...,
-        "tools/list" => ...,
-        _ => Err("unknown method"),
-    }
-}
+**Flow:**
+1. Curator edits data files locally
+2. Curator signs entries using their PKARR keypair (offline CLI tool, separate from server)
+3. Signed JSON files committed to repo
+4. Server loads and serves pre-signed data
+5. Clients verify signatures using pubkey from `/health` or `get_provenance`
 
-// GOOD
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-enum MpcMethod {
-    Initialize,
-    #[serde(rename = "tools/list")]
-    ToolsList,
-    #[serde(rename = "tools/call")]
-    ToolsCall,
-}
+The identity module links the same PKARR pubkey to social platform handles. The curator's identity entry in `identities.json` will reference the same pubkey that appears in `registry.json`'s `curator.pubkey` field and in `/health`'s response.
 
-fn dispatch_method(method: MpcMethod) -> Result<Response> {
-    match method {
-        MpcMethod::ToolsCall => ...,
-        MpcMethod::ToolsList => ...,
-        MpcMethod::Initialize => ...,
-    }
-}
-```
+## Build Order (Dependency-Aware)
 
----
-
-### Anti-Pattern 3: Blocking I/O in Async Handlers
-
-**What goes wrong:** Using `std::fs::read` or blocking Pubky calls in async functions
-
-**Why bad:**
-- Blocks tokio worker thread
-- Degrades server throughput
-- Can cause deadlocks under load
-
-**Instead:** Use `tokio::fs` or `spawn_blocking` for blocking operations
-
-**Example:**
-```rust
-// BAD
-async fn load_local(path: &Path) -> Result<Vec<Source>> {
-    let data = std::fs::read_to_string(path)?; // BLOCKS!
-    Ok(serde_json::from_str(&data)?)
-}
-
-// GOOD
-async fn load_local(path: &Path) -> Result<Vec<Source>> {
-    let data = tokio::fs::read_to_string(path).await?;
-    Ok(serde_json::from_str(&data)?)
-}
-
-// Also GOOD (for CPU-heavy parsing)
-async fn load_local(path: &Path) -> Result<Vec<Source>> {
-    let path = path.to_owned();
-    tokio::task::spawn_blocking(move || {
-        let data = std::fs::read_to_string(&path)?;
-        serde_json::from_str(&data)
-    }).await?
-}
-```
-
----
-
-### Anti-Pattern 4: Catch-All Error Handling
-
-**What goes wrong:** Converting all errors to generic "Internal Error"
-
-**Why bad:**
-- Loses debugging information
-- Client can't distinguish error types
-- Makes troubleshooting harder
-
-**Instead:** Map errors to specific JSON-RPC codes with details
-
-**Example:**
-```rust
-// BAD
-async fn handle_request(req: Request) -> Response {
-    match process(req).await {
-        Ok(result) => Response::success(result),
-        Err(_) => Response::error(-32603, "Internal error"),
-    }
-}
-
-// GOOD
-async fn handle_request(req: Request) -> Response {
-    match process(req).await {
-        Ok(result) => Response::success(result),
-        Err(e) => {
-            let (code, message) = e.to_jsonrpc_error();
-            Response::error(code, message)
-                .with_data(json!({ "details": e.to_string() }))
-        }
-    }
-}
-```
-
----
-
-### Anti-Pattern 5: Premature Abstraction
-
-**What goes wrong:** Creating abstract traits for single implementations
-
-**Why it happens:** Anticipating future requirements that may never come
-
-**Consequences:**
-- Extra complexity with no benefit
-- Harder to understand and modify
-- Indirection that slows development
-
-**Instead:** Start concrete, refactor to trait when second implementation emerges
-
-**Detection:**
-- Trait with only one `impl` in codebase
-- Generic parameters used only with one type
-- "Future-proofing" comments
-
-**Example:**
-```rust
-// BAD (premature)
-trait Scorer: Send + Sync {
-    fn score(&self, query: &str, source: &Source) -> f32;
-}
-
-struct LevenshteinScorer;
-impl Scorer for LevenshteinScorer { ... }
-
-fn search(scorer: &dyn Scorer) -> Vec<Source> { ... }
-
-// GOOD (concrete until needed)
-fn score_match(query: &str, source: &Source) -> f32 {
-    // Direct implementation
-}
-
-fn search(query: &str) -> Vec<Source> {
-    sources.iter()
-        .map(|s| (s, score_match(query, s)))
-        .collect()
-}
-```
-
-**Exception:** RegistryLoader trait is NOT premature because we know we have two implementations (Pubky + Local) from day one.
-
----
-
-## Build Order and Dependencies
-
-### Phase 1: Foundation (No Dependencies)
-
-**Components:**
-- Error types (error.rs)
-- Domain types (registry/types.rs: Source, MatchResult)
-- Config struct (config.rs or in main.rs)
-
-**Rationale:** These are dependencies for all other components
-
-**Testing:** Unit tests for type validation, error conversion
-
----
-
-### Phase 2: Data Layer (Depends on Phase 1)
-
-**Components:**
-- RegistryLoader trait (registry/loader.rs)
-- LocalLoader implementation (reads JSON)
-- Registry struct with load_from method
-
-**Skip:** PubkyLoader (defer to later phase)
-
-**Rationale:**
-- Can develop and test with local JSON
-- Pubky integration is independent concern
-- Unblocks business logic development
-
-**Testing:**
-- LocalLoader with fixture JSON files
-- Registry construction and access
-
----
-
-### Phase 3: Business Logic (Depends on Phase 1, 2)
-
-**Components:**
-- Query matching pipeline (registry/matcher.rs)
-- Fuzzy search implementation
-- Scoring and ranking logic
-
-**Rationale:**
-- Core value of the system
-- Can test thoroughly with local data
-- Independent of protocol details
-
-**Testing:**
-- Unit tests with various query patterns
-- Edge cases (empty query, no matches, exact matches)
-- Performance tests (large registry)
-
----
-
-### Phase 4: Protocol Layer (Depends on Phase 1)
-
-**Components:**
-- JSON-RPC types (mcp/protocol.rs)
-- Request/response serialization
-- Method dispatch skeleton
-
-**Rationale:**
-- Independent of business logic (can stub)
-- Enables protocol testing
-- Defines handler signatures
-
-**Testing:**
-- JSON-RPC parsing (valid and invalid)
-- Error response formatting
-- Method dispatch routing
-
----
-
-### Phase 5: HTTP Integration (Depends on Phase 2, 3, 4)
-
-**Components:**
-- axum router setup (main.rs)
-- AppState construction
-- Handler wiring
-- Startup sequence
-
-**Rationale:**
-- Brings all layers together
-- End-to-end functionality
-- Can test full request flow
-
-**Testing:**
-- Integration tests with real HTTP requests
-- End-to-end query flow
-- Error handling paths
-
----
-
-### Phase 6: Pubky Integration (Depends on Phase 2)
-
-**Components:**
-- Pubky SDK wrapper (pubky/client.rs)
-- PubkyLoader implementation
-- Identity management (pubky/identity.rs)
-- Config-based loader selection
-
-**Rationale:**
-- Can be developed in parallel with Phase 3-5
-- Plugs into existing RegistryLoader trait
-- Non-breaking addition
-
-**Testing:**
-- Integration tests against Pubky testnet
-- Fallback behavior (Pubky → Local on failure)
-
----
-
-### Dependency Graph
+The three new features have minimal inter-dependencies:
 
 ```
-Phase 1: Foundation
-         ↓
-    ┌────┴────┐
-    ↓         ↓
-Phase 2:   Phase 4:
-Data       Protocol
-    ↓         ↓
-    └────┬────┘
-         ↓
-      Phase 3:
-    Business Logic
-         ↓
-      Phase 5:
-   HTTP Integration
-         ↓
-      Phase 6:
-Pubky Integration
+audit (standalone) ----\
+                        +---> All share AppState, loaded independently at startup
+identity (standalone) -/
+                        \
+contributions (references proposer pubkey, but no hard code dependency)
 ```
 
-**Critical path:** 1 → 2 → 3 → 5 (can ship without Pubky)
+### Phase 1: Audit Log Module
+- **Why first:** Simplest schema (flat list of entries). No new MCP tools (REST-only per project spec). Establishes the "new module" pattern that identity and contributions will copy.
+- **Creates:** `src/audit/` (4 files), `audit_log.json`, test fixtures
+- **Modifies:** `main.rs` (add load), `lib.rs` (add mod), `config.rs` (add path), `server.rs` (add AppState field + route + handler)
+- **Does not modify:** `mcp/` (no new tools for audit)
+- **Tests:** Loader unit tests, route integration test, filter tests
 
-**Parallel development:** Phase 4 can happen alongside Phase 2
+### Phase 2: Identity Module
+- **Why second:** Introduces path parameter routes (`/identities/{pubkey}`) and the first new MCP tool (`get_identity`). This pattern is then reused by contributions.
+- **Creates:** `src/identity/` (4 files), `identities.json`, test fixtures
+- **Modifies:** `main.rs`, `lib.rs`, `config.rs`, `server.rs` (AppState + 2 routes), `mcp/handler.rs` (McpHandler fields), `mcp/tools.rs` (1 new tool + tools_list update)
+- **Tests:** Loader tests, route tests, MCP tool integration test
 
-**Optional:** Phase 6 adds Pubky but doesn't block MVP
+### Phase 3: Contributions Module
+- **Why third:** Most complex schema (proposals with votes, status, resolution). Adds two MCP tools. Reuses all patterns established in phases 1-2.
+- **Creates:** `src/contributions/` (4 files), `contributions.json`, test fixtures
+- **Modifies:** `main.rs`, `lib.rs`, `config.rs`, `server.rs` (AppState + 2 routes), `mcp/handler.rs`, `mcp/tools.rs` (2 new tools + tools_list update)
+- **Tests:** Loader tests, route tests, vote type filtering tests, 2 MCP tool integration tests
 
----
+### Phase 4: Integration and Polish
+- Update `get_provenance` tool to mention identity linking
+- Update landing page HTML to document new endpoints
+- Update `.env.example` and Dockerfile with new env vars
+- Update `test_tools_list_returns_four_tools` to assert 7 tools
+- End-to-end integration test across all new endpoints
+
+## Files Modified vs Created
+
+### Modified (existing files)
+
+| File | Changes |
+|------|---------|
+| `src/main.rs` | 3 new module declarations, 3 new load calls, extended AppState and McpHandler construction |
+| `src/lib.rs` | Add `pub mod audit; pub mod identity; pub mod contributions;` |
+| `src/config.rs` | Add 3 new `PathBuf` fields |
+| `src/server.rs` | Extend AppState struct (3 new Arc fields), add 5 new routes to `build_router()`, add 5 new handler functions |
+| `src/mcp/handler.rs` | Extend McpHandler struct (3 new Arc fields), extend `McpHandler::new()` signature, pass new data to `handle_tool_call()` |
+| `src/mcp/tools.rs` | Add 3 new param structs, extend `get_tools_list()` (4 -> 7 tools), add 3 match arms in `handle_tool_call()`, add 3 `tool_*` functions |
+| `.env` / `.env.example` | Add `AUDIT_LOG_PATH`, `IDENTITIES_PATH`, `CONTRIBUTIONS_PATH` |
+| `Dockerfile` | COPY new JSON files, set new ENV vars |
+| `tests/integration_mcp.rs` | Update tool count assertion from 4 to 7 |
+
+### Created (new files)
+
+| File | Purpose |
+|------|---------|
+| `src/audit/mod.rs` | Module re-exports |
+| `src/audit/types.rs` | AuditLog, AuditEntry, AuditAction |
+| `src/audit/loader.rs` | Load + validate audit_log.json |
+| `src/audit/error.rs` | AuditError enum |
+| `src/identity/mod.rs` | Module re-exports |
+| `src/identity/types.rs` | IdentityRegistry, Identity, IdentityClaim, Platform |
+| `src/identity/loader.rs` | Load + validate identities.json |
+| `src/identity/error.rs` | IdentityError enum |
+| `src/contributions/mod.rs` | Module re-exports |
+| `src/contributions/types.rs` | ContributionRegistry, Proposal, Vote, ProposalStatus, VoterType |
+| `src/contributions/loader.rs` | Load + validate contributions.json |
+| `src/contributions/error.rs` | ContributionError enum |
+| `audit_log.json` | Seed audit data (retroactive entries for v1.0 source additions) |
+| `identities.json` | Seed identity data (curator's own identity with claims) |
+| `contributions.json` | Empty contributions (`{"version":"1.0.0","proposals":[]}`) |
+| `tests/fixtures/valid_audit_log.json` | Test fixture |
+| `tests/fixtures/valid_identities.json` | Test fixture |
+| `tests/fixtures/valid_contributions.json` | Test fixture |
+| `tests/integration_audit.rs` | Integration tests for /audit |
+| `tests/integration_identity.rs` | Integration tests for /identities |
+| `tests/integration_contributions.rs` | Integration tests for /proposals + MCP tools |
+
+## Estimated Size Impact
+
+| Area | Current | After v2.0 | Notes |
+|------|---------|------------|-------|
+| Rust source files | 20 | 32 | +12 new files in 3 modules |
+| Lines of Rust | ~2,179 | ~3,200-3,500 | ~1,000-1,300 new lines |
+| JSON data files | 1 | 4 | +3 new data files |
+| Test files | 4 integration | 7 integration | +3 new test files |
+| MCP tools | 4 | 7 | +3 new tools |
+| HTTP routes | 4 | 9 | +5 new routes |
 
 ## Scalability Considerations
 
-### At 100 users (MVP)
-
-| Concern | Approach |
-|---------|----------|
-| Request throughput | Single-process axum server, ~10K req/s |
-| Registry size | In-memory Vec, <1MB, linear search fine |
-| Startup time | <100ms for local JSON load |
-| Memory | ~50MB process size |
-| Concurrent requests | Tokio handles 100s of concurrent connections |
-
-**No optimizations needed**
-
----
-
-### At 10K users
-
-| Concern | Approach |
-|---------|----------|
-| Request throughput | Add horizontal scaling (multiple instances behind load balancer) |
-| Registry size | If >10K sources, add HashMap index by category |
-| Fuzzy search | Consider pre-computed n-gram index |
-| Memory | Still fits in memory (~500MB for large registry) |
-| Concurrent requests | Tokio still handles this, may need rate limiting |
-
-**Optimizations:**
-- Add category-based index for faster filtering
-- Cache top queries (LRU cache of query → results)
-- Add observability (metrics, tracing)
-
----
-
-### At 1M users
-
-| Concern | Approach |
-|---------|----------|
-| Request throughput | Autoscaling pod cluster, CDN for static responses |
-| Registry size | If >1M sources, consider external search (ElasticSearch/Meilisearch) |
-| Fuzzy search | Replace with dedicated search engine |
-| Memory | Shared cache layer (Redis) for hot queries |
-| Concurrent requests | Rate limiting per user, priority queues |
-
-**Architecture changes:**
-- Registry becomes external service (not in-memory)
-- Add caching layer (Redis)
-- Add message queue for async processing
-- Split into microservices (API gateway → query service → registry service)
-
-**For MVP:** Ignore all of this. Start simple, scale when needed.
-
----
-
-## Pubky-Specific Considerations
-
-### Pubky Client Lifecycle
-
-**Question:** When to initialize Pubky client?
-
-**Answer:** At startup, before creating AppState
-
-**Pattern:**
-```rust
-#[tokio::main]
-async fn main() -> Result<()> {
-    let config = Config::load()?;
-
-    // Initialize Pubky client if enabled
-    let pubky_client = if config.pubky_enabled {
-        Some(PubkyClient::new(&config.homeserver_url).await?)
-    } else {
-        None
-    };
-
-    // Create loader based on availability
-    let loader: Box<dyn RegistryLoader> = match pubky_client {
-        Some(client) => Box::new(PubkyLoader::new(client)),
-        None => Box::new(LocalLoader::new(&config.fallback_path)),
-    };
-
-    let registry = Registry::load_from(loader).await?;
-
-    let app_state = AppState {
-        registry: Arc::new(registry),
-        config: Arc::new(config),
-    };
-
-    // ... start server
-}
-```
-
----
-
-### Pubky Fallback Strategy
-
-**Requirement:** If Pubky fetch fails, fall back to local JSON
-
-**Implementation:**
-```rust
-async fn load_registry(config: &Config) -> Result<Registry> {
-    // Try Pubky first if enabled
-    if config.pubky_enabled {
-        match try_load_from_pubky(config).await {
-            Ok(registry) => {
-                info!("Loaded registry from Pubky");
-                return Ok(registry);
-            }
-            Err(e) => {
-                warn!("Pubky load failed: {}, falling back to local", e);
-            }
-        }
-    }
-
-    // Fallback to local
-    let loader = LocalLoader::new(&config.fallback_path);
-    let sources = loader.load().await?;
-    Ok(Registry::new(sources))
-}
-```
-
-**Key decision:** Fail open (serve stale local data) rather than fail closed (reject requests)
-
----
-
-### Pubky Trust Score Integration
-
-**Data flow:**
-```
-Pubky homeserver
-    ↓ (fetch)
-Source metadata with trust signals
-    ↓ (parse)
-Calculate trust_score (0.0-1.0)
-    ↓ (store)
-Source struct with trust_score field
-    ↓ (use)
-Ranking tiebreaker in search results
-```
-
-**Trust score factors:**
-- Pubky identity verification
-- Endorsements from trusted sources
-- Historical accuracy
-- Community ratings
-
-**Storage:** Store as `f32` field on `Source`, use in ranking
-
----
-
-### Identity Management
-
-**For MVP:** Server has single identity (operator's key)
-
-**Pattern:**
-```rust
-pub struct PubkyIdentity {
-    keypair: Keypair,
-    public_key: String,
-}
-
-impl PubkyIdentity {
-    pub fn load_from_env() -> Result<Self> {
-        let secret = env::var("PUBKY_SECRET_KEY")?;
-        let keypair = Keypair::from_secret(&secret)?;
-        Ok(PubkyIdentity {
-            public_key: keypair.public_key().to_string(),
-            keypair,
-        })
-    }
-
-    pub fn sign(&self, data: &[u8]) -> Signature {
-        self.keypair.sign(data)
-    }
-}
-```
-
-**Security:** Never log or expose secret key, load from env var only
-
----
-
-## Testing Strategy
-
-### Unit Tests
-
-**What to test:**
-- JSON-RPC parsing and serialization
-- Query matching logic (scoring, ranking)
-- Error conversions
-- Domain type validation
-
-**Location:** `#[cfg(test)] mod tests` in each module
-
-**Example:**
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_levenshtein_scoring() {
-        let score = calculate_levenshtein("rust", "trust");
-        assert!(score > 0.7);
-    }
-
-    #[tokio::test]
-    async fn test_local_loader() {
-        let loader = LocalLoader::new("fixtures/test_registry.json");
-        let sources = loader.load().await.unwrap();
-        assert_eq!(sources.len(), 3);
-    }
-}
-```
-
----
-
-### Integration Tests
-
-**What to test:**
-- Full HTTP request → JSON-RPC response flow
-- Multiple requests to same server
-- Error handling paths
-- Startup and shutdown
-
-**Location:** `tests/integration_test.rs`
-
-**Pattern:**
-```rust
-#[tokio::test]
-async fn test_tools_call_request() {
-    let app = create_test_app().await;
-
-    let request = json!({
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "tools/call",
-        "params": {
-            "name": "search_sources",
-            "arguments": { "query": "rust async" }
-        }
-    });
-
-    let response = app
-        .oneshot(
-            Request::builder()
-                .uri("/mcp")
-                .method("POST")
-                .header("content-type", "application/json")
-                .body(Body::from(serde_json::to_string(&request).unwrap()))
-                .unwrap()
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(response.status(), StatusCode::OK);
-
-    let body: JsonRpcResponse = serde_json::from_slice(
-        &hyper::body::to_bytes(response.into_body()).await.unwrap()
-    ).unwrap();
-
-    assert_eq!(body.id, json!(1));
-    assert!(body.result.is_some());
-}
-```
-
----
-
-### Property-Based Tests (with proptest)
-
-**What to test:**
-- Fuzzy matching always returns scores in [0.0, 1.0]
-- Top 3 results are always sorted by score descending
-- All queries return valid JSON-RPC responses
-
-**Example:**
-```rust
-use proptest::prelude::*;
-
-proptest! {
-    #[test]
-    fn test_score_always_in_range(query in "\\PC{1,100}") {
-        let source = Source::fixture();
-        let score = calculate_match_score(&query, &source);
-        prop_assert!(score >= 0.0 && score <= 1.0);
-    }
-}
-```
-
----
-
-## Open Questions and Research Flags
-
-### Questions Requiring Phase-Specific Research
-
-1. **Pubky SDK API surface:**
-   - What's the exact API for fetching from homeserver?
-   - How are signatures verified?
-   - What's the error model?
-   - **Flag for:** Phase 6 (Pubky Integration)
-
-2. **MCP protocol versioning:**
-   - How to handle protocol version negotiation?
-   - Are there breaking changes between versions?
-   - **Flag for:** Phase 4 (Protocol Layer)
-
-3. **Fuzzy matching performance:**
-   - At what registry size does linear search become too slow?
-   - Should we use n-gram indexing from start?
-   - **Flag for:** Phase 3 (Business Logic) - benchmark with realistic data
-
-4. **Hot-reload requirements:**
-   - Do we need runtime registry updates?
-   - If yes, how often?
-   - **Flag for:** Post-MVP enhancement
-
----
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| axum 0.8 patterns | HIGH | Standard patterns, well-documented |
-| JSON-RPC structure | HIGH | Spec is clear, widely implemented |
-| Trait abstraction | HIGH | Idiomatic Rust pattern |
-| Module layout | HIGH | Follows Rust conventions |
-| Error handling | HIGH | thiserror + anyhow is standard |
-| Fuzzy matching | MEDIUM | Algorithm choice may need tuning |
-| Pubky integration | LOW | Pubky SDK API not verified |
-| Performance estimates | MEDIUM | Based on typical Rust web service benchmarks |
-
----
+| Concern | At current scale | At 1K entries | Notes |
+|---------|-----------------|---------------|-------|
+| Audit log size | <1KB (seed data) | ~100KB | Linear scan fine, string comparison for filtering |
+| Identity count | 1 (curator) | ~50 | Linear scan fine, Vec::iter().find() adequate |
+| Proposal count | 0 | ~100 | Linear scan fine |
+| Startup time | ~10ms | ~15ms | Negligible additional load time |
+
+Growth is bounded by human curation speed. In-memory with no pagination is appropriate for the foreseeable project lifetime.
 
 ## Sources
 
-**Note:** Due to tool restrictions, sources are based on Rust ecosystem knowledge as of January 2025. Key patterns verified through:
-
-- axum documentation and examples (standard State pattern)
-- Rust API guidelines (trait-based abstraction, error handling)
-- JSON-RPC 2.0 specification (message formats)
-- Common Rust web service architectures (layered, trait-based)
-
-**Verification needed:**
-- Pubky SDK documentation (client API, identity management)
-- MCP protocol specification (exact message formats, versioning)
-- axum 0.8 specific changes (if any from 0.7)
-
-**Confidence level:** MEDIUM overall (HIGH for Rust patterns, LOW for Pubky specifics)
+- Direct analysis of all 20 existing `.rs` source files (HIGH confidence)
+- axum 0.8 `{param}` path syntax and `Query`/`Path` extractors verified from existing codebase usage of axum 0.8 (HIGH confidence)
+- Project conventions: `deny_unknown_fields`, thiserror enums, async file loading, Arc wrapping, env-based config via envy (HIGH confidence, directly observed in code)
+- PROJECT.md v2.0 feature requirements (HIGH confidence, explicit specification)

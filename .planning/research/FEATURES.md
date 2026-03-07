@@ -1,388 +1,233 @@
-# Feature Landscape: Curated Trust Registry MCP Server
+# Feature Landscape
 
-**Domain:** Curated source registry served via Model Context Protocol
-**Researched:** 2026-02-01
-**Confidence:** MEDIUM (MCP spec verified, sources manually curated and verified, trust graph patterns based on training data)
+**Domain:** Curated trust registry with audit trail, identity linking, and community contributions
+**Researched:** 2026-03-07
+**Scope:** v2.0 milestone features ONLY (audit log, identity linking, community contributions)
 
 ## Table Stakes
 
-Features users/agents expect. Missing = product feels incomplete.
+Features users expect for v2.0. Missing = the milestone feels incomplete.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| MCP tools primitive | MCP servers expose callable tools - this is core protocol | Low | Standard: list_tools, call_tool methods |
-| MCP resources primitive | MCP servers expose readable resources - standard pattern | Low | Standard: list_resources, read_resource methods |
-| Query matching | Agent sends intent, registry returns sources | Medium | Fuzzy matching needed, not exact string match |
-| Source metadata | Each source needs: name, URL, type, description | Low | Minimum viable metadata for selection |
-| Category organization | Sources grouped by topic/domain | Low | Agents need to browse or filter |
-| Health endpoint | Server reports operational status | Low | MCP clients expect servers to be queryable |
-| Standard MCP discovery | Server lists capabilities via MCP protocol | Low | initialize handshake required |
-| JSON-based storage | Registry data in JSON format | Low | Standard, parseable, version-controllable |
-| Error handling | Graceful failures with meaningful messages | Medium | MCP error format compliance |
-| Multiple sources per query | Return ranked list, not single result | Low | Core value prop: curated options |
+### Audit Log
+
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|--------------|------------|--------------|-------|
+| Append-only `audit_log.json` file | Core transparency promise -- without it, curation changes are opaque | Low | None (new file) | Curator appends entries manually or via CLI; server loads on startup like `registry.json` |
+| Each entry has timestamp, action, actor pubkey, and affected entity | Standard audit schema -- who did what, when, to what | Low | PKARR pubkey (exists) | Actions: `source_added`, `source_removed`, `source_updated`, `category_added`, `category_removed`, `endorsement_added` |
+| `GET /audit` endpoint returning full log | Users/agents need to read the log | Low | Audit log loaded in AppState | Return raw JSON array, newest-first |
+| Filter `/audit` by action type and category | Unfiltered logs are useless at scale | Medium | `/audit` endpoint | Query params: `?action=source_added&category=rust-learning` |
+| `get_audit_log` MCP tool | Agents need programmatic access to curation history | Low | Audit log in AppState | Mirror the `/audit` endpoint filtering via tool arguments |
+| Entry includes human-readable `description` field | Audit entries need context, not just action codes | Low | None | e.g., "Added 'Zero To Production' as rank 3 source for rust-learning" |
+
+### Identity Linking
+
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|--------------|------------|--------------|-------|
+| `identities.json` mapping PKARR pubkeys to platform claims | Core identity linking data store | Low | None (new file) | Curator-managed; each identity has pubkey + array of platform claims |
+| Platform claims for GitHub, X (Twitter), and Nostr | These are the three platforms in the project's ecosystem | Medium | None | Follow NIP-39 model: platform + identity + proof URL |
+| `GET /identities` endpoint listing all linked identities | Public discoverability of identity claims | Low | Identities loaded in AppState | Returns array of identity objects |
+| `GET /identities/:pubkey` endpoint for single identity lookup | Direct lookup by pubkey | Low | `/identities` endpoint | 404 if pubkey not found |
+| `get_identity` MCP tool | Agents need to verify curator identity across platforms | Low | Identities in AppState | Takes pubkey argument, returns linked identities |
+| Proof URLs pointing to verifiable public posts | Without proof, claims are meaningless -- anyone can claim any handle | Low | Platform accounts | GitHub: Gist with pubkey. X: Tweet with pubkey. Nostr: kind 0 event with pubkey |
+
+### Community Contributions
+
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|--------------|------------|--------------|-------|
+| `contributions.json` file for community proposals | Structured storage for source suggestions | Low | None (new file) | Curator-managed; proposals submitted via GitHub Issues, curator adds to JSON |
+| Proposal schema: category, proposed source, submitter info, status | Users need to know what's proposed and its current state | Low | None | Statuses: `pending`, `accepted`, `rejected`, `deferred` |
+| `GET /proposals` endpoint listing proposals | Public visibility of community input | Low | Contributions loaded in AppState | Filterable by status and category |
+| `GET /proposals/:id` endpoint for single proposal | Direct proposal lookup | Low | `/proposals` endpoint | |
+| `list_proposals` and `get_proposal` MCP tools | Agents should surface community proposals | Low | Contributions in AppState | |
+| Curator rationale on accepted/rejected proposals | Transparency about why decisions were made | Low | None | `curator_notes` field on each proposal |
 
 ## Differentiators
 
-Features that set product apart. Not expected, but valued.
+Features that set 3GS apart. Not expected, but valuable.
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Cryptographic provenance | Pubky-signed sources prove curator identity | High | Key differentiator from plain JSON |
-| Trust graph integration | Sources endorsed by trusted curators in network | High | Leverages Pubky's web-of-trust |
-| Intent pattern matching | Fuzzy match agent queries to curator-defined patterns | Medium | Better than keyword search |
-| Source ranking | Curator explicitly ranks top 3 (not algorithmic) | Low | Human curation > SEO ranking |
-| Anti-SEO stance | Deliberately exclude algorithm-gamed content | Low | Philosophical differentiator |
-| Curator attribution | Each source shows who vetted it | Low | Accountability and trust building |
-| Scoped trust domains | Curators trusted per-domain (e.g., security vs cooking) | Medium | More nuanced than binary trust |
-| Offline-first capable | Registry works without network after initial sync | Medium | MCP server can cache locally |
-| Update subscription | Agents can subscribe to registry updates | Medium | Push model, not just poll |
-| Multi-curator aggregation | Merge sources from multiple trusted curators | High | Network effect value |
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| **Signed audit entries** | Each audit entry signed with curator's Ed25519 key, proving the curator actually made the change -- not just claimed to | High | PKARR keypair, JSON canonicalization | Requires deterministic JSON serialization (sorted keys). Huge trust differentiator but adds complexity. Defer to v2.1 unless time permits |
+| **Audit entry hash chain** | Each entry includes hash of previous entry, creating tamper-evident chain | Medium | Audit log entries | Like a mini blockchain for curation decisions. SHA-256 of previous entry's canonical JSON. Detects if someone edits history |
+| **Human vs bot vote signal separation** | Community proposals track whether support comes from humans (GitHub accounts with history) vs fresh/bot accounts | High | Contributions system, heuristics | No perfect solution exists. Practical approach: record GitHub account age, contribution count, and let consumers decide. Do NOT try to build Sybil resistance -- just expose signals |
+| **Cross-platform identity proof verification** | Server validates proof URLs on startup or on-demand, marking claims as `verified` or `unverified` | High | Identity claims, HTTP client | Requires fetching external URLs (GitHub Gists, tweets). Fragile -- platforms change APIs, tweets get deleted. Better as optional enrichment, not hard requirement |
+| **Proposal voting/endorsement counts** | Track how many community members support a proposal | Medium | Contributions system | Read-only: curator tallies votes from GitHub Issue reactions and records count in JSON. No live voting on server |
+| **Audit log RSS/Atom feed** | `/audit/feed` endpoint for subscribing to curation changes | Low | Audit log | Nice for transparency watchers. Low effort, high signal |
 
 ## Anti-Features
 
-Features to explicitly NOT build. Common mistakes in this domain.
+Features to explicitly NOT build for v2.0.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Algorithmic ranking | Defeats purpose of human curation | Curator manually ranks top 3 |
-| User voting/stars | Becomes popularity contest, gameable | Trust the curator's expertise |
-| Automated source discovery | Brings in SEO spam | Manual curation only |
-| Search engine integration | Defeats anti-SEO purpose | Curated query patterns only |
-| Machine learning recommendations | Black box, not transparent | Explicit curator choices |
-| Centralized authority | Single point of trust failure | Distributed Pubky curators |
-| General-purpose coverage | Can't curate everything well | Start with 10 focused domains |
-| Source comments/discussion | Scope creep, moderation burden | Keep it simple: curator picks sources |
-| Dynamic content scraping | Fragile, maintenance nightmare | Static URLs only |
-| Analytics/tracking | Privacy violation | No user tracking |
+| **Write API for submissions** | Server is read-only by design. Write APIs introduce auth, rate limiting, spam, input validation complexity. The curator-managed JSON model is the core architectural decision | Accept proposals via GitHub Issues. Curator manually adds to `contributions.json`. Link to issue in proposal |
+| **OAuth-based identity verification** | Requires registering OAuth apps with every platform, managing tokens, handling revocations. Massive complexity for marginal benefit | Use Keybase/NIP-39 model: user posts proof on their platform, curator records the URL. Verification is out-of-band |
+| **Live voting system** | Real-time voting requires auth, Sybil resistance, rate limiting, database writes -- all antithetical to the read-only JSON architecture | Record vote counts from GitHub Issue reactions in the JSON. Curator updates periodically |
+| **Automated identity verification on server** | Fetching and parsing external platform pages is fragile, breaks when platforms change HTML/APIs, and adds runtime dependencies | Mark identity claims as `claimed` with proof URLs. Let consumers verify independently. Optionally verify during curator review |
+| **User accounts or authentication** | No user accounts. The server serves curated data. Period | Community interaction happens on GitHub (Issues for proposals, Gists for identity proofs) |
+| **Nostr relay or event infrastructure** | Running a Nostr relay is an entirely separate system. 3GS is an MCP server, not a Nostr relay | Reference Nostr events by ID. Link to Nostr event URLs. Don't process or verify Nostr events on server |
+| **Weighted or quadratic voting** | Sybil resistance in voting is an unsolved research problem. Bond voting, quadratic voting, proof-of-personhood all require infrastructure 3GS does not have | Simple counts from GitHub reactions. Label as "signal, not governance." Curator makes final decisions |
 
 ## Feature Dependencies
 
 ```
-MCP Protocol Layer (foundation)
-├── tools primitive
-├── resources primitive
-└── discovery/initialization
+registry.json (exists) --> audit_log.json (logs changes to registry)
+                       --> contributions.json (proposals reference categories/sources)
 
-Registry Core (builds on MCP)
-├── Query matching (requires: tools primitive)
-├── Source metadata (requires: resources primitive)
-└── Category organization (requires: resources primitive)
+PKARR keypair (exists) --> identities.json (maps pubkeys to platform claims)
+                       --> audit_log.json (actor field uses pubkey)
 
-Trust Layer (builds on Registry)
-├── Cryptographic provenance (requires: Pubky integration)
-├── Curator attribution (requires: source metadata)
-└── Trust graph (requires: provenance + curator attribution)
+audit_log.json --> GET /audit endpoint --> get_audit_log MCP tool
+identities.json --> GET /identities endpoint --> get_identity MCP tool
+contributions.json --> GET /proposals endpoint --> list_proposals + get_proposal MCP tools
 
-Advanced Features (builds on Trust)
-├── Multi-curator aggregation (requires: trust graph)
-├── Scoped trust domains (requires: trust graph)
-└── Update subscription (requires: MCP + trust layer)
+All three new JSON files follow the same pattern as registry.json:
+  1. Curator edits file locally
+  2. File committed to git
+  3. Server loads on startup via include_str! or file read
+  4. Stored in Arc<T> in AppState
+  5. Served read-only via HTTP + MCP
 ```
+
+## Proposed Schemas
+
+### audit_log.json
+
+```json
+{
+  "version": "1.0.0",
+  "entries": [
+    {
+      "id": "2026-03-07-001",
+      "timestamp": "2026-03-07T14:30:00Z",
+      "action": "source_added",
+      "actor": "o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy",
+      "category": "rust-learning",
+      "target": "Zero To Production In Rust",
+      "description": "Added 'Zero To Production' as rank 3 source for rust-learning",
+      "previous_hash": null
+    }
+  ]
+}
+```
+
+**Action enum:** `source_added`, `source_removed`, `source_updated`, `source_reranked`, `category_added`, `category_removed`, `category_updated`, `endorsement_added`, `endorsement_removed`, `identity_linked`, `identity_unlinked`, `proposal_accepted`, `proposal_rejected`
+
+**Design rationale:** The `id` field uses date-based sequential IDs (not UUIDs) because the curator manages this file manually. The `previous_hash` field is optional for v2.0 (hash chain is a differentiator, not table stakes). The `actor` field is always the curator's PKARR pubkey since only the curator can modify these files.
+
+### identities.json
+
+```json
+{
+  "version": "1.0.0",
+  "identities": [
+    {
+      "pubkey": "o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy",
+      "display_name": "John Turner",
+      "claims": [
+        {
+          "platform": "github",
+          "identity": "johnturner",
+          "proof": "https://gist.github.com/johnturner/abc123",
+          "claimed_at": "2026-03-07T14:30:00Z"
+        },
+        {
+          "platform": "x",
+          "identity": "johnturner",
+          "proof": "https://x.com/johnturner/status/123456789",
+          "claimed_at": "2026-03-07T14:30:00Z"
+        },
+        {
+          "platform": "nostr",
+          "identity": "npub1abc123...",
+          "proof": "note1xyz789...",
+          "claimed_at": "2026-03-07T14:30:00Z"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Platform claim model** follows the NIP-39 / Keybase pattern:
+- Platform name (normalized lowercase)
+- Identity on that platform (username, npub, etc.)
+- Proof URL or event ID pointing to a public post containing the PKARR pubkey
+- Verification is out-of-band: anyone can follow the proof URL and check
+
+**Supported platforms for v2.0:** `github` (Gist proof), `x` (Tweet proof), `nostr` (kind 0 profile event or signed note). Additional platforms can be added later by extending the platform enum.
+
+### contributions.json
+
+```json
+{
+  "version": "1.0.0",
+  "proposals": [
+    {
+      "id": "prop-001",
+      "submitted_at": "2026-03-07T14:30:00Z",
+      "submitter": {
+        "name": "community_member",
+        "github": "https://github.com/community_member",
+        "account_created": "2020-01-15",
+        "public_repos": 42
+      },
+      "category": "rust-learning",
+      "proposed_source": {
+        "name": "Rustlings",
+        "url": "https://github.com/rust-lang/rustlings",
+        "type": "tutorial",
+        "why": "Interactive exercises for learning Rust syntax and concepts"
+      },
+      "action": "add_source",
+      "status": "pending",
+      "github_issue": "https://github.com/3goodsources/3goodsources/issues/42",
+      "community_signals": {
+        "github_reactions": 12,
+        "unique_commenters": 5
+      },
+      "curator_notes": null,
+      "resolved_at": null
+    }
+  ]
+}
+```
+
+**Action types:** `add_source` (propose new source for category), `replace_source` (propose replacing existing source), `new_category` (propose entirely new category), `update_source` (fix URL, update description)
+
+**Submitter metadata** serves as a soft Sybil signal: GitHub account age and repo count give consumers (and the curator) context about whether the submitter is a real person with history or a fresh throwaway account. This is NOT automated verification -- just recorded data points.
+
+**Status lifecycle:** `pending` -> `accepted` | `rejected` | `deferred`. Once resolved, `curator_notes` explains the decision and `resolved_at` gets a timestamp.
 
 ## MVP Recommendation
 
-For MVP, prioritize:
-
-1. **MCP tools primitive** - Query tool: agent sends intent, gets sources
-2. **MCP resources primitive** - List categories, read category sources
-3. **Query matching** - Simple fuzzy match on query patterns
-4. **Source metadata** - name, URL, type, why (description)
-5. **Category organization** - 10 seed categories with 3 sources each
-6. **JSON-based storage** - `registry.json` with schema
-7. **Source ranking** - Explicit 1/2/3 ordering per category
-8. **Error handling** - MCP-compliant error responses
-
-Defer to post-MVP:
-- **Cryptographic provenance**: High complexity, can validate concept first - Phase 2
-- **Trust graph integration**: Needs multi-curator adoption - Phase 3
-- **Update subscription**: Nice to have after core works - Phase 2
-- **Multi-curator aggregation**: Network effect feature - Phase 3
-- **Scoped trust domains**: Complexity not needed until multi-curator - Phase 3
-
-## MCP Server Implementation Patterns
-
-Based on MCP specification and ecosystem patterns:
-
-### Core MCP Primitives
-
-**Tools** - Callable functions exposed to agents
-- `query_sources(intent: string, category?: string)` - Main query interface
-- `list_categories()` - Enumerate available domains
-- Returns: JSON with source array
-
-**Resources** - Readable data exposed to agents
-- `registry://categories` - List all categories
-- `registry://category/{name}` - Read specific category sources
-- `registry://metadata` - Registry metadata (curator, version, timestamp)
-
-**Prompts** (optional for MVP)
-- Not strictly needed for registry use case
-- Could provide example queries later
-
-### Expected by MCP Clients
-
-| Capability | Required | Purpose |
-|-----------|----------|---------|
-| initialize handshake | Yes | Protocol version negotiation |
-| capabilities list | Yes | Client discovers what server offers |
-| tools/list | Yes (if tools) | Enumerate callable tools |
-| tools/call | Yes (if tools) | Execute tool with parameters |
-| resources/list | Yes (if resources) | Enumerate readable resources |
-| resources/read | Yes (if resources) | Read resource content |
-| Error responses | Yes | MCP-standard error format |
-| Logging | Optional | Debugging/observability |
-| notifications | Optional | Push updates to client |
-
-## Curated Registry Specific Features
-
-### Query Matching Approaches
-
-**Simple (MVP):**
-- Exact substring match on query patterns
-- Case-insensitive
-- Return all matches for category
-
-**Better (Phase 2):**
-- Fuzzy string matching (Levenshtein distance)
-- Synonym expansion
-- Multi-word token matching
-
-**Advanced (Phase 3+):**
-- Semantic similarity (embeddings)
-- Query reformulation
-- Learning from usage patterns (with privacy)
-
-### Trust Signals
-
-| Signal | Source | Value |
-|--------|--------|-------|
-| Curator identity | Pubky key | Cryptographic proof of curator |
-| Curator reputation | Trust graph | Web-of-trust endorsements |
-| Source freshness | Timestamp | When last verified |
-| Domain expertise | Scoped trust | Curator trusted in this domain |
-| Endorsement count | Network | How many curators picked this source |
-| Conflict flags | Validation | Sources disputed by trusted curators |
-
-### Provenance Chain
-
-For each source, track:
-1. **Curator** - Who added/endorsed this source (Pubky ID)
-2. **Timestamp** - When added/verified
-3. **Signature** - Cryptographic proof curator added this
-4. **Rationale** - Why curator chose this (in "why" field)
-5. **Updates** - History of changes to source
-
-## Developer Experience Features
-
-What developers expect from an MCP server:
-
-| Feature | Importance | Complexity | Notes |
-|---------|-----------|------------|-------|
-| Clear documentation | Critical | Low | README with setup, usage examples |
-| Installation instructions | Critical | Low | npm/pip/binary instructions |
-| Configuration file example | High | Low | Show how to configure registry path |
-| Health check | High | Low | Endpoint or command to verify working |
-| Logging levels | Medium | Low | Debug, info, warn, error |
-| Error messages | High | Medium | Helpful, actionable error text |
-| Schema documentation | High | Low | registry.json schema spec |
-| Example queries | High | Low | Show what queries work |
-| Testing tools | Medium | Medium | Validate registry.json format |
-| Version compatibility | High | Low | Which MCP spec version supported |
-
-### Debug/Development Tools
-
-**MVP:**
-- `--verbose` flag for detailed logging
-- Schema validator for registry.json
-- Example registry.json with all fields
-
-**Post-MVP:**
-- Interactive query tester
-- Source URL validator (check 404s)
-- Category coverage analyzer
-- Query pattern overlap detector
-
-## Real Seed Sources
-
-High-quality, verified sources for the 10 seed categories. These are real URLs that exist.
-
-### 1. bitcoin-node-setup
-
-Running your own Bitcoin full node.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Bitcoin Core Documentation | https://bitcoin.org/en/full-node | documentation | Official Bitcoin Core guide for running full nodes, maintained by Bitcoin project |
-| RaspiBlitz Guide | https://github.com/raspiblitz/raspiblitz | repo | Popular open-source Bitcoin/Lightning node solution on Raspberry Pi, actively maintained |
-| Ministry of Nodes YouTube | https://www.youtube.com/@MinistryofNodes | video | Step-by-step video tutorials for Bitcoin node setup, trusted community educator |
-
-### 2. self-hosted-email
-
-Running your own email server.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Sovereign Email Stack | https://github.com/sovereign/sovereign | repo | Automated email server setup with ansible, well-documented, security-focused |
-| NSA Email Self-Defense | https://emailselfdefense.fsf.org/en/ | tutorial | FSF guide to email encryption and privacy, comprehensive and beginner-friendly |
-| Mail-in-a-Box | https://mailinabox.email/ | tool | One-click email server setup, actively maintained, strong documentation |
-
-### 3. rust-learning
-
-Learning Rust programming language.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| The Rust Book | https://doc.rust-lang.org/book/ | book | Official Rust programming language book, comprehensive and authoritative |
-| Rust by Example | https://doc.rust-lang.org/rust-by-example/ | tutorial | Official hands-on examples for Rust concepts, interactive and practical |
-| Rustlings | https://github.com/rust-lang/rustlings | course | Official Rust learning exercises, progressive difficulty, actively maintained |
-
-### 4. home-automation-private
-
-Privacy-respecting home automation.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Home Assistant | https://www.home-assistant.io/docs/ | documentation | Leading open-source home automation, local-first, extensive device support |
-| Self-Hosted Home Automation Guide | https://github.com/awesome-selfhosted/awesome-selfhosted#automation | repo | Curated list of self-hosted automation tools, community-maintained |
-| Privacy-Focused Smart Home | https://www.privacyguides.org/en/home-automation/ | article | Privacy Guides' recommendations for home automation, security-focused |
-
-### 5. password-management
-
-Password managers and security practices.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Bitwarden Official Docs | https://bitwarden.com/help/ | documentation | Open-source password manager documentation, self-hostable, audited |
-| KeePassXC User Guide | https://keepassxc.org/docs/ | documentation | Offline password manager, no cloud dependencies, cross-platform |
-| EFF Password Guide | https://ssd.eff.org/module/creating-strong-passwords | article | Electronic Frontier Foundation guide to password security practices |
-
-### 6. linux-hardening
-
-Hardening Linux systems for security.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| CIS Benchmarks | https://www.cisecurity.org/cis-benchmarks | documentation | Industry-standard Linux hardening guides, comprehensive and maintained |
-| Arch Linux Security | https://wiki.archlinux.org/title/Security | documentation | Detailed security hardening wiki, applicable beyond Arch Linux |
-| Linux Hardening Guide | https://github.com/trimstray/the-practical-linux-hardening-guide | repo | Practical hardening guide with explanations, community-driven |
-
-### 7. threat-modeling
-
-Threat modeling methodologies.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| OWASP Threat Modeling | https://owasp.org/www-community/Threat_Modeling | documentation | Industry-standard threat modeling guide from OWASP, comprehensive |
-| Threat Modeling Manifesto | https://www.threatmodelingmanifesto.org/ | article | Community-driven threat modeling principles and best practices |
-| Microsoft STRIDE | https://learn.microsoft.com/en-us/training/modules/tm-use-a-framework-to-identify-threats-and-find-ways-to-reduce-or-eliminate-risk/ | course | Microsoft's threat modeling framework training, structured approach |
-
-### 8. nostr-development
-
-Building on Nostr protocol.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Nostr Protocol Specification | https://github.com/nostr-protocol/nostr | repo | Official Nostr protocol specs (NIPs), authoritative source |
-| Nostr Developer Resources | https://nostr-resources.com/ | documentation | Community-curated developer resources, tutorials, and tools |
-| Awesome Nostr | https://github.com/aljazceru/awesome-nostr | repo | Comprehensive list of Nostr libraries, clients, and resources |
-
-### 9. pubky-development
-
-Building on Pubky protocol.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| Pubky Core Repository | https://github.com/pubky/pubky-core | repo | Main Pubky implementation repository, official source |
-| Pkarr Documentation | https://github.com/Nuhvi/pkarr | repo | Pkarr protocol (Pubky's DNS layer), specification and implementation |
-| Pubky Homeserver | https://github.com/pubky/pubky-homeserver | repo | Reference implementation for Pubky homeservers, practical examples |
-
-### 10. mcp-development
-
-Building MCP servers and tools.
-
-| Name | URL | Type | Why |
-|------|-----|------|-----|
-| MCP Official Documentation | https://modelcontextprotocol.io/docs | documentation | Official Model Context Protocol docs, specification and guides |
-| MCP TypeScript SDK | https://github.com/modelcontextprotocol/typescript-sdk | repo | Official TypeScript SDK for building MCP servers and clients |
-| MCP Python SDK | https://github.com/modelcontextprotocol/python-sdk | repo | Official Python SDK for building MCP servers, well-documented |
-
-## Source Quality Criteria
-
-For vetting sources in registry:
-
-**Include:**
-- Official documentation from project maintainers
-- Well-maintained open-source repositories (active commits)
-- Educational content from trusted organizations (EFF, OWASP, FSF)
-- Community-curated lists with clear curation standards
-- Academic or research papers from reputable sources
-
-**Exclude:**
-- SEO-optimized blog spam
-- Affiliate marketing sites
-- Outdated/unmaintained resources
-- Paywalled content (unless exceptional and noted)
-- Social media threads (too ephemeral)
-- Content farms
-
-**Verification checklist:**
-- [ ] URL is live and accessible
-- [ ] Content is current (published/updated recently)
-- [ ] Author/organization is identifiable and credible
-- [ ] Content depth matches category needs
-- [ ] No obvious commercial bias
-- [ ] Community reputation (if applicable)
-
-## Feature Prioritization Matrix
-
-| Feature | MVP | Phase 2 | Phase 3 | Never |
-|---------|-----|---------|---------|-------|
-| MCP tools/resources | X | | | |
-| Query matching (simple) | X | | | |
-| JSON registry | X | | | |
-| 10 seed categories | X | | | |
-| Source metadata | X | | | |
-| Error handling | X | | | |
-| Documentation | X | | | |
-| Health checks | X | | | |
-| Schema validator | X | | | |
-| Query matching (fuzzy) | | X | | |
-| Update subscription | | X | | |
-| Cryptographic signatures | | X | | |
-| Logging framework | | X | | |
-| Multi-curator support | | | X | |
-| Trust graph integration | | | X | |
-| Scoped trust domains | | | X | |
-| Source verification bot | | | X | |
-| Algorithmic ranking | | | | X |
-| User voting | | | | X |
-| Auto-discovery | | | | X |
-
-## Confidence Assessment
-
-| Research Area | Confidence | Notes |
-|--------------|-----------|-------|
-| MCP features | HIGH | Official MCP site fetched, spec is public and clear |
-| Registry patterns | MEDIUM | Based on similar systems (awesome lists, package registries) |
-| Trust graph features | MEDIUM | Pubky concepts understood but repo access limited |
-| Real sources | HIGH | All URLs manually verified as real, authoritative sources |
-| Developer needs | HIGH | Standard server developer expectations |
+Prioritize (build in this order due to dependencies):
+1. **Audit log** -- `audit_log.json` + `/audit` endpoint + `get_audit_log` MCP tool. Lowest risk, highest transparency value. Backfill initial entries for existing 10 categories and 30 sources
+2. **Identity linking** -- `identities.json` + `/identities` endpoints + `get_identity` MCP tool. Curator creates proof posts on GitHub/X/Nostr, records URLs. Immediate credibility boost
+3. **Community contributions** -- `contributions.json` + `/proposals` endpoints + MCP tools. Depends on having a GitHub Issues template for submissions
+
+Defer to v2.1:
+- **Signed audit entries**: Requires JSON canonicalization library, adds build complexity. The hash chain alone provides tamper evidence
+- **Cross-platform proof verification**: Fragile external HTTP calls. Let consumers verify manually for now
+- **Vote signal separation**: Record basic GitHub reaction counts first. Sophisticated human/bot separation is premature
+
+## Complexity Assessment
+
+| Feature Area | New Files | New Endpoints | New MCP Tools | Estimated Effort |
+|-------------|-----------|---------------|---------------|-----------------|
+| Audit Log | 1 (`audit_log.json`) | 1 (`/audit`) | 1 (`get_audit_log`) | Low -- follows exact same pattern as `registry.json` |
+| Identity Linking | 1 (`identities.json`) | 2 (`/identities`, `/identities/:pubkey`) | 1 (`get_identity`) | Low-Medium -- new route pattern with path params |
+| Community Contributions | 1 (`contributions.json`) | 2 (`/proposals`, `/proposals/:id`) | 2 (`list_proposals`, `get_proposal`) | Low-Medium -- most complexity is in schema design, not code |
+
+**Total new surface area:** 3 JSON files, 5 HTTP endpoints, 4 MCP tools. All read-only. All following the established pattern of "load JSON on startup, serve via Arc in AppState."
+
+The existing `AppState` struct adds three new fields. The existing `build_router` function adds five new routes. The existing `McpHandler` registers four new tools. No architectural changes required -- this is additive.
 
 ## Sources
 
-**MCP Protocol:**
-- Model Context Protocol Official Site: https://modelcontextprotocol.io (fetched 2026-02-01)
-- MCP specification understood from training data (January 2025)
-
-**Real Sources:**
-- All 30 source URLs (3 per category x 10 categories) manually verified as:
-  - Live and accessible URLs
-  - Official documentation, repos, or trusted community resources
-  - Current and maintained
-  - High-quality educational content
-
-**Curation Patterns:**
-- Based on analysis of: awesome-lists methodology, package registry patterns, academic citation systems
-- Trust models: Web-of-trust concepts, PGP key signing, decentralized identity patterns
-
-**Note:** Some features described from training data knowledge. Where specific implementation details needed, marked as requiring phase-specific research.
+- [NIP-39: External Identities in Profiles](https://github.com/nostr-protocol/nips/blob/master/39.md) -- identity proof model for cross-platform claims (HIGH confidence)
+- [Keybase Proof System](https://keybase.io/blog/keybase-proofs-for-mastodon-and-everyone) -- prior art for cross-platform identity verification architecture (HIGH confidence)
+- [Martin Fowler: Audit Log Pattern](https://martinfowler.com/eaaDev/AuditLog.html) -- canonical audit log design pattern (HIGH confidence)
+- [Mattermost Audit Log JSON Schema](https://docs.mattermost.com/comply/embedded-json-audit-log-schema.html) -- real-world audit log schema reference (MEDIUM confidence)
+- [Sybil Attack Resistance in Voting](https://arxiv.org/abs/2407.01844) -- academic context on why automated Sybil resistance is hard and should be deferred (MEDIUM confidence)
+- [Append-Only Logs: Design Patterns](https://medium.com/@komalshehzadi/append-only-logs-the-immutable-diary-of-data-58c36a871c7c) -- hash chain and immutability patterns (LOW confidence, blog post)
