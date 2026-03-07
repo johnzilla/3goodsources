@@ -34,7 +34,16 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 
 ### Active
 
-(No active milestone — next milestone TBD)
+## Current Milestone: v2.0 Community Curation
+
+**Goal:** Add public audit log, identity linking, and community contribution infrastructure — all read-only on server, curator-managed JSON files.
+
+**Target features:**
+- Public audit log with signed entries and filterable `/audit` endpoint
+- Identity linking (PKARR ↔ X/Nostr/GitHub) with `/identities` endpoints and `get_identity` MCP tool
+- Community contribution proposals with `/proposals` endpoints and `list_proposals`/`get_proposal` MCP tools
+- Human vs bot vote signal separation
+- All new data files (audit_log, identities, contributions) loaded on startup alongside registry
 
 ### Out of Scope
 
@@ -47,6 +56,9 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - Domain-specific forks (3gs-woodworking, etc.) — future
 - Mobile app or rich frontend — landing page is static only
 - Pubky SDK integration for registry storage and trust graph — SDK immature, local-first for now
+- Submission API for identity claims or proposals — read-only server for v2.0, add write API later
+- AI Note Writer for X — separate project, not part of 3GS server
+- Automated identity verification (OAuth, signature challenges) — manual curation for v2.0
 
 ## Context
 
@@ -90,4 +102,4 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - curve25519-dalek git patch dependency persists — monitor for v5.0.0 stable release
 
 ---
-*Last updated: 2026-02-09 after v1.1 milestone*
+*Last updated: 2026-03-07 after v2.0 milestone started*
