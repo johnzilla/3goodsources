@@ -1,3 +1,4 @@
+mod audit;
 mod config;
 mod error;
 mod matcher;
@@ -63,15 +64,25 @@ async fn main() -> anyhow::Result<()> {
     // Load and validate registry
     let registry = Arc::new(registry::load(&config.registry_path).await?);
 
+    // Load audit log
+    let audit_log = Arc::new(crate::audit::load(&config.audit_log_path).await?);
+    tracing::info!(entries = audit_log.len(), "Audit log loaded");
+
     // Create MCP handler with shared registry and match config
     let pubkey_z32 = public_key.to_z32();
-    let mcp_handler = mcp::McpHandler::new(Arc::clone(&registry), match_config, pubkey_z32);
+    let mcp_handler = mcp::McpHandler::new(
+        Arc::clone(&registry),
+        match_config,
+        pubkey_z32,
+        Arc::clone(&audit_log),
+    );
 
     // Build application state
     let app_state = Arc::new(server::AppState {
         mcp_handler,
         registry,
         pubkey: public_key,
+        audit_log,
     });
 
     // Build router with routes and middleware

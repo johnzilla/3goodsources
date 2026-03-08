@@ -1,7 +1,8 @@
+use crate::audit::{AuditEntry, AuditFilterParams, filter_entries};
 use crate::mcp::McpHandler;
 use crate::registry::Registry;
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::{header, HeaderName, HeaderValue, Method, StatusCode},
     routing::{get, post},
     Json, Router,
@@ -19,6 +20,7 @@ pub struct AppState {
     pub mcp_handler: McpHandler,
     pub registry: Arc<Registry>,
     pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
+    pub audit_log: Arc<Vec<AuditEntry>>,
 }
 
 /// Build the axum router with all routes and middleware
@@ -41,6 +43,7 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/mcp", post(mcp_endpoint))
         .route("/health", get(health_endpoint))
         .route("/registry", get(registry_endpoint))
+        .route("/audit", get(audit_endpoint))
         .layer(cors)
         .with_state(state)
 }
@@ -89,6 +92,28 @@ async fn registry_endpoint(
             StatusCode::INTERNAL_SERVER_ERROR,
             [(header::CONTENT_TYPE, "application/json")],
             format!(r#"{{"error":"Failed to serialize registry: {}"}}"#, e),
+        ),
+    }
+}
+
+/// GET /audit - Audit log endpoint with optional query filters
+async fn audit_endpoint(
+    State(state): State<Arc<AppState>>,
+    Query(params): Query<AuditFilterParams>,
+) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
+    let filtered = filter_entries(&state.audit_log, &params);
+    let entries: Vec<&AuditEntry> = filtered;
+
+    match serde_json::to_string(&entries) {
+        Ok(json) => (
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, "application/json")],
+            json,
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            [(header::CONTENT_TYPE, "application/json")],
+            format!(r#"{{"error":"Failed to serialize audit log: {}"}}"#, e),
         ),
     }
 }

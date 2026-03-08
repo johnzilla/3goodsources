@@ -2,6 +2,7 @@ use schemars::{schema_for, JsonSchema};
 use serde::Deserialize;
 use serde_json::{json, Value};
 
+use crate::audit::{filter_entries, AuditEntry, AuditFilterParams};
 use crate::matcher::{MatchConfig, MatchError};
 use crate::registry::Registry;
 
@@ -34,6 +35,21 @@ pub struct GetProvenanceParams {}
 #[serde(deny_unknown_fields)]
 pub struct GetEndorsementsParams {}
 
+/// Tool parameter type for get_audit_log
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct GetAuditLogParams {
+    /// Filter entries after this ISO 8601 timestamp (e.g. "2026-02-03T00:00:00Z")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub since: Option<String>,
+    /// Filter entries by category slug (e.g. "rust-learning")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    /// Filter entries by action type (e.g. "source_added", "category_added")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+}
+
 /// Error type for tool call operations
 #[derive(Debug)]
 pub enum ToolCallError {
@@ -41,12 +57,13 @@ pub enum ToolCallError {
     InvalidParams,
 }
 
-/// Get the tools/list response with all 4 tool definitions
+/// Get the tools/list response with all 5 tool definitions
 pub fn get_tools_list() -> Value {
     let get_sources_schema = schema_for!(GetSourcesParams);
     let list_categories_schema = schema_for!(ListCategoriesParams);
     let get_provenance_schema = schema_for!(GetProvenanceParams);
     let get_endorsements_schema = schema_for!(GetEndorsementsParams);
+    let get_audit_log_schema = schema_for!(GetAuditLogParams);
 
     json!({
         "tools": [
@@ -69,6 +86,11 @@ pub fn get_tools_list() -> Value {
                 "name": "get_endorsements",
                 "description": "Get the list of endorsed curators for this registry. In v1, this returns an empty list. Future versions will support curator endorsements with trust relationships. No parameters required.",
                 "inputSchema": serde_json::to_value(get_endorsements_schema).unwrap()
+            },
+            {
+                "name": "get_audit_log",
+                "description": "Get the public audit log of all registry changes. Returns signed, hash-chained entries showing when sources and categories were added, updated, or removed. Supports optional filtering by timestamp (since), category slug (category), and action type (action).",
+                "inputSchema": serde_json::to_value(get_audit_log_schema).unwrap()
             }
         ]
     })
@@ -81,12 +103,14 @@ pub fn handle_tool_call(
     registry: &Registry,
     match_config: &MatchConfig,
     pubkey_z32: &str,
+    audit_log: &[AuditEntry],
 ) -> Result<Value, ToolCallError> {
     match name {
         "get_sources" => tool_get_sources(arguments, registry, match_config),
         "list_categories" => tool_list_categories(arguments, registry),
         "get_provenance" => tool_get_provenance(arguments, registry, pubkey_z32),
         "get_endorsements" => tool_get_endorsements(arguments, registry),
+        "get_audit_log" => tool_get_audit_log(arguments, audit_log),
         _ => Err(ToolCallError::UnknownTool),
     }
 }
@@ -273,6 +297,70 @@ fn tool_get_endorsements(
         // Future: list endorsements
         format!("Endorsements: {}", registry.endorsements.len())
     };
+
+    Ok(json!({
+        "content": [{"type": "text", "text": text}],
+        "isError": false
+    }))
+}
+
+/// Handle get_audit_log tool call
+///
+/// Returns audit log entries with optional filtering by since, category, and action.
+/// Formats entries as human-readable text with entry count header.
+fn tool_get_audit_log(
+    arguments: Option<Value>,
+    audit_log: &[AuditEntry],
+) -> Result<Value, ToolCallError> {
+    // Parse arguments
+    let params: GetAuditLogParams = if let Some(args) = arguments {
+        serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?
+    } else {
+        // No arguments means no filters
+        GetAuditLogParams {
+            since: None,
+            category: None,
+            action: None,
+        }
+    };
+
+    // Convert to AuditFilterParams for shared filter logic
+    let filter_params = AuditFilterParams {
+        since: params.since,
+        category: params.category,
+        action: params.action,
+    };
+
+    let filtered = filter_entries(audit_log, &filter_params);
+
+    let mut text = format!("Audit Log ({} entries):\n", filtered.len());
+
+    for entry in &filtered {
+        let action_str = serde_json::to_value(&entry.action)
+            .ok()
+            .and_then(|v| v.as_str().map(|s| s.to_string()))
+            .unwrap_or_else(|| "unknown".to_string());
+
+        let actor_display = if entry.actor.len() > 16 {
+            format!("{}...", &entry.actor[..16])
+        } else {
+            entry.actor.clone()
+        };
+
+        let category_display = entry
+            .category
+            .as_deref()
+            .unwrap_or("(none)");
+
+        text.push_str(&format!(
+            "\n- {} | {} | {} | category: {} | actor: {}",
+            entry.id,
+            entry.timestamp.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+            action_str,
+            category_display,
+            actor_display,
+        ));
+    }
 
     Ok(json!({
         "content": [{"type": "text", "text": text}],

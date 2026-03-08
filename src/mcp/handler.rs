@@ -1,3 +1,4 @@
+use crate::audit::AuditEntry;
 use crate::matcher::MatchConfig;
 use crate::mcp::tools::{self, ToolCallError};
 use crate::mcp::types::{CallToolParams, InitializeParams, JsonRpcRequest, JsonRpcResponse};
@@ -11,15 +12,22 @@ pub struct McpHandler {
     registry: Arc<Registry>,
     match_config: MatchConfig,
     pubkey_z32: String,
+    audit_log: Arc<Vec<AuditEntry>>,
 }
 
 impl McpHandler {
-    pub fn new(registry: Arc<Registry>, match_config: MatchConfig, pubkey_z32: String) -> Self {
+    pub fn new(
+        registry: Arc<Registry>,
+        match_config: MatchConfig,
+        pubkey_z32: String,
+        audit_log: Arc<Vec<AuditEntry>>,
+    ) -> Self {
         Self {
             initialized: Arc::new(AtomicBool::new(false)),
             registry,
             match_config,
             pubkey_z32,
+            audit_log,
         }
     }
 
@@ -137,6 +145,7 @@ impl McpHandler {
             &self.registry,
             &self.match_config,
             &self.pubkey_z32,
+            &self.audit_log,
         ) {
             Ok(result) => Some(self.serialize_response(JsonRpcResponse::success(id, result))),
             Err(ToolCallError::UnknownTool) => {
@@ -173,7 +182,7 @@ mod tests {
             match_keyword_weight: 0.3,
         };
 
-        McpHandler::new(Arc::new(registry), match_config, "test-pubkey-z32".to_string())
+        McpHandler::new(Arc::new(registry), match_config, "test-pubkey-z32".to_string(), Arc::new(vec![]))
     }
 
     #[test]
@@ -412,7 +421,7 @@ mod tests {
     // ===== TDD Tests for Plan 02: Tool Implementations =====
 
     #[test]
-    fn test_tools_list_returns_four_tools() {
+    fn test_tools_list_returns_five_tools() {
         let handler = test_handler();
         init_handler(&handler);
 
@@ -430,7 +439,7 @@ mod tests {
         assert!(response["result"]["tools"].is_array());
 
         let tools = response["result"]["tools"].as_array().unwrap();
-        assert_eq!(tools.len(), 4, "Should return exactly 4 tools");
+        assert_eq!(tools.len(), 5, "Should return exactly 5 tools");
 
         // Check tool names
         let tool_names: Vec<&str> = tools
@@ -441,6 +450,7 @@ mod tests {
         assert!(tool_names.contains(&"list_categories"));
         assert!(tool_names.contains(&"get_provenance"));
         assert!(tool_names.contains(&"get_endorsements"));
+        assert!(tool_names.contains(&"get_audit_log"));
     }
 
     #[test]

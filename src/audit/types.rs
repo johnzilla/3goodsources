@@ -75,6 +75,49 @@ pub fn canonical_message(entry: &AuditEntry) -> String {
     )
 }
 
+/// Filter audit entries by optional since, category, and action parameters.
+/// Returns a new Vec containing only matching entries.
+pub fn filter_entries<'a>(
+    entries: &'a [AuditEntry],
+    params: &AuditFilterParams,
+) -> Vec<&'a AuditEntry> {
+    entries
+        .iter()
+        .filter(|entry| {
+            // Filter by since (timestamp >= since)
+            if let Some(ref since_str) = params.since {
+                if let Ok(since_dt) = since_str.parse::<DateTime<Utc>>() {
+                    if entry.timestamp < since_dt {
+                        return false;
+                    }
+                }
+                // If since fails to parse, ignore the filter (lenient)
+            }
+
+            // Filter by category
+            if let Some(ref cat) = params.category {
+                match &entry.category {
+                    Some(entry_cat) if entry_cat == cat => {}
+                    _ => return false,
+                }
+            }
+
+            // Filter by action
+            if let Some(ref action_str) = params.action {
+                let entry_action_str = serde_json::to_value(&entry.action)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.to_string()));
+                match entry_action_str {
+                    Some(s) if s == *action_str => {}
+                    _ => return false,
+                }
+            }
+
+            true
+        })
+        .collect()
+}
+
 /// SHA-256 hash of the compact JSON serialization of an entry, hex-encoded.
 /// Used for the previous_hash chain.
 pub fn hash_entry_json(entry: &AuditEntry) -> String {
