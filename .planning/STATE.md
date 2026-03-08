@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Community Curation
-status: in-progress
-stopped_at: Completed 14-01-PLAN.md
-last_updated: "2026-03-08T17:42:28Z"
-last_activity: 2026-03-08 -- Phase 14 community-contributions plan 01 complete
+status: complete
+stopped_at: Completed 14-02-PLAN.md
+last_updated: "2026-03-08T17:49:03Z"
+last_activity: 2026-03-08 -- Phase 14 community-contributions plan 02 complete (milestone v2.0 complete)
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 4
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 14 of 14 (Community Contributions)
-Plan: 1 of 2 in current phase
-Status: Plan 14-01 complete, plan 14-02 remaining
-Last activity: 2026-03-08 -- Phase 14 community-contributions plan 01 complete
+Plan: 2 of 2 in current phase
+Status: Phase 14 complete, milestone v2.0 complete
+Last activity: 2026-03-08 -- Phase 14 community-contributions plan 02 complete
 
-Progress: [████████░░] 83% (v2.0)
+Progress: [██████████] 100% (v2.0)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 83% (v2.0)
 | Phase 13 P01 | 120s | 2 tasks | 8 files |
 | Phase 13 P02 | 286s | 2 tasks | 7 files |
 | Phase 14 P01 | 141s | 2 tasks | 8 files |
+| Phase 14 P02 | 266s | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,10 @@ Recent decisions affecting current work:
 - [Phase 14 P01]: Contributions module replicates identity module pattern (mod.rs, types.rs, error.rs, loader.rs)
 - [Phase 14 P01]: Proposal id is HashMap key (not in struct), matching identities pattern
 - [Phase 14 P01]: Voter pubkey validation at load time via identities HashMap parameter (fail-fast)
+- [Phase 14 P02]: Proposals REST endpoints follow identity endpoint pattern (list + detail by ID)
+- [Phase 14 P02]: Lenient status filtering: invalid status returns empty array, not error
+- [Phase 14 P02]: Proposal detail endpoint injects id field into JSON (id is HashMap key, not in struct)
+- [Phase 14 P02]: MCP tools use human-readable text output matching audit/identity tool patterns
 
 ### Pending Todos
 
@@ -90,7 +95,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T17:42:28Z
-Stopped at: Completed 14-01-PLAN.md
-Resume file: .planning/phases/14-community-contributions/14-02-PLAN.md
-Next step: Execute plan 14-02 (server wiring for contributions endpoints).
+Last session: 2026-03-08T17:49:03Z
+Stopped at: Completed 14-02-PLAN.md
+Resume file: N/A -- v2.0 milestone complete
+Next step: All phases complete. v2.0 Community Curation milestone finished.
