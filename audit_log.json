@@ -1,0 +1,612 @@
+[
+  {
+    "id": "5896c7fc-1e8f-41a8-ae04-a149f39892cd",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "bitcoin-node-setup",
+    "data": {
+      "description": "Running a Bitcoin full node for network participation, transaction validation, and sovereignty over your own blockchain data.",
+      "name": "Bitcoin Node Setup"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "c9ac29d009e630b862349a6aab0570f9ba3e31df90c8fcafed840d595dd7aaf156fec7089250b9e142ad613045dcd8131dd001c6dc7f63dd1dd12e1a98ffd602",
+    "previous_hash": null
+  },
+  {
+    "id": "0e5d5f21-8523-4d62-b586-96211466d8b0",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "home-automation-private",
+    "data": {
+      "description": "Building smart home automation systems that operate locally without cloud dependencies, protecting your privacy while automating your living space.",
+      "name": "Privacy-Respecting Home Automation"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "95dae07ca8522cb91e7bb8f341db9c4420f606e33c31fe00551cb179374b480bcc57a231237de1fd8d3095ee48869d7d18c3e3e256af9395bedaa25a102f9900",
+    "previous_hash": "903cba951770e86e5c420b4b9ac08899c6719e18a2655dd579dac570588e1d11"
+  },
+  {
+    "id": "ff044df8-6817-4f9f-b612-71b0fe8f005d",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "linux-hardening",
+    "data": {
+      "description": "Hardening Linux systems through security configurations, access controls, kernel parameters, and monitoring to reduce attack surface and improve resilience.",
+      "name": "Linux Security Hardening"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "0a4ffe527bbdcf5d684527b3c6109d41b9a8640c7c8fd41066e5253a094585e69c8ede751a113374daa956aca3626a8cf9360a83f85dc741b7a2254f2cc4fd0e",
+    "previous_hash": "df1fd03732e0c2e0d6d77db7e4a5024382197b42c3cdcb4f8faba74eff0762d2"
+  },
+  {
+    "id": "1a817622-205e-4d2b-a9ed-30197359a1cf",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "mcp-development",
+    "data": {
+      "description": "Developing Model Context Protocol servers and clients for AI agent integration, enabling structured communication between language models and external systems.",
+      "name": "MCP Development"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "762d9b3cc965c892cd9781a52b8f5034941ab02b415bcd759a3366a620243e9873a211904a0db4f1b084b5b29288daa4269c8e83522451a6b760a1e028ee0b01",
+    "previous_hash": "0e97cc41fe56a3cbdd244613499a2986fc94b57e6d9ae420100a26eafc91f04b"
+  },
+  {
+    "id": "0640e613-9f83-4bae-a1e7-68d98e51766c",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "nostr-development",
+    "data": {
+      "description": "Developing applications on Nostr, a decentralized social protocol using cryptographic keypairs and relay networks for censorship-resistant communication.",
+      "name": "Nostr Protocol Development"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "96bcbb0fba9d1cbfe963da5221e75d91ab37792661310423774e5f01d8fb453ca90a41057a7438ede511ff4e9d5645027cfb63c5deaa01a3452ce9fb6ab8cc03",
+    "previous_hash": "37561abb7a024487a8092350239b21d4befa83be21517ce4d41ff3d7294161a8"
+  },
+  {
+    "id": "1f6333d8-8b87-4e6c-b75f-05e5a147533d",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "password-management",
+    "data": {
+      "description": "Secure password management tools and practices for generating, storing, and organizing credentials with encryption and multi-device sync.",
+      "name": "Password Management"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "0020c8387cf534f8c1473af93282c3c901d706f72896d863516a7868976ba0db57966d6bdc0a1806df0a51088fbf84b9e918ef4bded8ef83ffbf3bc708effb0c",
+    "previous_hash": "649374f0458c5d1d7f982ef8f1a224b796c44059890364203599fb985974b2ae"
+  },
+  {
+    "id": "91d34bcf-67b0-4a27-802e-3dd2184c578d",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "pubky-development",
+    "data": {
+      "description": "Developing with Pubky and PKARR for decentralized identity, DNS, and data storage using public key infrastructure and homeserver architecture.",
+      "name": "Pubky Development"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "227e409610b9df6e833b44945c9a43554f97e793ef9cf163e5abbbdd0f442292f31155a1f28c3a9f8bad061bef8e0c7e011911e121dcc44da818289b6552ca01",
+    "previous_hash": "8c38a31d63bcd2e95b21c5f6f59f4180cc319a61c2da481f516f09d1609be3ad"
+  },
+  {
+    "id": "2d0f3666-81c2-4a92-8981-ac8482bc268c",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "rust-learning",
+    "data": {
+      "description": "Learning the Rust programming language from basics through advanced concepts including ownership, lifetimes, async programming, and systems design.",
+      "name": "Rust Learning"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "8a8bd48faf8bd87d19b521a2c4e5ff8835120d249a9b8269afa0f8bd2b12982ee4916029389af6e4684d62d36b3e8806de58830e7b6c6c575d981ca5496bd700",
+    "previous_hash": "878b6c8ce7182a28402f5a27ab8d1b0c0f621f9df45a87e6612901e4bd0db50f"
+  },
+  {
+    "id": "66b067eb-9b6f-4d88-b539-ef1a054f86a6",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "self-hosted-email",
+    "data": {
+      "description": "Self-hosting email servers with complete control over your communication infrastructure, including SMTP, IMAP, spam filtering, and domain configuration.",
+      "name": "Self-Hosted Email"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "ee8f55a8a4116fc4965497a6e2bb50d87987befe053b124f40e4bbb75f73f5da3d9983d2a922487f3c3c90e0bda00bfa012e53f56b2bb292d01f70efb1991b0c",
+    "previous_hash": "c92e71d47a6def80bd90592ba2b3f711b154798103f9141ab28f827a873e1cef"
+  },
+  {
+    "id": "c6df997e-249f-443b-86dd-800fdc42f722",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "category_added",
+    "category": "threat-modeling",
+    "data": {
+      "description": "Methodologies for identifying, prioritizing, and mitigating security threats through structured analysis of systems, assets, and attack vectors.",
+      "name": "Threat Modeling"
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "a393cd715b3c454e0b47bec5940d898ce4b7a7f12e5f91eb2c32ca477480fa9e01c9d59642638c877b599dc3dccf2013217127d812b4b354261f6e1d48ff060d",
+    "previous_hash": "6470f552ea8347860d233ed796dea3cda0043e346db50a547d1763bc86999484"
+  },
+  {
+    "id": "05dcec57-c79c-49b8-9bfa-5f3e8c9a3b18",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "bitcoin-node-setup",
+    "data": {
+      "name": "Bitcoin Core Documentation",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://bitcoin.org/en/full-node",
+      "why": "Official guide from Bitcoin Core covering installation, configuration, and best practices for running a full node."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "c37d006e525e2c0691369a9bef0ea393845590cb6f797087261a5b708451ed15def20b30eeb79cb0ede29b1344853835542cae44784b44b890fc5a0c8ab75a0b",
+    "previous_hash": "85cd9b735f5918a7f88dade382977d43c75cd785e466ce40fca8e0012d10325a"
+  },
+  {
+    "id": "432b63fd-3430-44a2-8fc2-07d2cc04eae1",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "bitcoin-node-setup",
+    "data": {
+      "name": "Umbrel Node Platform",
+      "rank": 2,
+      "type": "tool",
+      "url": "https://umbrel.com/",
+      "why": "User-friendly self-hosted platform for running Bitcoin and Lightning nodes with a web interface on Raspberry Pi or other hardware."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "cd6c7fc1e8c61eabf81ef38a5b0c3e46159c4f0a86f6d58a5d4039ead208ed48ed0e391396b4be3b3d1dbb53f43abf11fc09137520cf709d5697e0deb0efae03",
+    "previous_hash": "c6bd41d666a3c7f216e4de2182d755672d532edfa6af4910b09d9fe5bc3dd392"
+  },
+  {
+    "id": "54434106-f5c7-49ba-b18a-6a2144bc1fd0",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "bitcoin-node-setup",
+    "data": {
+      "name": "Raspibolt Guide",
+      "rank": 3,
+      "type": "tutorial",
+      "url": "https://raspibolt.org/",
+      "why": "Comprehensive step-by-step guide to building a Bitcoin and Lightning node on a Raspberry Pi from scratch."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "aa22b6aa85a786801af67c0efe214257124966d866e74d6d246e58b8ccc2d33a07b64d4dc0466c3bf0346ef9ea4e9dbb94955bbcc6fbad3f9555f01424129004",
+    "previous_hash": "13bf67c4303e037dcaa4161ef0aabfc63ad6e964cdc430ece4764a6cff67fc44"
+  },
+  {
+    "id": "68454cd6-88a9-4490-bce8-010ee60081cf",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "home-automation-private",
+    "data": {
+      "name": "Home Assistant Documentation",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://www.home-assistant.io/docs/",
+      "why": "Official documentation for Home Assistant, the leading open-source home automation platform with local-first architecture."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "88c7bcd736581365e82781fe77ee6ed2ca6fd22497f4600bbeae09616344771ea4dc926e49e726fa3015b52d3a60c61f17528625b12a67d0502bb5a126040207",
+    "previous_hash": "de8b4ca80322dd8e5081d686b386c5aa986e42189b1a5ef917cc17d9b0b64ed1"
+  },
+  {
+    "id": "a9673c28-a504-4ed3-b0cc-6c5146d53f0a",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "home-automation-private",
+    "data": {
+      "name": "Home Assistant Installation Guide",
+      "rank": 2,
+      "type": "tutorial",
+      "url": "https://www.home-assistant.io/installation/",
+      "why": "Step-by-step installation instructions for various platforms including Raspberry Pi, Docker, and dedicated hardware."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "63c3257c5a7e7a3467903f795d07310174ebdc4720fcd3e0c87c69cecaf1ac1f176602a4d79b1db8db5eca05c5ababbabd19742522dc649d62492b47f6a0910f",
+    "previous_hash": "389c227c97a1629e27598bdce57c69b8f367bd4c037dcb801d8d98930b4fc2e7"
+  },
+  {
+    "id": "ef91ade7-519b-4820-9784-e1548ed407b2",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "home-automation-private",
+    "data": {
+      "name": "ESPHome Project",
+      "rank": 3,
+      "type": "tool",
+      "url": "https://esphome.io/",
+      "why": "System for controlling ESP8266/ESP32 devices with simple YAML configuration, enabling DIY sensors and actuators without programming."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "38a48cba55d29ba9c6d45d1472f9f48b021169f696729fa2c19642ffffaca6979f287b0b2ad374cac5b7b99629a936289595a3fed2324af85ff1c75b9ee8a204",
+    "previous_hash": "38fc104fa776eef6ac797668fe4d031e5d5a40eaf2d8641adcc2e913bdb1b375"
+  },
+  {
+    "id": "0f240518-2277-40e6-bdce-395fb05d3986",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "linux-hardening",
+    "data": {
+      "name": "CIS Benchmarks for Linux",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://www.cisecurity.org/benchmark/distribution_independent_linux",
+      "why": "Industry-standard security configuration benchmarks for Linux distributions developed by consensus of cybersecurity experts."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "96f7aec5fa44eb315f2beff28036df496c24fbd8c2a5e972ddd9caf25a085f16027fed364b338671a1282bd1713a1034d31e51096779a02142c54fc9b3f1120e",
+    "previous_hash": "d5383db2d729e009b37edeaa6dda96f278d7eb44541b6cc173104bc4960d59b0"
+  },
+  {
+    "id": "1a10fe81-9bce-4f97-ab88-4784425cfb86",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "linux-hardening",
+    "data": {
+      "name": "Lynis Security Auditing Tool",
+      "rank": 2,
+      "type": "tool",
+      "url": "https://cisofy.com/lynis/",
+      "why": "Open-source security auditing tool for Linux systems that scans for vulnerabilities and provides hardening recommendations."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "2fa0cb166fa8e86b51961aa661081a88bb594549597b59eb3f6dedde58785244e135bbd8c27273673df912452bfc2d0211d3a9bfe13cba1c1f66907aa8c99f04",
+    "previous_hash": "20385de3a6c14d0a5fb7c8e91d5a16a065a69451ecf48255562b598ed0111adf"
+  },
+  {
+    "id": "9af06f9a-c747-42cb-b896-e2e8dc8e4dbb",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "linux-hardening",
+    "data": {
+      "name": "ArchWiki Security Guide",
+      "rank": 3,
+      "type": "article",
+      "url": "https://wiki.archlinux.org/title/Security",
+      "why": "Comprehensive community-maintained guide covering Linux security concepts, tools, and hardening techniques applicable to all distributions."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "cf202cc76c4c9e78abf47fc27ca28728c2a3d46e571f46800d5d58f4b129ab9f37cc31e2b70560c01acb957177a8545248c0ab6afeaa0a74acc22cdd7db44a05",
+    "previous_hash": "d634bd8f5ba7d20d53d82538b0e2b49e5b4b2024f7ac9e93ac09ebbe1f7f2c14"
+  },
+  {
+    "id": "80af70cd-e680-400c-bb77-c042ff4ba8af",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "mcp-development",
+    "data": {
+      "name": "MCP Specification",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://spec.modelcontextprotocol.io/",
+      "why": "Official Model Context Protocol specification defining the protocol, transport layers, and implementation requirements."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "aae55961f4b5a8ac54b4f5a12b37e2a119b13ccb9e92baf27b5c1b0aee97fe9f7264f9bc19d46f68d5be6475e97bd76bd2cdfba37794a304ac6b81bc8440c20e",
+    "previous_hash": "3c0c94385f85e09c2e55f5ac8adfbac20644914bdc9c9a94c5826e9705fcf4b5"
+  },
+  {
+    "id": "457d6e92-cbca-41d3-916a-e01cf2e22cfd",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "mcp-development",
+    "data": {
+      "name": "MCP TypeScript SDK",
+      "rank": 2,
+      "type": "repo",
+      "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+      "why": "Official TypeScript SDK for building MCP servers and clients with examples and reference implementations."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "349150aa322c1c9661ae03ff2fc6682fffea4ced5d295504e6a53e0753aee3f02ed9e8415114bcfb69e9abe57366ac1fd6675514d8fe1eb2d78039b5ae01bb09",
+    "previous_hash": "95d40fafc20d01d077393bc731b8ddc4bbbeac5e5c6bf106b3792f4f4aa8503a"
+  },
+  {
+    "id": "0a75eb73-7705-4def-acdc-321ed2c3a47f",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "mcp-development",
+    "data": {
+      "name": "Building MCP Servers Guide",
+      "rank": 3,
+      "type": "tutorial",
+      "url": "https://modelcontextprotocol.io/docs/building-mcp-servers",
+      "why": "Step-by-step tutorial for creating MCP servers, covering tool definitions, resource handling, and client integration."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "fddd02b9b8e46295dc7dd9550ab581dd9102e1f633d3860ea5a75bedfd6f5b8bef2d3acf76956a869655db929d0342a34f5943f606eb692540defde6ed7b960b",
+    "previous_hash": "d784a20aa0323e66b8e743be983f41b971fc307d2ab70625e53f272483b48de9"
+  },
+  {
+    "id": "620f934b-cc88-46c9-ada6-fbee132ada8e",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "nostr-development",
+    "data": {
+      "name": "Nostr NIPs Repository",
+      "rank": 1,
+      "type": "repo",
+      "url": "https://github.com/nostr-protocol/nips",
+      "why": "Official Nostr Implementation Possibilities (NIPs) repository defining protocol specifications and extensions."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "c37630ac7a6cedede645c87597ef2e7ffefc2ae1e7ca86cc993dc03ae0519e9a3733ed1eb3add0fe01b9e97d3f229cc9fbef406fffa837d0bfdf1baa543da30c",
+    "previous_hash": "9ba9d39199950f949acad1e1456d6e36d2dcc19cfdd07ec6554568237710597e"
+  },
+  {
+    "id": "0e1dd429-d2ee-42de-9342-46bd985735f8",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "nostr-development",
+    "data": {
+      "name": "Nostr Developer Resources",
+      "rank": 2,
+      "type": "documentation",
+      "url": "https://nostr.how/en/developers",
+      "why": "Comprehensive developer guide covering protocol basics, client development, relay implementation, and best practices."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "a67ad5a7cf6eff4ffce3607ff7a5c9048c17bd4ebc447645a9f3725ac49232395fc2863623495165158ae3bb377cb963b72b0b8ba82e8708382159e0075c1a09",
+    "previous_hash": "b9a279071717e646deb0a99fa00bb1be2df0326e564e034cabc602d529fe83a3"
+  },
+  {
+    "id": "de2bd90d-2c04-4b39-8c0e-aa01670d9332",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "nostr-development",
+    "data": {
+      "name": "nostr-tools Library",
+      "rank": 3,
+      "type": "repo",
+      "url": "https://github.com/nbd-wtf/nostr-tools",
+      "why": "JavaScript/TypeScript library for Nostr protocol implementation with utilities for keys, events, and relay connections."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "26f7efe9c946bf52abc6ba1b6cea1f177bdcee59bc984270e0a8a499fcf4a4c1970b5797944f2a305e97ae2c680c4fb01b0c4cfa7c3cae96475c5bc1264da904",
+    "previous_hash": "9d6c461dd1a2eb0b4c90c3fc61b8da5b16103be0d69476795372ddd14d52c7e2"
+  },
+  {
+    "id": "ebd4c01d-2cc0-455c-ad97-0774407ff313",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "password-management",
+    "data": {
+      "name": "Bitwarden Help Center",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://bitwarden.com/help/",
+      "why": "Comprehensive documentation for Bitwarden, a leading open-source password manager with self-hosting options and strong encryption."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "7197932b8b9cb848d22bdb42c2465d0a8997e18695100d8a433ab7f4ed7fb8384b7f7e4525bd316a4f2c2297a7b27147578c593c2dee6dfc247214b87ff2ed03",
+    "previous_hash": "384a49819bfdf6cc20552acd194b31d9034997de7ca4331f5703f05f277861cc"
+  },
+  {
+    "id": "a6431649-ae14-4de3-ac80-178ca618a523",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "password-management",
+    "data": {
+      "name": "EFF's Guide to Password Management",
+      "rank": 2,
+      "type": "article",
+      "url": "https://ssd.eff.org/module/creating-strong-passwords",
+      "why": "Electronic Frontier Foundation's guide to password security best practices, including generation, storage, and common pitfalls."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "270d2164b56114b2b96cbdcefcba6f7c22446c2f73c3072949f559c0ab3a776eb0d6e53187987950ae81a6f9cd0662c5e480b4b2e230955d7d60d71daae9ec0c",
+    "previous_hash": "6e56170a5a006d538a7c2368e4ae172adc480a17b72d8a54e47d1e75127c0089"
+  },
+  {
+    "id": "0421e270-d8f4-4b8c-acda-5de6d1ab6efa",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "password-management",
+    "data": {
+      "name": "KeePassXC",
+      "rank": 3,
+      "type": "tool",
+      "url": "https://keepassxc.org/",
+      "why": "Cross-platform, community-driven password manager with local-only encrypted database and no cloud dependencies."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "d8009da1ab4bb8d6e2e898e99c027580a6aaa60167e03d6f41d5e03774f5d9fd7b16dac22a67e477b42d935712aa2d57b129acf61df7cedb5822fc5b8aa7ea06",
+    "previous_hash": "37e87d582c51a46e7f4f6f1a53c64d235ab9262fdbf8c496d91da1f422396297"
+  },
+  {
+    "id": "f9bf0b29-4879-4aed-88c4-d6b23a8c4ac3",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "pubky-development",
+    "data": {
+      "name": "Pubky Core Repository",
+      "rank": 1,
+      "type": "repo",
+      "url": "https://github.com/pubky/pubky-core",
+      "why": "Core Pubky implementation in Rust with examples, documentation, and reference code for decentralized identity and data."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "57e370618729d592dc8cc8aa54b3032fa561bd09daeab60e5ff99fd13fdf0336c59f51b8f223a08955cdd24d36f980054f2e3c4d1b4beac1bbd39b509237ea0c",
+    "previous_hash": "91404fc7b04ec9c103701332a3613a34fd055a60ee08fcae22b550bce8254deb"
+  },
+  {
+    "id": "02edc61c-0a04-4b20-86da-faafbb4c7960",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "pubky-development",
+    "data": {
+      "name": "PKARR Specification",
+      "rank": 2,
+      "type": "documentation",
+      "url": "https://github.com/Nuhvi/pkarr",
+      "why": "Public Key Addressable Resource Records specification explaining the DNS-over-mainline-DHT approach underlying Pubky."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "2bb65a7fa6a76469def0975b9af2267cc3efe2e95e2890054fa3cbde7d42f024da6d35a41874e30de304d9b551005b559b0347b62eb9d97bba0aabc37e312a02",
+    "previous_hash": "746047b59bcc04189ec1a16da787d9f4e3da7708e5d9ddcc82e783006874400a"
+  },
+  {
+    "id": "03bf6c0a-94cc-44b0-908c-70efff18af4a",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "pubky-development",
+    "data": {
+      "name": "Pubky Developer Documentation",
+      "rank": 3,
+      "type": "documentation",
+      "url": "https://pubky.github.io/pubky-core/",
+      "why": "Official API documentation and developer guide for building applications on the Pubky protocol."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "29194807d1e4c6b5d724b6d95c21ee0754dd2188dce4e77b9384eeb8edc0897c6dd649845237d27383798312d94a463f36bf851488957906f529ee233e119f03",
+    "previous_hash": "8d657be94ec2b781419f94f86ff3b9ea46c2744d5b161b4c7f47c030d5a314dc"
+  },
+  {
+    "id": "0238891d-5071-4328-ba33-526e6d9c85fc",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "rust-learning",
+    "data": {
+      "name": "The Rust Programming Language Book",
+      "rank": 1,
+      "type": "book",
+      "url": "https://doc.rust-lang.org/book/",
+      "why": "Official comprehensive guide to Rust, covering fundamentals through advanced topics with clear examples and exercises."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "0e5229b35c00b7ca1759db133553549bc85d0500e3d31e7c6c872c6ba067584f60031b2e2fcea96ae9a37d2a5c13d80e5c7b1f5208a9cdc76c278b8b7ad97407",
+    "previous_hash": "c3a0e71dcac6334ea88969152ebd903d6198a91e21d38cf40a17c201bf5c3510"
+  },
+  {
+    "id": "3fbf5d08-55ff-46c9-b839-efffcc493bb6",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "rust-learning",
+    "data": {
+      "name": "Rust by Example",
+      "rank": 2,
+      "type": "tutorial",
+      "url": "https://doc.rust-lang.org/rust-by-example/",
+      "why": "Collection of runnable examples illustrating Rust concepts and standard libraries with hands-on code snippets."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "b862098579c6c402fcd7300dfb52d7ccb42a27f8b8a198dba1adc95e39ec393bab64060a480e67b18d6f9fe2b8ff53f206711c12a6de07858bf2bce8f4462401",
+    "previous_hash": "5bc1bf09eff0bae100729fd5314a8f58912986d340cd4345ebbcd1f3654bf134"
+  },
+  {
+    "id": "27a47e2c-98d8-47ec-a2ef-34c504637f39",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "rust-learning",
+    "data": {
+      "name": "Zero To Production In Rust",
+      "rank": 3,
+      "type": "book",
+      "url": "https://www.zero2prod.com/",
+      "why": "Practical guide to building production-ready backend applications in Rust, covering real-world API development and deployment."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "7099e393d79fbd9f74317804fd590227d8be9c9d05f09ec59e00e6f0e068f127336ce29b8484f08c30db2b536c28d05ff1b1c4955e7e389e44b5b0f75801c200",
+    "previous_hash": "534c168ece2f5c3802f5db216173a552350170de0fea5c045effd2a5d4ab232a"
+  },
+  {
+    "id": "e6419d85-d110-4593-a942-c93d2f640dae",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "self-hosted-email",
+    "data": {
+      "name": "Mail-in-a-Box",
+      "rank": 1,
+      "type": "tool",
+      "url": "https://mailinabox.email/",
+      "why": "Turnkey email server solution that sets up a complete mail server on Ubuntu with automated configuration for SMTP, IMAP, DNS, and webmail."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "726dec1cbd75f4620c6e819e76f1befa7097b99e30e8c31a81dc7300d143308c0e661ac35486adf0d593c924dce7cea2e686d83de8a04ef20bf9d112ce5dac04",
+    "previous_hash": "45d67013585afefa77afa3d975f425a3101955640520ac743c198ed51444ca19"
+  },
+  {
+    "id": "a65f417a-62a8-4fb5-9588-5c670b35c6ea",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "self-hosted-email",
+    "data": {
+      "name": "NSA's Email Self-Defense Guide",
+      "rank": 2,
+      "type": "tutorial",
+      "url": "https://emailselfdefense.fsf.org/",
+      "why": "Free Software Foundation guide to email encryption and privacy, essential reading for anyone self-hosting email."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "45dd80aa233c09897c2db68bc78a59063bd007d20a92f95966b459f436fc5a23f61e3b827cbf19332ea027122c92c4887d625752a9cf84b782bdee1e4a277405",
+    "previous_hash": "a279f93c87566db281ef0dc2db4ca9a5d8022dc4a4ca4010dbca518220faa064"
+  },
+  {
+    "id": "1e296b6c-458d-47e8-b673-d52dfe420304",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "self-hosted-email",
+    "data": {
+      "name": "Docker Mailserver",
+      "rank": 3,
+      "type": "repo",
+      "url": "https://docker-mailserver.github.io/docker-mailserver/latest/",
+      "why": "Production-ready, containerized fullstack mail server with extensive documentation for Docker-based deployments."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "30be2e53b88ed488aa0fec876daf7ee3285ac835f02fba58c6b85bd20c7ad74b1b39433f49036871f03e7cd4855a53391f045b3bbe269dc00b4c097c3d84cd08",
+    "previous_hash": "e48e67f2fbf97ed9b81c98a55efd6740f79f478e2fd76d26de483593b8d38464"
+  },
+  {
+    "id": "def125ac-ad1b-442d-9cf9-49a92f092b51",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "threat-modeling",
+    "data": {
+      "name": "OWASP Threat Modeling",
+      "rank": 1,
+      "type": "documentation",
+      "url": "https://owasp.org/www-community/Threat_Modeling",
+      "why": "OWASP's comprehensive guide to threat modeling covering methodologies, processes, and practical application for web applications."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "11cb27fc156d3c303be0079b531df37910610d9f08836d5edb04b3ad11ac4e12711be6f23742309ec2a85443e18e0ba4ff15e0445e448cca158060f3e6e5f50c",
+    "previous_hash": "4141b1641761406c7de8a06b165e9ad97404a5741436f7cc8b1c8476ec1d3006"
+  },
+  {
+    "id": "a55ee0d3-d587-4a37-955b-31c145c40dd2",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "threat-modeling",
+    "data": {
+      "name": "Threat Modeling Manifesto",
+      "rank": 2,
+      "type": "article",
+      "url": "https://www.threatmodelingmanifesto.org/",
+      "why": "Community-driven manifesto defining values, principles, and patterns for effective threat modeling across different contexts."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "0bca7ab7d47c4693bb0ef15c51c71c6db48f9fa742fcfd463610a894603d4754c87086a3a0212fa5b2e2f216660f03249f2b9f6e521f8af74fa47fec5f2ef800",
+    "previous_hash": "ddde31aaf415350e02dfc92873995a883d8f37680b4e03bd4cd0726c98557ed5"
+  },
+  {
+    "id": "10951065-354c-4eb3-9a87-39a141679cb3",
+    "timestamp": "2026-02-03T00:00:00Z",
+    "action": "source_added",
+    "category": "threat-modeling",
+    "data": {
+      "name": "STRIDE Threat Model",
+      "rank": 3,
+      "type": "documentation",
+      "url": "https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats",
+      "why": "Microsoft's STRIDE methodology documentation explaining threat categorization and analysis for secure system design."
+    },
+    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
+    "signature": "0898ae7cc7e448958546eb83046dfff3a7199f8fec2d949015f5e67b07568927f4a440885aee5223ac703bff2f3db08a4f2fec2e700a74e210183a86a78f9f0f",
+    "previous_hash": "62a6a8ba8d4092b4c75213e2d34e7bdccf182574aac09702eccaa876ae6f8eae"
+  }
+]
