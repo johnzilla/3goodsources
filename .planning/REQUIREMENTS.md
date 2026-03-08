@@ -9,12 +9,12 @@ Requirements for community curation milestone. Each maps to roadmap phases.
 
 ### Audit Log
 
-- [ ] **AUDIT-01**: Every registry change creates an append-only audit log entry with timestamp, action, category, data, and actor
-- [ ] **AUDIT-02**: Each audit entry is signed by the actor's Ed25519 key using a defined canonical format
-- [ ] **AUDIT-03**: Each audit entry includes a previous_hash field linking to the prior entry (hash chain)
+- [x] **AUDIT-01**: Every registry change creates an append-only audit log entry with timestamp, action, category, data, and actor
+- [x] **AUDIT-02**: Each audit entry is signed by the actor's Ed25519 key using a defined canonical format
+- [x] **AUDIT-03**: Each audit entry includes a previous_hash field linking to the prior entry (hash chain)
 - [ ] **AUDIT-04**: GET /audit endpoint returns audit entries filterable by since, category, and action
 - [ ] **AUDIT-05**: get_audit_log MCP tool returns audit entries with the same filtering as the REST endpoint
-- [ ] **AUDIT-06**: Retroactive audit entries exist for all 30 existing sources from v1.0
+- [x] **AUDIT-06**: Retroactive audit entries exist for all 30 existing sources from v1.0
 
 ### Identity
 
@@ -72,12 +72,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 12 | Pending |
-| AUDIT-02 | Phase 12 | Pending |
-| AUDIT-03 | Phase 12 | Pending |
+| AUDIT-01 | Phase 12 | Complete |
+| AUDIT-02 | Phase 12 | Complete |
+| AUDIT-03 | Phase 12 | Complete |
 | AUDIT-04 | Phase 12 | Pending |
 | AUDIT-05 | Phase 12 | Pending |
-| AUDIT-06 | Phase 12 | Pending |
+| AUDIT-06 | Phase 12 | Complete |
 | IDENT-01 | Phase 13 | Pending |
 | IDENT-02 | Phase 13 | Pending |
 | IDENT-03 | Phase 13 | Pending |
