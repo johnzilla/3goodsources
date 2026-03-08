@@ -82,12 +82,11 @@ Plans:
   2. Each proposal tracks human and bot votes separately, classified by the voter's identity type from the identity registry
   3. GET /proposals returns proposals filterable by status and category, and GET /proposals/{id} returns a single proposal with full vote details
   4. list_proposals and get_proposal MCP tools expose proposal data to agents with the same filtering and detail as the REST endpoints
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
-- [ ] 14-03: TBD
+- [ ] 14-01-PLAN.md — Contributions module foundation (types, loader, error, seed contributions.json, Config update)
+- [ ] 14-02-PLAN.md — Server integration, REST/MCP endpoints, and integration tests
 
 ## Progress
 
@@ -100,4 +99,4 @@ Phases execute in numeric order: 12 → 13 → 14
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12. Audit Log | 2/2 | Complete    | 2026-03-08 | - |
 | 13. Identity Linking | 2/2 | Complete    | 2026-03-08 | - |
-| 14. Community Contributions | v2.0 | 0/? | Not started | - |
+| 14. Community Contributions | v2.0 | 0/2 | Not started | - |
