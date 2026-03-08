@@ -21,9 +21,9 @@ Requirements for community curation milestone. Each maps to roadmap phases.
 - [x] **IDENT-01**: identities.json maps PKARR pubkeys to platform handles (X, Nostr, GitHub) with human/bot type classification
 - [x] **IDENT-02**: Every platform claim includes a proof URL for independent verification
 - [x] **IDENT-03**: Bot identities link to a human operator's pubkey
-- [ ] **IDENT-04**: GET /identities endpoint returns all registered identities
-- [ ] **IDENT-05**: GET /identities/{pubkey} endpoint returns a single identity with all linked platforms
-- [ ] **IDENT-06**: get_identity MCP tool returns identity info for a given pubkey
+- [x] **IDENT-04**: GET /identities endpoint returns all registered identities
+- [x] **IDENT-05**: GET /identities/{pubkey} endpoint returns a single identity with all linked platforms
+- [x] **IDENT-06**: get_identity MCP tool returns identity info for a given pubkey
 - [x] **IDENT-07**: Curator's own identity (John Turner) is registered with real platform proofs
 
 ### Contributions
@@ -81,9 +81,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDENT-01 | Phase 13 | Complete |
 | IDENT-02 | Phase 13 | Complete |
 | IDENT-03 | Phase 13 | Complete |
-| IDENT-04 | Phase 13 | Pending |
-| IDENT-05 | Phase 13 | Pending |
-| IDENT-06 | Phase 13 | Pending |
+| IDENT-04 | Phase 13 | Complete |
+| IDENT-05 | Phase 13 | Complete |
+| IDENT-06 | Phase 13 | Complete |
 | IDENT-07 | Phase 13 | Complete |
 | CONTRIB-01 | Phase 14 | Pending |
 | CONTRIB-02 | Phase 14 | Pending |
