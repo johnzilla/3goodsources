@@ -1,5 +1,31 @@
 # Project Milestones: Three Good Sources (3GS)
 
+## v2.0 Community Curation (Shipped: 2026-03-08)
+
+**Delivered:** Community curation infrastructure — append-only audit log with Ed25519 signed hash-chained entries, cross-platform identity linking with proof URLs, and community contribution proposals with human/bot vote separation. All served via REST + MCP endpoints, read-only server with curator-managed JSON files.
+
+**Phases completed:** 12-14 (6 plans total)
+
+**Key accomplishments:**
+- Append-only audit log with Ed25519 signed, SHA-256 hash-chained entries for all 30 existing sources
+- Cross-platform identity linking (PKARR ↔ X/Nostr/GitHub) with independently verifiable proof URLs
+- Community contribution proposals with status lifecycle and human/bot vote separation
+- 6 new REST endpoints and 4 new MCP tools (8 total)
+- 144 tests passing (77 unit + 67 integration), up from 78 at v1.1
+- All 19 v2.0 requirements satisfied (AUDIT-01..06, IDENT-01..07, CONTRIB-01..06)
+
+**Stats:**
+- 51 files modified
+- 6,029 lines of Rust (up from 2,179 at v1.1)
+- 3 phases, 6 plans
+- 1 day execution (2026-03-08)
+
+**Git range:** `a38978c` (docs(12): research) → `0d6d731` (docs(phase-14): complete)
+
+**Tech debt carried forward:** curve25519-dalek git patch dependency (DEPS-01/DEPS-02)
+
+---
+
 ## v1 MVP (Shipped: 2026-02-03)
 
 **Delivered:** A working MCP server in Rust that serves curated, cryptographically-signed source recommendations for AI agents via HTTP POST JSON-RPC, with 10 seed categories, fuzzy query matching, PKARR identity, Docker deployment, and a landing page at 3gs.ai.

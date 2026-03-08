@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An MCP server in Rust that serves as a curated trust registry for AI agents. When queried via HTTP POST JSON-RPC, it returns three vetted sources for a given topic, with fuzzy query matching and cryptographic curator identity via PKARR. Serves a landing page at 3gs.ai and API at api.3gs.ai, deployed on DigitalOcean App Platform.
+An MCP server in Rust that serves as a curated trust registry for AI agents. When queried via HTTP POST JSON-RPC, it returns three vetted sources for a given topic, with fuzzy query matching and cryptographic curator identity via PKARR. Includes public audit log, cross-platform identity linking, and community contribution proposals. Serves a landing page at 3gs.ai and API at api.3gs.ai, deployed on DigitalOcean App Platform.
 
 ## Core Value
 
@@ -31,19 +31,19 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - Custom domains 3gs.ai (PRIMARY) and api.3gs.ai (ALIAS) with Let's Encrypt SSL — v1.1
 - Landing page served from Rust server via compile-time HTML embedding — v1.1
 - Git history verified clean of secrets — v1.1
+- ✓ Append-only audit log with Ed25519 signed, hash-chained entries — v2.0
+- ✓ GET /audit endpoint with since/category/action filtering — v2.0
+- ✓ get_audit_log MCP tool with same filtering as REST — v2.0
+- ✓ Cross-platform identity linking (PKARR ↔ X/Nostr/GitHub) with proof URLs — v2.0
+- ✓ GET /identities and GET /identities/{pubkey} endpoints — v2.0
+- ✓ get_identity MCP tool for identity lookup — v2.0
+- ✓ Community contribution proposals with status lifecycle — v2.0
+- ✓ Human/bot vote separation classified by voter identity type — v2.0
+- ✓ GET /proposals and GET /proposals/{id} endpoints — v2.0
+- ✓ list_proposals and get_proposal MCP tools — v2.0
+- ✓ 144 tests (77 unit + 67 integration) — v2.0
 
 ### Active
-
-## Current Milestone: v2.0 Community Curation
-
-**Goal:** Add public audit log, identity linking, and community contribution infrastructure — all read-only on server, curator-managed JSON files.
-
-**Target features:**
-- Public audit log with signed entries and filterable `/audit` endpoint
-- Identity linking (PKARR ↔ X/Nostr/GitHub) with `/identities` endpoints and `get_identity` MCP tool
-- Community contribution proposals with `/proposals` endpoints and `list_proposals`/`get_proposal` MCP tools
-- Human vs bot vote signal separation
-- All new data files (audit_log, identities, contributions) loaded on startup alongside registry
 
 ### Out of Scope
 
@@ -69,7 +69,7 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - **Curator**: John Turner. Domains of expertise: security, bitcoin, maker, self-hosting.
 - **Source types**: documentation, tutorial, video, article, tool, repo, forum, book, course, api.
 - **Seed categories**: bitcoin-node-setup, self-hosted-email, rust-learning, home-automation-private, password-management, linux-hardening, threat-modeling, nostr-development, pubky-development, mcp-development.
-- **Current state**: v1.1 shipped. 2,179 lines of Rust. 78 tests passing. 10 categories, 30 sources. Live at 3gs.ai and api.3gs.ai on DigitalOcean App Platform.
+- **Current state**: v2.0 shipped. 6,029 lines of Rust. 144 tests passing (77 unit + 67 integration). 10 categories, 30 sources. 3 data modules (audit, identity, contributions). 8 MCP tools. Live at 3gs.ai and api.3gs.ai on DigitalOcean App Platform.
 
 ## Constraints
 
@@ -96,10 +96,16 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 | Migrate from Render to DigitalOcean | Consolidate infrastructure on DO, Ansible provisioning | ✓ Good — deployed and healthy |
 | Landing page from Rust server | include_str! embeds HTML at compile time, no separate static host | ✓ Good — single deployment serves everything |
 | 3gs.ai as PRIMARY domain | Everything on one DO app, api.3gs.ai as ALIAS for backward compat | ✓ Good — simplified architecture |
+| Read-only server for v2.0 | All signing happens offline; server only loads and serves pre-signed data | ✓ Good — simple, secure, curator-controlled |
+| Replicate src/registry/ pattern for new modules | Consistent mod.rs/types.rs/loader.rs/error.rs structure | ✓ Good — predictable codebase |
+| #[serde(default)] over deny_unknown_fields | Enables schema evolution without breaking existing data | ✓ Good — future-proof |
+| Fail-fast on startup for JSON loading | All JSON files are curator-managed and should always be valid | ✓ Good — catches errors early |
+| Canonical signing format for audit entries | timestamp\|action\|category\|sha256(data)\|actor — deterministic and verifiable | ✓ Good — clear verification path |
+| Shared filter_entries() for REST + MCP | Single filtering implementation used by both transport layers | ✓ Good — DRY, consistent behavior |
 
 ## Known Tech Debt
 
 - curve25519-dalek git patch dependency persists — monitor for v5.0.0 stable release
 
 ---
-*Last updated: 2026-03-07 after v2.0 milestone started*
+*Last updated: 2026-03-08 after v2.0 milestone*
