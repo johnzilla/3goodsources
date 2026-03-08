@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Community Curation
-status: completed
-stopped_at: Phase 14 context gathered
-last_updated: "2026-03-08T17:18:47.876Z"
-last_activity: 2026-03-08 -- Phase 13 identity-linking plan 02 complete
+status: in-progress
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-03-08T17:42:28Z"
+last_activity: 2026-03-08 -- Phase 14 community-contributions plan 01 complete
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 4
-  completed_plans: 4
-  percent: 100
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 13 - Identity Linking
+**Current focus:** Phase 14 - Community Contributions
 
 ## Current Position
 
-Phase: 13 of 14 (Identity Linking)
-Plan: 2 of 2 in current phase
-Status: Phase 13 complete, all plans done
-Last activity: 2026-03-08 -- Phase 13 identity-linking plan 02 complete
+Phase: 14 of 14 (Community Contributions)
+Plan: 1 of 2 in current phase
+Status: Plan 14-01 complete, plan 14-02 remaining
+Last activity: 2026-03-08 -- Phase 14 community-contributions plan 01 complete
 
-Progress: [██████████] 100% (v2.0)
+Progress: [████████░░] 83% (v2.0)
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100% (v2.0)
 | Phase 12 P02 | 242s | 2 tasks | 9 files |
 | Phase 13 P01 | 120s | 2 tasks | 8 files |
 | Phase 13 P02 | 286s | 2 tasks | 7 files |
+| Phase 14 P01 | 141s | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase 13 P02]: Identity wiring follows data module pattern: types -> loader -> AppState + McpHandler -> REST + MCP -> tests
 - [Phase 13 P02]: MCP get_identity tool uses human-readable text output matching audit log tool pattern
 - [Phase 13 P02]: Axum v0.7+ uses {param} path syntax (not :param)
+- [Phase 14 P01]: Contributions module replicates identity module pattern (mod.rs, types.rs, error.rs, loader.rs)
+- [Phase 14 P01]: Proposal id is HashMap key (not in struct), matching identities pattern
+- [Phase 14 P01]: Voter pubkey validation at load time via identities HashMap parameter (fail-fast)
 
 ### Pending Todos
 
@@ -86,7 +90,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T17:18:47.873Z
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-community-contributions/14-CONTEXT.md
-Next step: Phase 13 complete. Proceed to Phase 14 (documentation) if applicable.
+Last session: 2026-03-08T17:42:28Z
+Stopped at: Completed 14-01-PLAN.md
+Resume file: .planning/phases/14-community-contributions/14-02-PLAN.md
+Next step: Execute plan 14-02 (server wiring for contributions endpoints).

@@ -28,9 +28,9 @@ Requirements for community curation milestone. Each maps to roadmap phases.
 
 ### Contributions
 
-- [ ] **CONTRIB-01**: contributions.json holds proposals with defined status lifecycle (pending, approved, rejected, withdrawn)
-- [ ] **CONTRIB-02**: Proposals support actions: add_source, update_source, remove_source, add_category, update_category
-- [ ] **CONTRIB-03**: Human and bot votes are tracked separately per proposal, classified by voter's identity type
+- [x] **CONTRIB-01**: contributions.json holds proposals with defined status lifecycle (pending, approved, rejected, withdrawn)
+- [x] **CONTRIB-02**: Proposals support actions: add_source, update_source, remove_source, add_category, update_category
+- [x] **CONTRIB-03**: Human and bot votes are tracked separately per proposal, classified by voter's identity type
 - [ ] **CONTRIB-04**: GET /proposals endpoint returns proposals filterable by status and category
 - [ ] **CONTRIB-05**: GET /proposals/{id} endpoint returns a single proposal with vote details
 - [ ] **CONTRIB-06**: list_proposals and get_proposal MCP tools expose proposal data to agents
@@ -85,9 +85,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDENT-05 | Phase 13 | Complete |
 | IDENT-06 | Phase 13 | Complete |
 | IDENT-07 | Phase 13 | Complete |
-| CONTRIB-01 | Phase 14 | Pending |
-| CONTRIB-02 | Phase 14 | Pending |
-| CONTRIB-03 | Phase 14 | Pending |
+| CONTRIB-01 | Phase 14 | Complete |
+| CONTRIB-02 | Phase 14 | Complete |
+| CONTRIB-03 | Phase 14 | Complete |
 | CONTRIB-04 | Phase 14 | Pending |
 | CONTRIB-05 | Phase 14 | Pending |
 | CONTRIB-06 | Phase 14 | Pending |
