@@ -9,6 +9,9 @@ pub struct Config {
     /// Path to audit_log.json file. Required -- no default.
     pub audit_log_path: PathBuf,
 
+    /// Path to identities.json file. Required -- no default.
+    pub identities_path: PathBuf,
+
     /// Logging format: "pretty" (default, colored for dev) or "json" (structured for production).
     #[serde(default = "default_log_format")]
     pub log_format: String,
@@ -36,7 +39,7 @@ impl Config {
         dotenvy::dotenv().ok(); // Load .env if present, ignore if missing
         envy::from_env::<Config>().map_err(|e| {
             anyhow::anyhow!(
-                "Failed to load configuration: {}\n\nRequired: REGISTRY_PATH environment variable must be set",
+                "Failed to load configuration: {}\n\nRequired: REGISTRY_PATH, AUDIT_LOG_PATH, IDENTITIES_PATH environment variables must be set",
                 e
             )
         })
