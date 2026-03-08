@@ -35,7 +35,7 @@
 
 **Milestone Goal:** Add public audit log, identity linking, and community contribution infrastructure -- all read-only on server, curator-managed JSON files.
 
-- [ ] **Phase 12: Audit Log** - Append-only curation transparency with signed entries, hash chain, REST + MCP endpoints
+- [x] **Phase 12: Audit Log** - Append-only curation transparency with signed entries, hash chain, REST + MCP endpoints (completed 2026-03-08)
 - [ ] **Phase 13: Identity Linking** - Cross-platform identity mapping with proof URLs, REST + MCP endpoints
 - [ ] **Phase 14: Community Contributions** - Proposal lifecycle with human/bot vote separation, REST + MCP endpoints
 
@@ -99,6 +99,6 @@ Phases execute in numeric order: 12 → 13 → 14
 |-------|-----------|----------------|--------|-----------|
 | 1-7 | v1.0 | 17/17 | Complete | 2026-02-03 |
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
-| 12. Audit Log | 1/2 | In Progress|  | - |
+| 12. Audit Log | 2/2 | Complete   | 2026-03-08 | - |
 | 13. Identity Linking | v2.0 | 0/? | Not started | - |
 | 14. Community Contributions | v2.0 | 0/? | Not started | - |
