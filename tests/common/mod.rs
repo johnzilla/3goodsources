@@ -1,4 +1,5 @@
 use three_good_sources::audit::AuditEntry;
+use three_good_sources::contributions::Proposal;
 use three_good_sources::identity::Identity;
 use three_good_sources::matcher::MatchConfig;
 use three_good_sources::mcp::McpHandler;
@@ -9,6 +10,7 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use uuid::Uuid;
 
 /// Spawn a real HTTP server on a random port for integration testing.
 /// Returns the socket address for making requests.
@@ -44,6 +46,12 @@ pub async fn spawn_test_server() -> SocketAddr {
         .expect("Failed to parse identities.json");
     let identities = Arc::new(identities);
 
+    // Load contributions
+    let contributions_json = include_str!("../../contributions.json");
+    let contributions: HashMap<Uuid, Proposal> = serde_json::from_str(contributions_json)
+        .expect("Failed to parse contributions.json");
+    let proposals = Arc::new(contributions);
+
     // Build MCP handler and app state
     let mcp_handler = McpHandler::new(
         Arc::clone(&registry),
@@ -51,6 +59,7 @@ pub async fn spawn_test_server() -> SocketAddr {
         pubkey_z32,
         Arc::clone(&audit_log),
         Arc::clone(&identities),
+        Arc::clone(&proposals),
     );
     let app_state = Arc::new(AppState {
         mcp_handler,
@@ -58,6 +67,7 @@ pub async fn spawn_test_server() -> SocketAddr {
         pubkey,
         audit_log,
         identities,
+        proposals,
     });
 
     let app = build_router(app_state);
