@@ -6,6 +6,9 @@ pub struct Config {
     /// Path to registry.json file. Required -- no default.
     pub registry_path: PathBuf,
 
+    /// Path to audit_log.json file. Required -- no default.
+    pub audit_log_path: PathBuf,
+
     /// Logging format: "pretty" (default, colored for dev) or "json" (structured for production).
     #[serde(default = "default_log_format")]
     pub log_format: String,
