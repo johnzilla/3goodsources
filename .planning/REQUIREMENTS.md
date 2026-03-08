@@ -18,13 +18,13 @@ Requirements for community curation milestone. Each maps to roadmap phases.
 
 ### Identity
 
-- [ ] **IDENT-01**: identities.json maps PKARR pubkeys to platform handles (X, Nostr, GitHub) with human/bot type classification
-- [ ] **IDENT-02**: Every platform claim includes a proof URL for independent verification
-- [ ] **IDENT-03**: Bot identities link to a human operator's pubkey
+- [x] **IDENT-01**: identities.json maps PKARR pubkeys to platform handles (X, Nostr, GitHub) with human/bot type classification
+- [x] **IDENT-02**: Every platform claim includes a proof URL for independent verification
+- [x] **IDENT-03**: Bot identities link to a human operator's pubkey
 - [ ] **IDENT-04**: GET /identities endpoint returns all registered identities
 - [ ] **IDENT-05**: GET /identities/{pubkey} endpoint returns a single identity with all linked platforms
 - [ ] **IDENT-06**: get_identity MCP tool returns identity info for a given pubkey
-- [ ] **IDENT-07**: Curator's own identity (John Turner) is registered with real platform proofs
+- [x] **IDENT-07**: Curator's own identity (John Turner) is registered with real platform proofs
 
 ### Contributions
 
@@ -78,13 +78,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUDIT-04 | Phase 12 | Complete |
 | AUDIT-05 | Phase 12 | Complete |
 | AUDIT-06 | Phase 12 | Complete |
-| IDENT-01 | Phase 13 | Pending |
-| IDENT-02 | Phase 13 | Pending |
-| IDENT-03 | Phase 13 | Pending |
+| IDENT-01 | Phase 13 | Complete |
+| IDENT-02 | Phase 13 | Complete |
+| IDENT-03 | Phase 13 | Complete |
 | IDENT-04 | Phase 13 | Pending |
 | IDENT-05 | Phase 13 | Pending |
 | IDENT-06 | Phase 13 | Pending |
-| IDENT-07 | Phase 13 | Pending |
+| IDENT-07 | Phase 13 | Complete |
 | CONTRIB-01 | Phase 14 | Pending |
 | CONTRIB-02 | Phase 14 | Pending |
 | CONTRIB-03 | Phase 14 | Pending |
