@@ -72,31 +72,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | — | Pending |
-| AUDIT-02 | — | Pending |
-| AUDIT-03 | — | Pending |
-| AUDIT-04 | — | Pending |
-| AUDIT-05 | — | Pending |
-| AUDIT-06 | — | Pending |
-| IDENT-01 | — | Pending |
-| IDENT-02 | — | Pending |
-| IDENT-03 | — | Pending |
-| IDENT-04 | — | Pending |
-| IDENT-05 | — | Pending |
-| IDENT-06 | — | Pending |
-| IDENT-07 | — | Pending |
-| CONTRIB-01 | — | Pending |
-| CONTRIB-02 | — | Pending |
-| CONTRIB-03 | — | Pending |
-| CONTRIB-04 | — | Pending |
-| CONTRIB-05 | — | Pending |
-| CONTRIB-06 | — | Pending |
+| AUDIT-01 | Phase 12 | Pending |
+| AUDIT-02 | Phase 12 | Pending |
+| AUDIT-03 | Phase 12 | Pending |
+| AUDIT-04 | Phase 12 | Pending |
+| AUDIT-05 | Phase 12 | Pending |
+| AUDIT-06 | Phase 12 | Pending |
+| IDENT-01 | Phase 13 | Pending |
+| IDENT-02 | Phase 13 | Pending |
+| IDENT-03 | Phase 13 | Pending |
+| IDENT-04 | Phase 13 | Pending |
+| IDENT-05 | Phase 13 | Pending |
+| IDENT-06 | Phase 13 | Pending |
+| IDENT-07 | Phase 13 | Pending |
+| CONTRIB-01 | Phase 14 | Pending |
+| CONTRIB-02 | Phase 14 | Pending |
+| CONTRIB-03 | Phase 14 | Pending |
+| CONTRIB-04 | Phase 14 | Pending |
+| CONTRIB-05 | Phase 14 | Pending |
+| CONTRIB-06 | Phase 14 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after initial definition*
+*Last updated: 2026-03-07 after roadmap creation*
