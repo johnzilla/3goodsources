@@ -51,12 +51,11 @@
   3. Each audit entry links to the previous entry via a previous_hash field forming a hash chain
   4. GET /audit returns audit entries and accepts since, category, and action query parameters for filtering
   5. get_audit_log MCP tool returns audit entries with the same filtering capabilities as the REST endpoint
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
-- [ ] 12-02: TBD
-- [ ] 12-03: TBD
+- [ ] 12-01-PLAN.md — Audit module foundation + signing utility + audit_log.json generation
+- [ ] 12-02-PLAN.md — Server integration, REST/MCP endpoints, and integration tests
 
 ### Phase 13: Identity Linking
 **Goal**: Curator and future contributors have verifiable cross-platform identities linking PKARR keys to public profiles
@@ -100,6 +99,6 @@ Phases execute in numeric order: 12 → 13 → 14
 |-------|-----------|----------------|--------|-----------|
 | 1-7 | v1.0 | 17/17 | Complete | 2026-02-03 |
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
-| 12. Audit Log | v2.0 | 0/? | Not started | - |
+| 12. Audit Log | v2.0 | 0/2 | Planning | - |
 | 13. Identity Linking | v2.0 | 0/? | Not started | - |
 | 14. Community Contributions | v2.0 | 0/? | Not started | - |
