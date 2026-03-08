@@ -1,6 +1,7 @@
 pub mod audit;
 pub mod config;
 pub mod error;
+pub mod identity;
 pub mod matcher;
 pub mod mcp;
 pub mod pubky;
