@@ -1,4 +1,5 @@
 use crate::audit::{AuditEntry, AuditFilterParams, filter_entries};
+use crate::contributions::{Proposal, ProposalFilterParams, ProposalSummary};
 use crate::identity::Identity;
 use crate::mcp::McpHandler;
 use crate::registry::Registry;
@@ -14,6 +15,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
+use uuid::Uuid;
 
 const LANDING_HTML: &str = include_str!("../docs/index.html");
 
@@ -24,6 +26,7 @@ pub struct AppState {
     pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
     pub audit_log: Arc<Vec<AuditEntry>>,
     pub identities: Arc<HashMap<String, Identity>>,
+    pub proposals: Arc<HashMap<Uuid, Proposal>>,
 }
 
 /// Build the axum router with all routes and middleware
@@ -49,6 +52,8 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/audit", get(audit_endpoint))
         .route("/identities", get(identities_endpoint))
         .route("/identities/{pubkey}", get(identity_by_pubkey_endpoint))
+        .route("/proposals", get(proposals_endpoint))
+        .route("/proposals/{id}", get(proposal_by_id_endpoint))
         .layer(cors)
         .with_state(state)
 }
@@ -163,6 +168,92 @@ async fn identity_by_pubkey_endpoint(
             StatusCode::NOT_FOUND,
             [(header::CONTENT_TYPE, "application/json")],
             r#"{"error":"Identity not found"}"#.to_string(),
+        ),
+    }
+}
+
+/// GET /proposals - List proposals with optional status and category filters
+async fn proposals_endpoint(
+    State(state): State<Arc<AppState>>,
+    Query(params): Query<ProposalFilterParams>,
+) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
+    let mut summaries: Vec<ProposalSummary> = state
+        .proposals
+        .iter()
+        .filter(|(_, proposal)| {
+            // Filter by status (lenient: serialize status to string and compare)
+            if let Some(ref status_filter) = params.status {
+                let status_str = serde_json::to_value(&proposal.status)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.to_string()))
+                    .unwrap_or_default();
+                if status_str != *status_filter {
+                    return false;
+                }
+            }
+            // Filter by category
+            if let Some(ref cat_filter) = params.category {
+                if proposal.category != *cat_filter {
+                    return false;
+                }
+            }
+            true
+        })
+        .map(|(id, proposal)| ProposalSummary {
+            id: *id,
+            action: proposal.action.clone(),
+            status: proposal.status.clone(),
+            category: proposal.category.clone(),
+            proposer: proposal.proposer.clone(),
+            created_at: proposal.created_at,
+        })
+        .collect();
+
+    // Sort by created_at descending
+    summaries.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+
+    match serde_json::to_string(&summaries) {
+        Ok(json) => (
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, "application/json")],
+            json,
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            [(header::CONTENT_TYPE, "application/json")],
+            format!(r#"{{"error":"Failed to serialize proposals: {}"}}"#, e),
+        ),
+    }
+}
+
+/// GET /proposals/{id} - Get full proposal detail by UUID
+async fn proposal_by_id_endpoint(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
+    match state.proposals.get(&id) {
+        Some(proposal) => {
+            let mut value = serde_json::to_value(proposal).unwrap_or_default();
+            if let Some(obj) = value.as_object_mut() {
+                obj.insert("id".to_string(), serde_json::Value::String(id.to_string()));
+            }
+            match serde_json::to_string_pretty(&value) {
+                Ok(json) => (
+                    StatusCode::OK,
+                    [(header::CONTENT_TYPE, "application/json")],
+                    json,
+                ),
+                Err(e) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    [(header::CONTENT_TYPE, "application/json")],
+                    format!(r#"{{"error":"Failed to serialize proposal: {}"}}"#, e),
+                ),
+            }
+        }
+        None => (
+            StatusCode::NOT_FOUND,
+            [(header::CONTENT_TYPE, "application/json")],
+            r#"{"error":"Proposal not found"}"#.to_string(),
         ),
     }
 }

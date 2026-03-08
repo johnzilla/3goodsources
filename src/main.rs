@@ -1,5 +1,6 @@
 mod audit;
 mod config;
+mod contributions;
 mod error;
 mod identity;
 mod matcher;
@@ -73,6 +74,11 @@ async fn main() -> anyhow::Result<()> {
     let identities = Arc::new(crate::identity::load(&config.identities_path).await?);
     tracing::info!(count = identities.len(), "Identities loaded");
 
+    // Load contributions (validates voter pubkeys against identities)
+    let contributions = crate::contributions::load(&config.contributions_path, &identities).await?;
+    let proposals = Arc::new(contributions);
+    tracing::info!(count = proposals.len(), "Contributions loaded");
+
     // Create MCP handler with shared registry and match config
     let pubkey_z32 = public_key.to_z32();
     let mcp_handler = mcp::McpHandler::new(
@@ -81,6 +87,7 @@ async fn main() -> anyhow::Result<()> {
         pubkey_z32,
         Arc::clone(&audit_log),
         Arc::clone(&identities),
+        Arc::clone(&proposals),
     );
 
     // Build application state
@@ -90,6 +97,7 @@ async fn main() -> anyhow::Result<()> {
         pubkey: public_key,
         audit_log,
         identities,
+        proposals,
     });
 
     // Build router with routes and middleware

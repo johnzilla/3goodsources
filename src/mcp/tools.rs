@@ -3,10 +3,12 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::audit::{filter_entries, AuditEntry, AuditFilterParams};
+use crate::contributions::Proposal;
 use crate::identity::{Identity, IdentityType};
 use crate::matcher::{MatchConfig, MatchError};
 use crate::registry::Registry;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 /// Tool parameter type for get_sources
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -60,6 +62,26 @@ pub struct GetIdentityParams {
     pub pubkey: String,
 }
 
+/// Tool parameter type for list_proposals
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ListProposalsParams {
+    /// Filter by proposal status (pending, approved, rejected, withdrawn)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    /// Filter by category slug (e.g. "rust-learning")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+}
+
+/// Tool parameter type for get_proposal
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct GetProposalParams {
+    /// Proposal UUID
+    pub id: String,
+}
+
 /// Error type for tool call operations
 #[derive(Debug)]
 pub enum ToolCallError {
@@ -67,7 +89,7 @@ pub enum ToolCallError {
     InvalidParams,
 }
 
-/// Get the tools/list response with all 6 tool definitions
+/// Get the tools/list response with all 8 tool definitions
 pub fn get_tools_list() -> Value {
     let get_sources_schema = schema_for!(GetSourcesParams);
     let list_categories_schema = schema_for!(ListCategoriesParams);
@@ -75,6 +97,8 @@ pub fn get_tools_list() -> Value {
     let get_endorsements_schema = schema_for!(GetEndorsementsParams);
     let get_audit_log_schema = schema_for!(GetAuditLogParams);
     let get_identity_schema = schema_for!(GetIdentityParams);
+    let list_proposals_schema = schema_for!(ListProposalsParams);
+    let get_proposal_schema = schema_for!(GetProposalParams);
 
     json!({
         "tools": [
@@ -107,6 +131,16 @@ pub fn get_tools_list() -> Value {
                 "name": "get_identity",
                 "description": "Look up a registered identity by PKARR public key. Returns the identity's display name, type (human/bot), linked platform handles with proof URLs for independent verification, and operator info for bot identities.",
                 "inputSchema": serde_json::to_value(get_identity_schema).unwrap()
+            },
+            {
+                "name": "list_proposals",
+                "description": "List community proposals for source changes. Returns proposal summaries with optional filtering by status (pending, approved, rejected, withdrawn) and category slug.",
+                "inputSchema": serde_json::to_value(list_proposals_schema).unwrap()
+            },
+            {
+                "name": "get_proposal",
+                "description": "Get full details of a community proposal by UUID, including all votes with voter pubkeys and timestamps.",
+                "inputSchema": serde_json::to_value(get_proposal_schema).unwrap()
             }
         ]
     })
@@ -121,6 +155,7 @@ pub fn handle_tool_call(
     pubkey_z32: &str,
     audit_log: &[AuditEntry],
     identities: &HashMap<String, Identity>,
+    proposals: &HashMap<Uuid, Proposal>,
 ) -> Result<Value, ToolCallError> {
     match name {
         "get_sources" => tool_get_sources(arguments, registry, match_config),
@@ -129,6 +164,8 @@ pub fn handle_tool_call(
         "get_endorsements" => tool_get_endorsements(arguments, registry),
         "get_audit_log" => tool_get_audit_log(arguments, audit_log),
         "get_identity" => tool_get_identity(arguments, identities),
+        "list_proposals" => tool_list_proposals(arguments, proposals),
+        "get_proposal" => tool_get_proposal(arguments, proposals),
         _ => Err(ToolCallError::UnknownTool),
     }
 }
@@ -433,6 +470,161 @@ fn tool_get_identity(
         }
         None => {
             let text = format!("No identity found for pubkey: {}", params.pubkey);
+            Ok(json!({
+                "content": [{"type": "text", "text": text}],
+                "isError": true
+            }))
+        }
+    }
+}
+
+/// Handle list_proposals tool call
+///
+/// Lists proposals with optional filtering by status and category.
+/// Returns human-readable text with proposal count and summary lines.
+fn tool_list_proposals(
+    arguments: Option<Value>,
+    proposals: &HashMap<Uuid, Proposal>,
+) -> Result<Value, ToolCallError> {
+    let params: ListProposalsParams = if let Some(args) = arguments {
+        serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?
+    } else {
+        ListProposalsParams {
+            status: None,
+            category: None,
+        }
+    };
+
+    let mut entries: Vec<(Uuid, &Proposal)> = proposals
+        .iter()
+        .filter(|(_, proposal)| {
+            if let Some(ref status_filter) = params.status {
+                let status_str = serde_json::to_value(&proposal.status)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.to_string()))
+                    .unwrap_or_default();
+                if status_str != *status_filter {
+                    return false;
+                }
+            }
+            if let Some(ref cat_filter) = params.category {
+                if proposal.category != *cat_filter {
+                    return false;
+                }
+            }
+            true
+        })
+        .map(|(id, p)| (*id, p))
+        .collect();
+
+    // Sort by created_at descending
+    entries.sort_by(|a, b| b.1.created_at.cmp(&a.1.created_at));
+
+    let mut text = format!("Proposals ({}):\n", entries.len());
+
+    for (id, proposal) in &entries {
+        let action_str = serde_json::to_value(&proposal.action)
+            .ok()
+            .and_then(|v| v.as_str().map(|s| s.to_string()))
+            .unwrap_or_else(|| "unknown".to_string());
+
+        let status_str = serde_json::to_value(&proposal.status)
+            .ok()
+            .and_then(|v| v.as_str().map(|s| s.to_string()))
+            .unwrap_or_else(|| "unknown".to_string());
+
+        let proposer_display = if proposal.proposer.len() > 16 {
+            format!("{}...", &proposal.proposer[..16])
+        } else {
+            proposal.proposer.clone()
+        };
+
+        text.push_str(&format!(
+            "- {} | {} | {} | {} | by: {} | {}\n",
+            id,
+            action_str,
+            status_str,
+            proposal.category,
+            proposer_display,
+            proposal.created_at.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        ));
+    }
+
+    Ok(json!({
+        "content": [{"type": "text", "text": text}],
+        "isError": false
+    }))
+}
+
+/// Handle get_proposal tool call
+///
+/// Returns full proposal detail for a given UUID including votes.
+fn tool_get_proposal(
+    arguments: Option<Value>,
+    proposals: &HashMap<Uuid, Proposal>,
+) -> Result<Value, ToolCallError> {
+    let params: GetProposalParams = if let Some(args) = arguments {
+        serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?
+    } else {
+        return Err(ToolCallError::InvalidParams);
+    };
+
+    let uuid = Uuid::parse_str(&params.id).map_err(|_| ToolCallError::InvalidParams)?;
+
+    match proposals.get(&uuid) {
+        Some(proposal) => {
+            let action_str = serde_json::to_value(&proposal.action)
+                .ok()
+                .and_then(|v| v.as_str().map(|s| s.to_string()))
+                .unwrap_or_else(|| "unknown".to_string());
+
+            let status_str = serde_json::to_value(&proposal.status)
+                .ok()
+                .and_then(|v| v.as_str().map(|s| s.to_string()))
+                .unwrap_or_else(|| "unknown".to_string());
+
+            let data_pretty = serde_json::to_string_pretty(&proposal.data)
+                .unwrap_or_else(|_| "{}".to_string());
+
+            let mut text = format!(
+                "Proposal: {}\nAction: {}\nStatus: {}\nCategory: {}\nProposer: {}\nCreated: {}\n\nData:\n{}\n\nVotes ({}):\n",
+                uuid,
+                action_str,
+                status_str,
+                proposal.category,
+                proposal.proposer,
+                proposal.created_at.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+                data_pretty,
+                proposal.votes.len(),
+            );
+
+            for vote in &proposal.votes {
+                let voter_display = if vote.voter.len() > 16 {
+                    format!("{}...", &vote.voter[..16])
+                } else {
+                    vote.voter.clone()
+                };
+
+                let vote_str = serde_json::to_value(&vote.vote)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.to_string()))
+                    .unwrap_or_else(|| "unknown".to_string());
+
+                text.push_str(&format!(
+                    "- {} | {} | {}\n",
+                    voter_display,
+                    vote_str,
+                    vote.timestamp.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+                ));
+            }
+
+            Ok(json!({
+                "content": [{"type": "text", "text": text}],
+                "isError": false
+            }))
+        }
+        None => {
+            let text = format!("No proposal found for id: {}", uuid);
             Ok(json!({
                 "content": [{"type": "text", "text": text}],
                 "isError": true

@@ -1,4 +1,5 @@
 use crate::audit::AuditEntry;
+use crate::contributions::Proposal;
 use crate::identity::Identity;
 use crate::matcher::MatchConfig;
 use crate::mcp::tools::{self, ToolCallError};
@@ -8,6 +9,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct McpHandler {
     initialized: Arc<AtomicBool>,
@@ -16,6 +18,7 @@ pub struct McpHandler {
     pubkey_z32: String,
     audit_log: Arc<Vec<AuditEntry>>,
     identities: Arc<HashMap<String, Identity>>,
+    proposals: Arc<HashMap<Uuid, Proposal>>,
 }
 
 impl McpHandler {
@@ -25,6 +28,7 @@ impl McpHandler {
         pubkey_z32: String,
         audit_log: Arc<Vec<AuditEntry>>,
         identities: Arc<HashMap<String, Identity>>,
+        proposals: Arc<HashMap<Uuid, Proposal>>,
     ) -> Self {
         Self {
             initialized: Arc::new(AtomicBool::new(false)),
@@ -33,6 +37,7 @@ impl McpHandler {
             pubkey_z32,
             audit_log,
             identities,
+            proposals,
         }
     }
 
@@ -152,6 +157,7 @@ impl McpHandler {
             &self.pubkey_z32,
             &self.audit_log,
             &self.identities,
+            &self.proposals,
         ) {
             Ok(result) => Some(self.serialize_response(JsonRpcResponse::success(id, result))),
             Err(ToolCallError::UnknownTool) => {
@@ -194,6 +200,7 @@ mod tests {
             match_config,
             "test-pubkey-z32".to_string(),
             Arc::new(vec![]),
+            Arc::new(HashMap::new()),
             Arc::new(HashMap::new()),
         )
     }
@@ -434,7 +441,7 @@ mod tests {
     // ===== TDD Tests for Plan 02: Tool Implementations =====
 
     #[test]
-    fn test_tools_list_returns_six_tools() {
+    fn test_tools_list_returns_eight_tools() {
         let handler = test_handler();
         init_handler(&handler);
 
@@ -452,7 +459,7 @@ mod tests {
         assert!(response["result"]["tools"].is_array());
 
         let tools = response["result"]["tools"].as_array().unwrap();
-        assert_eq!(tools.len(), 6, "Should return exactly 6 tools");
+        assert_eq!(tools.len(), 8, "Should return exactly 8 tools");
 
         // Check tool names
         let tool_names: Vec<&str> = tools
@@ -465,6 +472,8 @@ mod tests {
         assert!(tool_names.contains(&"get_endorsements"));
         assert!(tool_names.contains(&"get_audit_log"));
         assert!(tool_names.contains(&"get_identity"));
+        assert!(tool_names.contains(&"list_proposals"));
+        assert!(tool_names.contains(&"get_proposal"));
     }
 
     #[test]
