@@ -5,18 +5,18 @@
     "platforms": [
       {
         "platform": "x",
-        "handle": "TODO_x_handle",
-        "proof_url": "https://x.com/TODO_handle/status/TODO_tweet_id"
+        "handle": "jturner",
+        "proof_url": "https://x.com/jturner/status/2030677039582208460"
       },
       {
         "platform": "github",
-        "handle": "TODO_github_handle",
-        "proof_url": "https://gist.github.com/TODO_handle/TODO_gist_id"
+        "handle": "johnzilla",
+        "proof_url": "https://gist.github.com/johnzilla/788993321b1038138d3bcc7a26099b77"
       },
       {
         "platform": "nostr",
-        "handle": "TODO_nostr_name",
-        "proof_url": "https://TODO_domain/.well-known/nostr.json?name=TODO"
+        "handle": "npub192qp5vwt7wc4d7f027gprf228c5shsmw7z05j7tx03zv4afun40qsunq39",
+        "proof_url": "https://damus.io/npub192qp5vwt7wc4d7f027gprf228c5shsmw7z05j7tx03zv4afun40qsunq39"
       }
     ]
   }
