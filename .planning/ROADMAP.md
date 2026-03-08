@@ -99,4 +99,4 @@ Phases execute in numeric order: 12 → 13 → 14
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12. Audit Log | 2/2 | Complete    | 2026-03-08 | - |
 | 13. Identity Linking | 2/2 | Complete    | 2026-03-08 | - |
-| 14. Community Contributions | 2/2 | Complete   | 2026-03-08 | - |
+| 14. Community Contributions | 2/2 | Complete    | 2026-03-08 | - |

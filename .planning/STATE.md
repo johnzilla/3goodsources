@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Community Curation
-status: complete
+status: completed
 stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-03-08T17:49:03Z"
-last_activity: 2026-03-08 -- Phase 14 community-contributions plan 02 complete (milestone v2.0 complete)
+last_updated: "2026-03-08T17:52:56.144Z"
+last_activity: 2026-03-08 -- Phase 14 community-contributions plan 02 complete
 progress:
   total_phases: 3
   completed_phases: 3
-  total_plans: 4
+  total_plans: 6
   completed_plans: 6
   percent: 100
 ---
