@@ -3,8 +3,10 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::audit::{filter_entries, AuditEntry, AuditFilterParams};
+use crate::identity::{Identity, IdentityType};
 use crate::matcher::{MatchConfig, MatchError};
 use crate::registry::Registry;
+use std::collections::HashMap;
 
 /// Tool parameter type for get_sources
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -50,6 +52,14 @@ pub struct GetAuditLogParams {
     pub action: Option<String>,
 }
 
+/// Tool parameter type for get_identity
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct GetIdentityParams {
+    /// PKARR public key (64-character hex string) to look up
+    pub pubkey: String,
+}
+
 /// Error type for tool call operations
 #[derive(Debug)]
 pub enum ToolCallError {
@@ -57,13 +67,14 @@ pub enum ToolCallError {
     InvalidParams,
 }
 
-/// Get the tools/list response with all 5 tool definitions
+/// Get the tools/list response with all 6 tool definitions
 pub fn get_tools_list() -> Value {
     let get_sources_schema = schema_for!(GetSourcesParams);
     let list_categories_schema = schema_for!(ListCategoriesParams);
     let get_provenance_schema = schema_for!(GetProvenanceParams);
     let get_endorsements_schema = schema_for!(GetEndorsementsParams);
     let get_audit_log_schema = schema_for!(GetAuditLogParams);
+    let get_identity_schema = schema_for!(GetIdentityParams);
 
     json!({
         "tools": [
@@ -91,6 +102,11 @@ pub fn get_tools_list() -> Value {
                 "name": "get_audit_log",
                 "description": "Get the public audit log of all registry changes. Returns signed, hash-chained entries showing when sources and categories were added, updated, or removed. Supports optional filtering by timestamp (since), category slug (category), and action type (action).",
                 "inputSchema": serde_json::to_value(get_audit_log_schema).unwrap()
+            },
+            {
+                "name": "get_identity",
+                "description": "Look up a registered identity by PKARR public key. Returns the identity's display name, type (human/bot), linked platform handles with proof URLs for independent verification, and operator info for bot identities.",
+                "inputSchema": serde_json::to_value(get_identity_schema).unwrap()
             }
         ]
     })
@@ -104,6 +120,7 @@ pub fn handle_tool_call(
     match_config: &MatchConfig,
     pubkey_z32: &str,
     audit_log: &[AuditEntry],
+    identities: &HashMap<String, Identity>,
 ) -> Result<Value, ToolCallError> {
     match name {
         "get_sources" => tool_get_sources(arguments, registry, match_config),
@@ -111,6 +128,7 @@ pub fn handle_tool_call(
         "get_provenance" => tool_get_provenance(arguments, registry, pubkey_z32),
         "get_endorsements" => tool_get_endorsements(arguments, registry),
         "get_audit_log" => tool_get_audit_log(arguments, audit_log),
+        "get_identity" => tool_get_identity(arguments, identities),
         _ => Err(ToolCallError::UnknownTool),
     }
 }
@@ -366,4 +384,59 @@ fn tool_get_audit_log(
         "content": [{"type": "text", "text": text}],
         "isError": false
     }))
+}
+
+/// Handle get_identity tool call
+///
+/// Looks up an identity by PKARR public key. Returns formatted identity info
+/// including name, type, platform claims with proof URLs, and operator info for bots.
+fn tool_get_identity(
+    arguments: Option<Value>,
+    identities: &HashMap<String, Identity>,
+) -> Result<Value, ToolCallError> {
+    let params: GetIdentityParams = if let Some(args) = arguments {
+        serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?
+    } else {
+        return Err(ToolCallError::InvalidParams);
+    };
+
+    match identities.get(&params.pubkey) {
+        Some(identity) => {
+            let type_str = match identity.identity_type {
+                IdentityType::Human => "human",
+                IdentityType::Bot => "bot",
+            };
+
+            let mut text = format!(
+                "Identity: {}\nType: {}\nPubkey: {}\n\nPlatforms:\n",
+                identity.name, type_str, params.pubkey
+            );
+
+            for claim in &identity.platforms {
+                let platform_str = format!("{:?}", claim.platform).to_lowercase();
+                text.push_str(&format!(
+                    "- {}: {} (proof: {})\n",
+                    platform_str, claim.handle, claim.proof_url
+                ));
+            }
+
+            if identity.identity_type == IdentityType::Bot {
+                if let Some(ref op_key) = identity.operator_pubkey {
+                    text.push_str(&format!("\nOperator: {}\n", op_key));
+                }
+            }
+
+            Ok(json!({
+                "content": [{"type": "text", "text": text}],
+                "isError": false
+            }))
+        }
+        None => {
+            let text = format!("No identity found for pubkey: {}", params.pubkey);
+            Ok(json!({
+                "content": [{"type": "text", "text": text}],
+                "isError": true
+            }))
+        }
+    }
 }

@@ -1,9 +1,11 @@
 use three_good_sources::audit::AuditEntry;
+use three_good_sources::identity::Identity;
 use three_good_sources::matcher::MatchConfig;
 use three_good_sources::mcp::McpHandler;
 use three_good_sources::pubky::identity::generate_or_load_keypair;
 use three_good_sources::registry::Registry;
 use three_good_sources::server::{AppState, build_router};
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -36,18 +38,26 @@ pub async fn spawn_test_server() -> SocketAddr {
     let pubkey = keypair.public_key();
     let pubkey_z32 = pubkey.to_z32();
 
+    // Load identities
+    let identities_json = include_str!("../../identities.json");
+    let identities: HashMap<String, Identity> = serde_json::from_str(identities_json)
+        .expect("Failed to parse identities.json");
+    let identities = Arc::new(identities);
+
     // Build MCP handler and app state
     let mcp_handler = McpHandler::new(
         Arc::clone(&registry),
         match_config,
         pubkey_z32,
         Arc::clone(&audit_log),
+        Arc::clone(&identities),
     );
     let app_state = Arc::new(AppState {
         mcp_handler,
         registry,
         pubkey,
         audit_log,
+        identities,
     });
 
     let app = build_router(app_state);

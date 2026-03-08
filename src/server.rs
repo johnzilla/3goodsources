@@ -1,14 +1,16 @@
 use crate::audit::{AuditEntry, AuditFilterParams, filter_entries};
+use crate::identity::Identity;
 use crate::mcp::McpHandler;
 use crate::registry::Registry;
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::{header, HeaderName, HeaderValue, Method, StatusCode},
     routing::{get, post},
     Json, Router,
 };
 use pkarr::PublicKey;
 use serde_json::json;
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
@@ -21,6 +23,7 @@ pub struct AppState {
     pub registry: Arc<Registry>,
     pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
     pub audit_log: Arc<Vec<AuditEntry>>,
+    pub identities: Arc<HashMap<String, Identity>>,
 }
 
 /// Build the axum router with all routes and middleware
@@ -44,6 +47,8 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/health", get(health_endpoint))
         .route("/registry", get(registry_endpoint))
         .route("/audit", get(audit_endpoint))
+        .route("/identities", get(identities_endpoint))
+        .route("/identities/{pubkey}", get(identity_by_pubkey_endpoint))
         .layer(cors)
         .with_state(state)
 }
@@ -114,6 +119,50 @@ async fn audit_endpoint(
             StatusCode::INTERNAL_SERVER_ERROR,
             [(header::CONTENT_TYPE, "application/json")],
             format!(r#"{{"error":"Failed to serialize audit log: {}"}}"#, e),
+        ),
+    }
+}
+
+/// GET /identities - Returns all identities as JSON object keyed by pubkey
+async fn identities_endpoint(
+    State(state): State<Arc<AppState>>,
+) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
+    match serde_json::to_string_pretty(&*state.identities) {
+        Ok(json) => (
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, "application/json")],
+            json,
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            [(header::CONTENT_TYPE, "application/json")],
+            format!(r#"{{"error":"Failed to serialize identities: {}"}}"#, e),
+        ),
+    }
+}
+
+/// GET /identities/:pubkey - Returns a single identity by pubkey or 404
+async fn identity_by_pubkey_endpoint(
+    State(state): State<Arc<AppState>>,
+    Path(pubkey): Path<String>,
+) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
+    match state.identities.get(&pubkey) {
+        Some(identity) => match serde_json::to_string_pretty(identity) {
+            Ok(json) => (
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "application/json")],
+                json,
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                [(header::CONTENT_TYPE, "application/json")],
+                format!(r#"{{"error":"Failed to serialize identity: {}"}}"#, e),
+            ),
+        },
+        None => (
+            StatusCode::NOT_FOUND,
+            [(header::CONTENT_TYPE, "application/json")],
+            r#"{"error":"Identity not found"}"#.to_string(),
         ),
     }
 }

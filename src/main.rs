@@ -1,6 +1,7 @@
 mod audit;
 mod config;
 mod error;
+mod identity;
 mod matcher;
 mod mcp;
 mod pubky;
@@ -68,6 +69,10 @@ async fn main() -> anyhow::Result<()> {
     let audit_log = Arc::new(crate::audit::load(&config.audit_log_path).await?);
     tracing::info!(entries = audit_log.len(), "Audit log loaded");
 
+    // Load identities
+    let identities = Arc::new(crate::identity::load(&config.identities_path).await?);
+    tracing::info!(count = identities.len(), "Identities loaded");
+
     // Create MCP handler with shared registry and match config
     let pubkey_z32 = public_key.to_z32();
     let mcp_handler = mcp::McpHandler::new(
@@ -75,6 +80,7 @@ async fn main() -> anyhow::Result<()> {
         match_config,
         pubkey_z32,
         Arc::clone(&audit_log),
+        Arc::clone(&identities),
     );
 
     // Build application state
@@ -83,6 +89,7 @@ async fn main() -> anyhow::Result<()> {
         registry,
         pubkey: public_key,
         audit_log,
+        identities,
     });
 
     // Build router with routes and middleware
