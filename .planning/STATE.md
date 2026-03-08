@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Community Curation
 status: completed
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-03-08T16:27:07.125Z"
+stopped_at: Phase 14 context gathered
+last_updated: "2026-03-08T17:18:47.876Z"
 last_activity: 2026-03-08 -- Phase 13 identity-linking plan 02 complete
 progress:
   total_phases: 3
@@ -86,7 +86,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T15:28:00Z
-Stopped at: Completed 13-02-PLAN.md
-Resume file: .planning/phases/13-identity-linking/13-02-SUMMARY.md
+Last session: 2026-03-08T17:18:47.873Z
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-community-contributions/14-CONTEXT.md
 Next step: Phase 13 complete. Proceed to Phase 14 (documentation) if applicable.
