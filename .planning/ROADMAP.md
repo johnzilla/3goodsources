@@ -67,12 +67,11 @@ Plans:
   3. GET /identities returns all registered identities, and GET /identities/{pubkey} returns a single identity with all linked platforms
   4. get_identity MCP tool returns identity info for a given pubkey matching the REST endpoint data
   5. John Turner's identity is registered with real, independently verifiable platform proofs
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
-- [ ] 13-03: TBD
+- [ ] 13-01-PLAN.md — Identity module foundation (types, loader, error, seed identities.json)
+- [ ] 13-02-PLAN.md — Server integration, REST/MCP endpoints, and integration tests
 
 ### Phase 14: Community Contributions
 **Goal**: Community members can propose source changes and the curator can manage proposals with transparent human/bot vote tracking
@@ -100,5 +99,5 @@ Phases execute in numeric order: 12 → 13 → 14
 | 1-7 | v1.0 | 17/17 | Complete | 2026-02-03 |
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12. Audit Log | 2/2 | Complete    | 2026-03-08 | - |
-| 13. Identity Linking | v2.0 | 0/? | Not started | - |
+| 13. Identity Linking | v2.0 | 0/2 | Planning complete | - |
 | 14. Community Contributions | v2.0 | 0/? | Not started | - |
