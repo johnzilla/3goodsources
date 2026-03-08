@@ -50,7 +50,7 @@ async fn test_initialize_returns_protocol_version() {
 }
 
 #[tokio::test]
-async fn test_tools_list_returns_four_tools() {
+async fn test_tools_list_returns_five_tools() {
     let addr = common::spawn_test_server().await;
     let client = reqwest::Client::new();
 
@@ -76,7 +76,7 @@ async fn test_tools_list_returns_four_tools() {
     assert!(body["result"]["tools"].is_array());
 
     let tools = body["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), 4, "Should return exactly 4 tools");
+    assert_eq!(tools.len(), 5, "Should return exactly 5 tools");
 
     // Verify tool names
     let tool_names: Vec<&str> = tools
@@ -88,6 +88,7 @@ async fn test_tools_list_returns_four_tools() {
     assert!(tool_names.contains(&"list_categories"));
     assert!(tool_names.contains(&"get_provenance"));
     assert!(tool_names.contains(&"get_endorsements"));
+    assert!(tool_names.contains(&"get_audit_log"));
 
     // Verify schema structure
     for tool in tools {

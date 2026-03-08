@@ -1,3 +1,4 @@
+use three_good_sources::audit::AuditEntry;
 use three_good_sources::matcher::MatchConfig;
 use three_good_sources::mcp::McpHandler;
 use three_good_sources::pubky::identity::generate_or_load_keypair;
@@ -16,6 +17,12 @@ pub async fn spawn_test_server() -> SocketAddr {
         .expect("Failed to parse registry.json");
     let registry = Arc::new(registry);
 
+    // Load audit log
+    let audit_log_json = include_str!("../../audit_log.json");
+    let audit_log: Vec<AuditEntry> = serde_json::from_str(audit_log_json)
+        .expect("Failed to parse audit_log.json");
+    let audit_log = Arc::new(audit_log);
+
     // Default match config
     let match_config = MatchConfig {
         match_threshold: 0.4,
@@ -30,11 +37,17 @@ pub async fn spawn_test_server() -> SocketAddr {
     let pubkey_z32 = pubkey.to_z32();
 
     // Build MCP handler and app state
-    let mcp_handler = McpHandler::new(Arc::clone(&registry), match_config, pubkey_z32);
+    let mcp_handler = McpHandler::new(
+        Arc::clone(&registry),
+        match_config,
+        pubkey_z32,
+        Arc::clone(&audit_log),
+    );
     let app_state = Arc::new(AppState {
         mcp_handler,
         registry,
         pubkey,
+        audit_log,
     });
 
     let app = build_router(app_state);
