@@ -2,6 +2,7 @@ pub mod audit;
 pub mod config;
 pub mod contributions;
 pub mod error;
+pub mod federation;
 pub mod identity;
 pub mod matcher;
 pub mod mcp;
