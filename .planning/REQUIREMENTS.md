@@ -32,7 +32,7 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 
 - [x] **DIST-01**: `3gs fork` CLI subcommand scaffolds a new node with keypair, skeleton files, and .env
 - [x] **DIST-02**: Fork parses args before Config::load() to avoid requiring env vars
-- [ ] **DIST-03**: Docker image published to GHCR (multi-platform linux/amd64 + linux/arm64)
+- [ ] **DIST-03**: Docker image published to GHCR (linux/amd64) via local publish script
 
 ## Future Requirements
 

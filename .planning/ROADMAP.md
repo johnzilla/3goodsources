@@ -48,7 +48,7 @@
 - [x] **Phase 15: Federation Foundation** - Endorsement data model, peer types, self-guard, and reqwest runtime dependency (completed 2026-04-03)
 - [x] **Phase 16: Core Federation** - Async refactor, peer cache networking, federated tool, and DRY cleanup (completed 2026-04-03)
 - [x] **Phase 17: Fork CLI** - `3gs fork` subcommand for scaffolding new nodes (completed 2026-04-03)
-- [ ] **Phase 18: Docker Distribution** - Multi-platform Docker image published to GHCR
+- [x] **Phase 18: Docker Distribution** - Multi-platform Docker image published to GHCR (completed 2026-04-03)
 
 ## Phase Details
 
@@ -117,4 +117,4 @@ Plans:
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
 | 16. Core Federation | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 17. Fork CLI | v3.0 | 1/1 | Complete    | 2026-04-03 |
-| 18. Docker Distribution | v3.0 | 0/1 | Not started | - |
+| 18. Docker Distribution | v3.0 | 0/1 | Complete    | 2026-04-03 |
