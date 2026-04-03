@@ -1,12 +1,14 @@
 # 3 Good Sources (3GS)
 
-**Curated, cryptographically-signed source recommendations for AI agents**
+**Federated, cryptographically-signed source recommendations for AI agents**
 
 ## What & Why
 
 AI agents searching for resources often get SEO-gamed results, listicles stuffed with affiliate links, and content optimized for search engines instead of accuracy. When an agent needs to learn Rust, set up a Bitcoin node, or find privacy-focused home automation guides, traditional search returns hundreds of results with no quality signal.
 
-**3GS solves this:** For each topic, a human curator researches and selects exactly three vetted sources — official documentation, practical tutorials, or essential tools. These recommendations are served via the Model Context Protocol (MCP) with cryptographic provenance using PKARR, so agents can verify the curator's identity and trust the recommendations.
+**3GS solves this:** For each topic, a human curator researches and selects exactly three vetted sources. These recommendations are served via the Model Context Protocol (MCP) with cryptographic provenance using PKARR, so agents can verify the curator's identity and trust the recommendations.
+
+**Federation:** Curators run their own 3GS nodes, endorse each other, and agents query across the trust network. Each node is opinionated (three sources per topic), but the network provides breadth. PGP's web of trust, but for source quality.
 
 The constraint is deliberate: **three sources per topic, always**. Quality over quantity. Primary sources over blog posts. Practical value over pagerank.
 
@@ -16,23 +18,33 @@ The constraint is deliberate: **three sources per topic, always**. Quality over 
 graph LR
     A[AI Agent] -->|HTTP POST /mcp| B[MCP Handler]
     B -->|JSON-RPC| C[Query Matcher]
-    C -->|Normalize & Score| D[Registry]
+    C -->|Normalize & Score| D[Local Registry]
+    C -->|Federated Query| E[Peer Cache]
+    E -->|HTTP GET /registry| F[Peer Nodes]
     D -->|3 Ranked Sources| C
+    F -->|Peer Sources| E
+    E -->|Trust-Tagged Results| C
     C -->|Match Result| B
     B -->|JSON Response| A
 
     style A fill:#e1f5ff
     style D fill:#fff3cd
     style B fill:#d4edda
+    style F fill:#ffe6e6
 ```
 
-**Request flow:**
+**Request flow (local):**
 1. Agent sends natural language query via MCP tool call (e.g., "learn rust programming")
 2. Query normalizer strips punctuation, removes stop words, lowercases text
 3. Scorer runs fuzzy matching (normalized Levenshtein) against category patterns, slugs, and names
 4. Keyword boosting increases score if query terms appear in category metadata
 5. Threshold filter ensures only strong matches return (default: 0.4/1.0)
 6. Best match returns category with all three sources, ranked and annotated
+
+**Request flow (federated):**
+1. Same matching runs on local registry (results tagged `trust: direct`)
+2. Matching also runs on cached peer registries (results tagged `trust: endorsed`)
+3. Agent sees sources from all trusted curators, knows who recommended what
 
 ## Quickstart
 
@@ -54,6 +66,23 @@ cargo run
 ```
 
 Server starts on `http://localhost:3000` by default.
+
+**Run from Docker:**
+
+```bash
+docker pull ghcr.io/johnzilla/3goodsources:latest
+docker run -p 3000:3000 ghcr.io/johnzilla/3goodsources:latest
+```
+
+**Fork a new node:**
+
+Scaffold your own 3GS node that endorses an existing curator:
+
+```bash
+cargo run -- fork --endorse <curator-pubkey> --url <curator-url> --name "Your Name"
+```
+
+This generates a new directory with a fresh PKARR keypair, skeleton registry, and `.env` file. Add your own categories and run it.
 
 **Test with curl:**
 
@@ -110,72 +139,35 @@ The agent can now call 3GS tools to get curated sources for any topic.
 
 ### POST /mcp
 
-**MCP JSON-RPC 2.0 endpoint.** Accepts initialize, tools/list, and tools/call requests.
-
-Example request (get_sources tool):
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "get_sources",
-    "arguments": {
-      "query": "set up bitcoin node",
-      "threshold": 0.4
-    }
-  }
-}
-```
-
-Example response:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [{
-      "type": "text",
-      "text": "Category: Bitcoin Node Setup\nSlug: bitcoin-node-setup\n\nSources:\n\n1. Bitcoin Core Documentation\n   URL: https://bitcoin.org/en/full-node\n   Type: documentation\n   Why: Official guide from Bitcoin Core..."
-    }],
-    "isError": false
-  }
-}
-```
+**MCP JSON-RPC 2.0 endpoint.** Accepts initialize, tools/list, and tools/call requests. Serves 9 tools including source queries, federation, identity, audit, and community contributions.
 
 ### GET /health
 
 Health check endpoint. Returns server status, version, and PKARR public key.
 
-Example response:
-
-```json
-{
-  "status": "ok",
-  "version": "0.1.0",
-  "pubkey": "ybnodffejre5yw6or85w9krbvww6omprf44yx1ytgjanej8k8uoy"
-}
-```
-
 ### GET /registry
 
-Returns the full registry.json file for transparency. Agents or humans can inspect all categories, sources, and curator metadata.
+Returns the full registry.json for transparency, including endorsements.
 
-Example response:
+### GET /audit
 
-```json
-{
-  "version": "0.1.0",
-  "updated": "2026-02-01",
-  "curator": {
-    "name": "3GS Curator",
-    "pubkey": "pk:placeholder"
-  },
-  "categories": { ... }
-}
-```
+Returns the signed, hash-chained audit log. Supports `since`, `category`, and `action` query filters.
+
+### GET /identities
+
+Returns all registered identities (PKARR-linked platform handles).
+
+### GET /identities/{pubkey}
+
+Returns a single identity by PKARR public key.
+
+### GET /proposals
+
+Lists community contribution proposals. Supports `status` and `category` filters.
+
+### GET /proposals/{id}
+
+Returns full proposal detail by UUID, including votes.
 
 ## MCP Tools
 
@@ -185,34 +177,47 @@ Example response:
 
 **Parameters:**
 - `query` (required, string): Natural language query describing what sources to find
-  - Examples: "learn rust programming", "set up bitcoin node", "self-host email"
-- `threshold` (optional, float 0.0-1.0): Match sensitivity. Lower values return more results, higher values require closer matches. Default: 0.4
+- `threshold` (optional, float 0.0-1.0): Match sensitivity. Default: 0.4
 
 **Returns:** Category name, description, and three sources (each with rank, name, URL, type, and explanation)
+
+### get_federated_sources
+
+**Query sources across the federated network.** Same parameters as `get_sources`, but searches both the local registry and all endorsed peer registries. Results are tagged with trust level (`direct` for local, `endorsed` for peer) and curator identity.
+
+**Parameters:**
+- `query` (required, string): Natural language query
+- `threshold` (optional, float 0.0-1.0): Match sensitivity. Default: 0.4
+
+**Returns:** Sources from local + peer registries, each tagged with curator name, pubkey, trust level, and stale flag
 
 ### list_categories
 
 **List all available topics.** Returns category slugs, display names, and descriptions for all topics in the registry.
 
-**Parameters:** None
-
-**Returns:** Formatted list of all categories, sorted by slug
-
 ### get_provenance
 
 **Get curator identity and verification info.** Returns curator name, PKARR public key, registry version, and instructions for cryptographic verification.
 
-**Parameters:** None
-
-**Returns:** Curator metadata and verification instructions
-
 ### get_endorsements
 
-**Get curator endorsements.** Returns the list of other curators who endorse this registry. In v1, this always returns an empty list (feature scaffolded for future use).
+**Get curator endorsements.** Returns the list of endorsed curators with their pubkeys, URLs, display names, and endorsement dates.
 
-**Parameters:** None
+### get_audit_log
 
-**Returns:** Endorsement list (empty in v1) with explanatory message
+**Get the public audit log.** Returns signed, hash-chained entries showing registry changes. Supports `since`, `category`, and `action` filters.
+
+### get_identity
+
+**Look up an identity by PKARR public key.** Returns display name, type (human/bot), linked platform handles with proof URLs.
+
+### list_proposals
+
+**List community contribution proposals.** Supports `status` and `category` filters.
+
+### get_proposal
+
+**Get full proposal detail by UUID.** Includes all votes with voter pubkeys and timestamps.
 
 ## Configuration
 
@@ -220,13 +225,48 @@ Configure via environment variables (loaded from `.env` if present):
 
 | Variable             | Required | Default  | Description                                                              |
 |----------------------|----------|----------|--------------------------------------------------------------------------|
-| REGISTRY_PATH        | Yes      | —        | Path to registry.json file                                               |
+| REGISTRY_PATH        | Yes      | ---        | Path to registry.json file                                               |
+| AUDIT_LOG_PATH       | Yes      | ---        | Path to audit_log.json file                                              |
+| IDENTITIES_PATH      | Yes      | ---        | Path to identities.json file                                             |
+| CONTRIBUTIONS_PATH   | Yes      | ---        | Path to contributions.json file                                          |
 | PORT                 | No       | 3000     | Server port                                                              |
 | LOG_FORMAT           | No       | pretty   | Logging format: `pretty` (colored, dev) or `json` (structured, prod)     |
-| PKARR_SECRET_KEY     | No       | —        | 64-char hex string (32 bytes) for persistent identity. Generates ephemeral keypair if not set |
+| PKARR_SECRET_KEY     | No       | ---        | 64-char hex string (32 bytes) for persistent identity. Generates ephemeral keypair if not set |
 | MATCH_THRESHOLD      | No       | 0.4      | Minimum match score (0.0-1.0) to return a result                         |
 | MATCH_FUZZY_WEIGHT   | No       | 0.7      | Weight for fuzzy matching component (0.0-1.0)                            |
 | MATCH_KEYWORD_WEIGHT | No       | 0.3      | Weight for keyword boosting component (0.0-1.0)                          |
+
+## Federation
+
+3GS nodes form a web of trust through endorsements. Each node runs independently with its own curator identity (PKARR keypair) and curated sources.
+
+**How it works:**
+1. Curator A endorses Curator B by adding B's pubkey and URL to their registry's endorsements
+2. Node A fetches and caches B's registry in the background (every 5 minutes)
+3. When an agent queries `get_federated_sources`, it searches both A's local registry and B's cached registry
+4. Results are tagged with trust level: `direct` (local) or `endorsed` (peer)
+5. If B is unreachable, A serves stale cached data with a flag, or skips B entirely
+
+**Start your own node:**
+
+```bash
+cargo run -- fork --endorse <curator-pubkey> --url <curator-url>
+```
+
+**Endorsement format in registry.json:**
+
+```json
+{
+  "endorsements": [
+    {
+      "pubkey": "ybnodffejre5yw6or85w9krbvww6omprf44yx1ytgjanej8k8uoy",
+      "url": "https://peer.example.com",
+      "name": "Peer Curator",
+      "since": "2026-04-03"
+    }
+  ]
+}
+```
 
 ## Registry Format
 
@@ -270,7 +310,7 @@ For complete schema documentation, see [docs/SCHEMA.md](docs/SCHEMA.md).
 1. **Normalization**: Query is lowercased, punctuation stripped, stop words removed, whitespace normalized
 2. **Fuzzy matching**: Normalized query is compared against category patterns, slugs, and names using normalized Levenshtein distance
 3. **Keyword boosting**: If query terms appear in category metadata, score is boosted
-4. **Weighted combination**: Final score = (fuzzy_weight × fuzzy_score) + (keyword_weight × keyword_score)
+4. **Weighted combination**: Final score = (fuzzy_weight x fuzzy_score) + (keyword_weight x keyword_score)
 5. **Threshold filtering**: Only matches above threshold (default 0.4) are returned
 
 This ensures queries like "learn rust programming" match the `rust-learning` category, while queries like "run bitcoin node" match `bitcoin-node-setup`, even if the exact wording differs from stored patterns.
@@ -307,23 +347,32 @@ curl -X POST http://localhost:3000/mcp \
 - Responses come from the curator who signed the registry
 - Source recommendations haven't been tampered with
 
-For PKARR primer and future federation vision, see [docs/PUBKY.md](docs/PUBKY.md).
+For PKARR primer and federation details, see [docs/PUBKY.md](docs/PUBKY.md).
 
 ## Docker
 
-**Build:**
+**Pull from GHCR:**
+
+```bash
+docker pull ghcr.io/johnzilla/3goodsources:latest
+docker run -p 3000:3000 ghcr.io/johnzilla/3goodsources:latest
+```
+
+**Build locally:**
 
 ```bash
 docker build -t 3gs .
-```
-
-**Run:**
-
-```bash
 docker run -p 3000:3000 \
   -e REGISTRY_PATH=/app/registry.json \
   -e PKARR_SECRET_KEY=your-64-char-hex-key \
   3gs
+```
+
+**Publish to GHCR:**
+
+```bash
+./scripts/docker-publish.sh          # pushes :latest + :sha-<hash>
+./scripts/docker-publish.sh v3.0     # also pushes :v3.0
 ```
 
 The Dockerfile uses a multi-stage build (Rust 1.85 builder, debian:bookworm-slim runtime) optimized for production deployment.
@@ -339,4 +388,4 @@ MIT
 **Learn more:**
 - Full registry schema: [docs/SCHEMA.md](docs/SCHEMA.md)
 - Curation methodology & matching algorithm: [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
-- PKARR identity & federation vision: [docs/PUBKY.md](docs/PUBKY.md)
+- PKARR identity & federation: [docs/PUBKY.md](docs/PUBKY.md)
