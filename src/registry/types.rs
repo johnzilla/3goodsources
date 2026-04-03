@@ -27,10 +27,19 @@ pub struct Curator {
     pub pubkey: String,
 }
 
-/// Endorsement placeholder for future use
+/// Endorsement of a peer curator
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Endorsement {}
+pub struct Endorsement {
+    /// PKARR public key of the endorsed peer (z-base-32)
+    pub pubkey: String,
+    /// URL of the endorsed peer's 3GS instance
+    pub url: String,
+    /// Optional display name for the endorsed peer
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// ISO 8601 date string when endorsement was made (e.g., "2026-04-03")
+    pub since: String,
+}
 
 /// Category containing sources for a specific topic
 #[derive(Debug, Clone, Serialize, Deserialize)]
