@@ -46,7 +46,7 @@
 **Milestone Goal:** Turn 3GS from a single-node curation server into a federated web-of-trust protocol where curators endorse each other and AI agents query across the network.
 
 - [x] **Phase 15: Federation Foundation** - Endorsement data model, peer types, self-guard, and reqwest runtime dependency (completed 2026-04-03)
-- [ ] **Phase 16: Core Federation** - Async refactor, peer cache networking, federated tool, and DRY cleanup
+- [x] **Phase 16: Core Federation** - Async refactor, peer cache networking, federated tool, and DRY cleanup (completed 2026-04-03)
 - [ ] **Phase 17: Fork CLI** - `3gs fork` subcommand for scaffolding new nodes
 - [ ] **Phase 18: Docker Distribution** - Multi-platform Docker image published to GHCR
 
@@ -80,7 +80,7 @@ Plans:
 Plans:
 - [x] 16-01-PLAN.md — PeerCache networking: HTTP fetch, refresh, staleness tracking
 - [x] 16-02-PLAN.md — MCP async refactor, DRY tool_response helper, endorsements update
-- [ ] 16-03-PLAN.md — Server wiring, background refresh loop, get_federated_sources tool
+- [x] 16-03-PLAN.md — Server wiring, background refresh loop, get_federated_sources tool
 **UI hint**: no
 
 ### Phase 17: Fork CLI
@@ -111,6 +111,6 @@ Plans:
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
-| 16. Core Federation | v3.0 | 2/3 | In Progress|  |
+| 16. Core Federation | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 17. Fork CLI | v3.0 | 0/? | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
-status: executing
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-04-03T14:05:43.432Z"
+status: verifying
+stopped_at: Completed 16-03-PLAN.md
+last_updated: "2026-04-03T14:12:34.263Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-02)
 
 Phase: 16 (core-federation) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [░░░░░░░░░░] 0%
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 15 P02 | 5 | 1 tasks | 2 files |
 | Phase 16-core-federation P01 | 2 | 2 tasks | 2 files |
 | Phase 16-core-federation P02 | 8 | 2 tasks | 3 files |
+| Phase 16-core-federation P16-03 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 16-core-federation]: CachedPeerSnapshot stale flag = (status == Stale) only — Unreachable is not stale, it means never reached
 - [Phase 16-core-federation]: All 8 tool functions made async as prerequisite for Plan 03 federated tool even without active awaits
 - [Phase 16-core-federation]: tool_response() DRY helper replaces 12 json!() boilerplate blocks across all tools
+- [Phase 16-core-federation]: tokio::sync::watch channel for shutdown broadcast — idiomatic pattern for background task lifecycle
+- [Phase 16-core-federation]: Temporary Registry constructed from PeerRegistry to reuse match_query — avoids duplicating matching logic
 
 ### Engineering Review Notes (from /plan-eng-review)
 
@@ -80,6 +83,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-03T14:05:43.429Z
-Stopped at: Completed 16-02-PLAN.md
+Last session: 2026-04-03T14:12:34.259Z
+Stopped at: Completed 16-03-PLAN.md
 Next step: /gsd:plan-phase 15

@@ -18,15 +18,15 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 - [x] **NET-01**: Peer cache fetches and caches endorsed peer registries via HTTP with 10s timeout
 - [x] **NET-02**: Background tokio task refreshes peer cache every 5 minutes
 - [x] **NET-03**: Stale cache (>1hr without success) served with stale flag, unreachable peers skipped
-- [ ] **NET-04**: Graceful shutdown for background refresh task via cancellation signal
+- [x] **NET-04**: Graceful shutdown for background refresh task via cancellation signal
 - [x] **NET-05**: reqwest moved from dev-dependency to runtime dependency
 
 ### MCP Tools
 
-- [ ] **MCP-01**: `get_federated_sources` tool queries local + cached peer registries with trust-level tagging
-- [ ] **MCP-02**: `get_endorsements` tool updated to show real endorsement data (pubkey, url, name, since)
-- [ ] **MCP-03**: DRY `tool_response()` helper refactored across all tools
-- [ ] **MCP-04**: Async refactor of `handle_json()` and `handle_tool_call()` for RwLock reads
+- [x] **MCP-01**: `get_federated_sources` tool queries local + cached peer registries with trust-level tagging
+- [x] **MCP-02**: `get_endorsements` tool updated to show real endorsement data (pubkey, url, name, since)
+- [x] **MCP-03**: DRY `tool_response()` helper refactored across all tools
+- [x] **MCP-04**: Async refactor of `handle_json()` and `handle_tool_call()` for RwLock reads
 
 ### Distribution
 
@@ -71,11 +71,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | NET-01 | Phase 16 | Complete |
 | NET-02 | Phase 16 | Complete |
 | NET-03 | Phase 16 | Complete |
-| NET-04 | Phase 16 | Pending |
-| MCP-01 | Phase 16 | Pending |
-| MCP-02 | Phase 16 | Pending |
-| MCP-03 | Phase 16 | Pending |
-| MCP-04 | Phase 16 | Pending |
+| NET-04 | Phase 16 | Complete |
+| MCP-01 | Phase 16 | Complete |
+| MCP-02 | Phase 16 | Complete |
+| MCP-03 | Phase 16 | Complete |
+| MCP-04 | Phase 16 | Complete |
 | DIST-01 | Phase 17 | Pending |
 | DIST-02 | Phase 17 | Pending |
 | DIST-03 | Phase 18 | Pending |
