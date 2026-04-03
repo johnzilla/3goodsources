@@ -30,8 +30,8 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 
 ### Distribution
 
-- [ ] **DIST-01**: `3gs fork` CLI subcommand scaffolds a new node with keypair, skeleton files, and .env
-- [ ] **DIST-02**: Fork parses args before Config::load() to avoid requiring env vars
+- [x] **DIST-01**: `3gs fork` CLI subcommand scaffolds a new node with keypair, skeleton files, and .env
+- [x] **DIST-02**: Fork parses args before Config::load() to avoid requiring env vars
 - [ ] **DIST-03**: Docker image published to GHCR (multi-platform linux/amd64 + linux/arm64)
 
 ## Future Requirements
@@ -76,8 +76,8 @@ Deferred to future release. Tracked but not in current roadmap.
 | MCP-02 | Phase 16 | Complete |
 | MCP-03 | Phase 16 | Complete |
 | MCP-04 | Phase 16 | Complete |
-| DIST-01 | Phase 17 | Pending |
-| DIST-02 | Phase 17 | Pending |
+| DIST-01 | Phase 17 | Complete |
+| DIST-02 | Phase 17 | Complete |
 | DIST-03 | Phase 18 | Pending |
 
 **Coverage:**
