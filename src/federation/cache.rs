@@ -1,15 +1,28 @@
 use std::collections::HashMap;
+use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
 
 use crate::registry::types::Endorsement;
-use super::types::{CachedPeer, PeerStatus};
+use super::types::{CachedPeer, PeerRegistry, PeerStatus};
+
+/// Snapshot of a cached peer for read-only consumers.
+/// Avoids holding the lock while callers process results.
+#[derive(Debug, Clone)]
+pub struct CachedPeerSnapshot {
+    pub pubkey: String,
+    pub url: String,
+    pub name: Option<String>,
+    pub registry: Option<PeerRegistry>,
+    pub stale: bool,
+    pub status: PeerStatus,
+}
 
 /// Cache of endorsed peer registries.
 /// Filters out self-endorsements at construction time.
-/// Phase 16 will add reqwest::Client, refresh_loop(), and fetch logic.
 pub struct PeerCache {
     peers: RwLock<HashMap<String, CachedPeer>>,
     local_pubkey: String,
+    client: reqwest::Client,
 }
 
 impl PeerCache {
@@ -41,9 +54,15 @@ impl PeerCache {
             peers.insert(endorsement.pubkey.clone(), cached);
         }
 
+        let client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .expect("Failed to build HTTP client");
+
         Self {
             peers: RwLock::new(peers),
             local_pubkey,
+            client,
         }
     }
 
@@ -55,6 +74,109 @@ impl PeerCache {
     /// Returns the local node's pubkey
     pub fn local_pubkey(&self) -> &str {
         &self.local_pubkey
+    }
+
+    /// Fetch the /registry endpoint from a single peer and update its cached state.
+    /// On success: sets status to Fresh, stores PeerRegistry, updates last_success.
+    /// On failure: logs WARN, keeps existing registry, marks Stale if >1hr since last success.
+    pub async fn fetch_peer(&self, pubkey: &str) {
+        // Acquire read lock to get peer URL, then release before HTTP call
+        let peer_url = {
+            let peers = self.peers.read().await;
+            peers.get(pubkey).map(|p| p.url.clone())
+        };
+
+        let url = match peer_url {
+            Some(u) => u,
+            None => {
+                tracing::warn!(pubkey = %pubkey, "fetch_peer called for unknown pubkey");
+                return;
+            }
+        };
+
+        let registry_url = format!("{}/registry", url.trim_end_matches('/'));
+
+        match self.client.get(&registry_url).send().await {
+            Ok(response) => {
+                match response.json::<PeerRegistry>().await {
+                    Ok(parsed) => {
+                        let mut peers = self.peers.write().await;
+                        if let Some(peer) = peers.get_mut(pubkey) {
+                            peer.registry = Some(parsed);
+                            peer.last_success = Some(Instant::now());
+                            peer.last_attempt = Some(Instant::now());
+                            peer.status = PeerStatus::Fresh;
+                            tracing::debug!(pubkey = %pubkey, url = %registry_url, "Peer registry fetched successfully");
+                        }
+                    }
+                    Err(err) => {
+                        tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to parse peer registry");
+                        let mut peers = self.peers.write().await;
+                        if let Some(peer) = peers.get_mut(pubkey) {
+                            peer.last_attempt = Some(Instant::now());
+                            let stale_threshold = Duration::from_secs(3600);
+                            let is_stale = peer.last_success
+                                .map(|t| t.elapsed() > stale_threshold)
+                                .unwrap_or(true);
+                            if is_stale {
+                                peer.status = if peer.registry.is_some() {
+                                    PeerStatus::Stale
+                                } else {
+                                    PeerStatus::Unreachable
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            Err(err) => {
+                tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to fetch peer registry");
+                let mut peers = self.peers.write().await;
+                if let Some(peer) = peers.get_mut(pubkey) {
+                    peer.last_attempt = Some(Instant::now());
+                    let stale_threshold = Duration::from_secs(3600);
+                    let is_stale = peer.last_success
+                        .map(|t| t.elapsed() > stale_threshold)
+                        .unwrap_or(true);
+                    if is_stale {
+                        peer.status = if peer.registry.is_some() {
+                            PeerStatus::Stale
+                        } else {
+                            PeerStatus::Unreachable
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    /// Refresh all peers sequentially by fetching their /registry endpoints.
+    pub async fn refresh_all(&self) {
+        // Collect pubkeys while holding the read lock, then release
+        let pubkeys: Vec<String> = {
+            let peers = self.peers.read().await;
+            peers.keys().cloned().collect()
+        };
+
+        tracing::info!(count = pubkeys.len(), "Refreshing peer cache ({} peers)", pubkeys.len());
+
+        for pubkey in pubkeys {
+            self.fetch_peer(&pubkey).await;
+        }
+    }
+
+    /// Returns a snapshot of all cached peers.
+    /// `stale` is true only when status == PeerStatus::Stale.
+    pub async fn get_all_cached(&self) -> Vec<CachedPeerSnapshot> {
+        let peers = self.peers.read().await;
+        peers.values().map(|peer| CachedPeerSnapshot {
+            pubkey: peer.pubkey.clone(),
+            url: peer.url.clone(),
+            name: peer.name.clone(),
+            registry: peer.registry.clone(),
+            stale: peer.status == PeerStatus::Stale,
+            status: peer.status.clone(),
+        }).collect()
     }
 }
 
@@ -68,6 +190,15 @@ mod tests {
             pubkey: pubkey.to_string(),
             url: url.to_string(),
             name: None,
+            since: "2026-04-03".to_string(),
+        }
+    }
+
+    fn make_endorsement_with_name(pubkey: &str, url: &str, name: &str) -> Endorsement {
+        Endorsement {
+            pubkey: pubkey.to_string(),
+            url: url.to_string(),
+            name: Some(name.to_string()),
             since: "2026-04-03".to_string(),
         }
     }
@@ -116,5 +247,63 @@ mod tests {
         ];
         let cache = PeerCache::new(endorsements, "local-key".to_string());
         assert_eq!(cache.peer_count().await, 3);
+    }
+
+    // Task 2: Tests for networking data structures and state transitions
+
+    #[tokio::test]
+    async fn test_get_all_cached_empty() {
+        let cache = PeerCache::new(vec![], "local-key".to_string());
+        let snapshots = cache.get_all_cached().await;
+        assert!(snapshots.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_get_all_cached_returns_peers() {
+        let endorsements = vec![
+            make_endorsement("peer-a", "http://a.example.com"),
+            make_endorsement("peer-b", "http://b.example.com"),
+        ];
+        let cache = PeerCache::new(endorsements, "local-key".to_string());
+        let snapshots = cache.get_all_cached().await;
+        assert_eq!(snapshots.len(), 2);
+        for snap in &snapshots {
+            assert_eq!(snap.status, PeerStatus::Unreachable);
+            assert!(!snap.stale); // Unreachable != Stale
+            assert!(snap.registry.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn test_cached_peer_snapshot_fields() {
+        let endorsements = vec![
+            make_endorsement_with_name("peer-a", "http://a.example.com", "Alice"),
+        ];
+        let cache = PeerCache::new(endorsements, "local-key".to_string());
+        let snapshots = cache.get_all_cached().await;
+        assert_eq!(snapshots.len(), 1);
+        let snap = &snapshots[0];
+        assert_eq!(snap.pubkey, "peer-a");
+        assert_eq!(snap.url, "http://a.example.com");
+        assert_eq!(snap.name, Some("Alice".to_string()));
+        assert!(!snap.stale);
+        assert_eq!(snap.status, PeerStatus::Unreachable);
+        assert!(snap.registry.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_peer_cache_has_client() {
+        // Verifies PeerCache::new() succeeds (implicitly tests client creation doesn't panic)
+        let cache = PeerCache::new(vec![], "local-key".to_string());
+        assert_eq!(cache.peer_count().await, 0);
+        assert_eq!(cache.local_pubkey(), "local-key");
+    }
+
+    #[tokio::test]
+    async fn test_refresh_all_with_no_peers() {
+        let cache = PeerCache::new(vec![], "local-key".to_string());
+        // Should complete without panic
+        cache.refresh_all().await;
+        assert!(cache.get_all_cached().await.is_empty());
     }
 }
