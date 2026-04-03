@@ -1,5 +1,20 @@
 # Project Milestones: Three Good Sources (3GS)
 
+## v3.0 Federation Test (Shipped: 2026-04-03)
+
+**Phases completed:** 4 phases, 7 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Endorsement struct with 4 fields, complete federation module with 7 peer types and FederationError enum, reqwest promoted to runtime dependency
+- PeerCache struct with WARN-logged self-endorsement guard using RwLock<HashMap> and 5 unit tests
+- PeerCache upgraded from data structure to networked client: reqwest::Client with 10s timeout, fetch_peer()/refresh_all()/get_all_cached() async methods, 1-hour staleness threshold, and 10 passing tests
+- PeerCache integrated into server with 5-minute background refresh, watch-channel shutdown, and get_federated_sources MCP tool returning trust-tagged local+peer results
+- `3gs fork` subcommand that scaffolds a complete 5-file node directory (keypair, registry, .env, identities, contributions, audit log) with a single command and no environment variables required
+- Original plan:
+
+---
+
 ## v2.0 Community Curation (Shipped: 2026-03-08)
 
 **Delivered:** Community curation infrastructure — append-only audit log with Ed25519 signed hash-chained entries, cross-platform identity linking with proof URLs, and community contribution proposals with human/bot vote separation. All served via REST + MCP endpoints, read-only server with curator-managed JSON files.
@@ -7,6 +22,7 @@
 **Phases completed:** 12-14 (6 plans total)
 
 **Key accomplishments:**
+
 - Append-only audit log with Ed25519 signed, SHA-256 hash-chained entries for all 30 existing sources
 - Cross-platform identity linking (PKARR ↔ X/Nostr/GitHub) with independently verifiable proof URLs
 - Community contribution proposals with status lifecycle and human/bot vote separation
@@ -15,6 +31,7 @@
 - All 19 v2.0 requirements satisfied (AUDIT-01..06, IDENT-01..07, CONTRIB-01..06)
 
 **Stats:**
+
 - 51 files modified
 - 6,029 lines of Rust (up from 2,179 at v1.1)
 - 3 phases, 6 plans
@@ -33,6 +50,7 @@
 **Phases completed:** 1-7 (17 plans total)
 
 **Key accomplishments:**
+
 - Built complete MCP JSON-RPC 2.0 server with four tools (get_sources, list_categories, get_provenance, get_endorsements)
 - Implemented fuzzy query matching engine with Levenshtein distance + keyword boosting (19 unit tests)
 - Curated 30 real sources across 10 categories (bitcoin, rust, security, privacy, self-hosting, nostr, pubky, mcp)
@@ -42,6 +60,7 @@
 - 72 tests passing (43 unit + 29 integration) with full E2E coverage
 
 **Stats:**
+
 - 112 files created/modified
 - 3,016 lines of Rust
 - 7 phases, 17 plans
@@ -60,6 +79,7 @@
 **Phases completed:** 8-11 (6 plans total)
 
 **Key accomplishments:**
+
 - Cleaned codebase: removed McpError enum, unused re-exports, zero clippy warnings (7 atomic commits)
 - Hardened CORS with explicit origin allowlist for 3gs.ai and api.3gs.ai (6 integration tests)
 - Deployed to DigitalOcean App Platform via Ansible playbook with Docker build
@@ -68,6 +88,7 @@
 - Verified git history clean of all secrets (4 comprehensive scans)
 
 **Stats:**
+
 - 16 files modified
 - 2,179 lines of Rust (down from 3,016 after dead code removal)
 - 4 phases, 6 plans
@@ -80,4 +101,3 @@
 **What's next:** TBD — next milestone planning
 
 ---
-

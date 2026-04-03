@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An MCP server in Rust that serves as a curated trust registry for AI agents. When queried via HTTP POST JSON-RPC, it returns three vetted sources for a given topic, with fuzzy query matching and cryptographic curator identity via PKARR. Includes public audit log, cross-platform identity linking, and community contribution proposals. Serves a landing page at 3gs.ai and API at api.3gs.ai, deployed on DigitalOcean App Platform.
+A federated MCP server in Rust that serves curated, cryptographically-signed source recommendations for AI agents. Curators run their own nodes, endorse each other via PKARR identity, and agents query across the trust network. Includes fuzzy query matching, public audit log, cross-platform identity linking, community contribution proposals, and a fork CLI for scaffolding new nodes. Serves at 3gs.ai and api.3gs.ai on DigitalOcean, with Docker image on GHCR.
 
 ## Core Value
 
@@ -43,31 +43,23 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - ✓ list_proposals and get_proposal MCP tools — v2.0
 - ✓ 144 tests (77 unit + 67 integration) — v2.0
 
+- ✓ Endorsement data model with pubkey, url, name, since fields — v3.0
+- ✓ Federation peer cache with background refresh (5min interval, 10s timeout per peer) — v3.0
+- ✓ PeerRegistry lax deserialization types for forward-compatible federation — v3.0
+- ✓ `get_federated_sources` MCP tool querying local + peer registries with trust tagging — v3.0
+- ✓ Updated `get_endorsements` tool showing real endorsement data — v3.0
+- ✓ `3gs fork` CLI subcommand to scaffold new nodes — v3.0
+- ✓ Async MCP handler refactor for RwLock-based peer cache reads — v3.0
+- ✓ DRY tool_response helper across all tools — v3.0
+- ✓ Self-endorsement guard filtering own pubkey from peer cache — v3.0
+- ✓ Graceful shutdown for background refresh task — v3.0
+- ✓ Docker image published to GHCR (linux/amd64) — v3.0
+- ✓ reqwest moved from dev to runtime dependency — v3.0
+- ✓ 154 tests (92 unit + 67 integration) — v3.0
+
 ### Active
 
-- [ ] Endorsement data model with pubkey, url, name, since fields
-- [ ] Federation peer cache with background refresh (5min interval, 10s timeout per peer)
-- [ ] PeerRegistry lax deserialization types for forward-compatible federation
-- [ ] `get_federated_sources` MCP tool querying local + peer registries with trust tagging
-- [ ] Updated `get_endorsements` tool showing real endorsement data
-- [ ] `3gs fork` CLI subcommand to scaffold new nodes
-- [ ] Async MCP handler refactor for RwLock-based peer cache reads
-- [ ] DRY tool_response helper across all tools
-- [ ] Self-endorsement guard filtering own pubkey from peer cache
-- [ ] Graceful shutdown for background refresh task
-- [ ] Docker image published to GHCR (multi-platform amd64/arm64)
-- [ ] reqwest moved from dev to runtime dependency
-
-## Current Milestone: v3.0 Federation Test
-
-**Goal:** Turn 3GS from a single-node curation server into a federated web-of-trust protocol where curators endorse each other and AI agents query across the network.
-
-**Target features:**
-- Endorsement data model and peer cache with background refresh
-- `get_federated_sources` MCP tool for cross-node queries
-- `3gs fork` CLI to scaffold new nodes
-- Docker image on GHCR for fast node spin-up
-- Async handler refactor and DRY cleanup
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -93,7 +85,7 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 - **Curator**: John Turner. Domains of expertise: security, bitcoin, maker, self-hosting.
 - **Source types**: documentation, tutorial, video, article, tool, repo, forum, book, course, api.
 - **Seed categories**: bitcoin-node-setup, self-hosted-email, rust-learning, home-automation-private, password-management, linux-hardening, threat-modeling, nostr-development, pubky-development, mcp-development.
-- **Current state**: v2.0 shipped. 6,029 lines of Rust. 144 tests passing (77 unit + 67 integration). 10 categories, 30 sources. 3 data modules (audit, identity, contributions). 8 MCP tools. Live at 3gs.ai and api.3gs.ai on DigitalOcean App Platform.
+- **Current state**: v3.0 shipped. ~4,800 lines of Rust. 154 tests passing (92 unit + 67 integration). 10 categories, 30 sources. 4 data modules (audit, identity, contributions, federation). 9 MCP tools. `3gs fork` CLI for node scaffolding. Docker image on GHCR. Live at 3gs.ai and api.3gs.ai on DigitalOcean App Platform.
 
 ## Constraints
 
@@ -149,4 +141,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 17 completion*
+*Last updated: 2026-04-03 after v3.0 milestone*
