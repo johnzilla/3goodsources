@@ -10,6 +10,14 @@ use crate::registry::Registry;
 use std::collections::HashMap;
 use uuid::Uuid;
 
+/// Build a standard MCP tool response with text content
+fn tool_response(text: &str, is_error: bool) -> Value {
+    json!({
+        "content": [{"type": "text", "text": text}],
+        "isError": is_error
+    })
+}
+
 /// Tool parameter type for get_sources
 #[derive(Debug, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -147,7 +155,7 @@ pub fn get_tools_list() -> Value {
 }
 
 /// Handle a tools/call request by dispatching to the appropriate tool
-pub fn handle_tool_call(
+pub async fn handle_tool_call(
     name: &str,
     arguments: Option<Value>,
     registry: &Registry,
@@ -158,14 +166,14 @@ pub fn handle_tool_call(
     proposals: &HashMap<Uuid, Proposal>,
 ) -> Result<Value, ToolCallError> {
     match name {
-        "get_sources" => tool_get_sources(arguments, registry, match_config),
-        "list_categories" => tool_list_categories(arguments, registry),
-        "get_provenance" => tool_get_provenance(arguments, registry, pubkey_z32),
-        "get_endorsements" => tool_get_endorsements(arguments, registry),
-        "get_audit_log" => tool_get_audit_log(arguments, audit_log),
-        "get_identity" => tool_get_identity(arguments, identities),
-        "list_proposals" => tool_list_proposals(arguments, proposals),
-        "get_proposal" => tool_get_proposal(arguments, proposals),
+        "get_sources" => tool_get_sources(arguments, registry, match_config).await,
+        "list_categories" => tool_list_categories(arguments, registry).await,
+        "get_provenance" => tool_get_provenance(arguments, registry, pubkey_z32).await,
+        "get_endorsements" => tool_get_endorsements(arguments, registry).await,
+        "get_audit_log" => tool_get_audit_log(arguments, audit_log).await,
+        "get_identity" => tool_get_identity(arguments, identities).await,
+        "list_proposals" => tool_list_proposals(arguments, proposals).await,
+        "get_proposal" => tool_get_proposal(arguments, proposals).await,
         _ => Err(ToolCallError::UnknownTool),
     }
 }
@@ -177,7 +185,7 @@ pub fn handle_tool_call(
 /// parameter for match sensitivity tuning.
 ///
 /// Returns MCP content with isError: true for no match, empty query, or stop-word-only queries.
-fn tool_get_sources(
+async fn tool_get_sources(
     arguments: Option<Value>,
     registry: &Registry,
     match_config: &MatchConfig,
@@ -224,10 +232,7 @@ fn tool_get_sources(
                 ));
             }
 
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": false
-            }))
+            Ok(tool_response(&text, false))
         }
         Err(MatchError::BelowThreshold {
             closest_slug,
@@ -244,24 +249,15 @@ fn tool_get_sources(
                 closest_score,
                 slugs.join(", ")
             );
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": true
-            }))
+            Ok(tool_response(&text, true))
         }
         Err(MatchError::EmptyQuery) => {
             let text = "Query cannot be empty. Provide a natural language query describing what sources you need.";
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": true
-            }))
+            Ok(tool_response(text, true))
         }
         Err(MatchError::QueryAllStopWords) => {
             let text = "Query contains only common words (stop words) with no searchable content. Try more specific terms.";
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": true
-            }))
+            Ok(tool_response(text, true))
         }
     }
 }
@@ -270,7 +266,7 @@ fn tool_get_sources(
 ///
 /// Returns a formatted list of all available categories in the registry,
 /// sorted by slug. Each entry includes the slug, display name, and description.
-fn tool_list_categories(
+async fn tool_list_categories(
     arguments: Option<Value>,
     registry: &Registry,
 ) -> Result<Value, ToolCallError> {
@@ -294,10 +290,7 @@ fn tool_list_categories(
         ));
     }
 
-    Ok(json!({
-        "content": [{"type": "text", "text": text}],
-        "isError": false
-    }))
+    Ok(tool_response(&text, false))
 }
 
 /// Handle get_provenance tool call
@@ -305,7 +298,7 @@ fn tool_list_categories(
 /// Returns curator identity and verification information for this registry,
 /// including curator name, PKARR public key, registry version, and instructions
 /// for cryptographic verification.
-fn tool_get_provenance(
+async fn tool_get_provenance(
     arguments: Option<Value>,
     registry: &Registry,
     pubkey_z32: &str,
@@ -326,17 +319,14 @@ fn tool_get_provenance(
         registry.curator.name
     );
 
-    Ok(json!({
-        "content": [{"type": "text", "text": text}],
-        "isError": false
-    }))
+    Ok(tool_response(&text, false))
 }
 
 /// Handle get_endorsements tool call
 ///
 /// Returns the list of curator endorsements for this registry.
-/// In v1, this always returns an empty list with an explanatory message.
-fn tool_get_endorsements(
+/// When empty, shows an explanatory message. When non-empty, shows real endorsement data.
+async fn tool_get_endorsements(
     arguments: Option<Value>,
     registry: &Registry,
 ) -> Result<Value, ToolCallError> {
@@ -346,24 +336,28 @@ fn tool_get_endorsements(
             serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?;
     }
 
-    let text = if registry.endorsements.is_empty() {
-        "Endorsements: 0\n\nThis registry does not yet have any endorsements. Endorsements allow\nother curators to vouch for the quality of this registry's sources.\nThis feature will be available in a future version.".to_string()
-    } else {
-        // Future: list endorsements
-        format!("Endorsements: {}", registry.endorsements.len())
-    };
+    if registry.endorsements.is_empty() {
+        let text = "Endorsements: 0\n\nThis registry does not yet have any endorsements. Endorsements allow\nother curators to vouch for the quality of this registry's sources.\nThis feature will be available in a future version.";
+        return Ok(tool_response(text, false));
+    }
 
-    Ok(json!({
-        "content": [{"type": "text", "text": text}],
-        "isError": false
-    }))
+    let mut text = format!("Endorsements: {}\n", registry.endorsements.len());
+    for endorsement in &registry.endorsements {
+        let name_display = endorsement.name.as_deref().unwrap_or("(unnamed)");
+        text.push_str(&format!(
+            "\n- {} ({})\n  URL: {}\n  Since: {}\n",
+            name_display, endorsement.pubkey, endorsement.url, endorsement.since
+        ));
+    }
+
+    Ok(tool_response(&text, false))
 }
 
 /// Handle get_audit_log tool call
 ///
 /// Returns audit log entries with optional filtering by since, category, and action.
 /// Formats entries as human-readable text with entry count header.
-fn tool_get_audit_log(
+async fn tool_get_audit_log(
     arguments: Option<Value>,
     audit_log: &[AuditEntry],
 ) -> Result<Value, ToolCallError> {
@@ -417,17 +411,14 @@ fn tool_get_audit_log(
         ));
     }
 
-    Ok(json!({
-        "content": [{"type": "text", "text": text}],
-        "isError": false
-    }))
+    Ok(tool_response(&text, false))
 }
 
 /// Handle get_identity tool call
 ///
 /// Looks up an identity by PKARR public key. Returns formatted identity info
 /// including name, type, platform claims with proof URLs, and operator info for bots.
-fn tool_get_identity(
+async fn tool_get_identity(
     arguments: Option<Value>,
     identities: &HashMap<String, Identity>,
 ) -> Result<Value, ToolCallError> {
@@ -463,17 +454,11 @@ fn tool_get_identity(
                 }
             }
 
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": false
-            }))
+            Ok(tool_response(&text, false))
         }
         None => {
             let text = format!("No identity found for pubkey: {}", params.pubkey);
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": true
-            }))
+            Ok(tool_response(&text, true))
         }
     }
 }
@@ -482,7 +467,7 @@ fn tool_get_identity(
 ///
 /// Lists proposals with optional filtering by status and category.
 /// Returns human-readable text with proposal count and summary lines.
-fn tool_list_proposals(
+async fn tool_list_proposals(
     arguments: Option<Value>,
     proposals: &HashMap<Uuid, Proposal>,
 ) -> Result<Value, ToolCallError> {
@@ -550,16 +535,13 @@ fn tool_list_proposals(
         ));
     }
 
-    Ok(json!({
-        "content": [{"type": "text", "text": text}],
-        "isError": false
-    }))
+    Ok(tool_response(&text, false))
 }
 
 /// Handle get_proposal tool call
 ///
 /// Returns full proposal detail for a given UUID including votes.
-fn tool_get_proposal(
+async fn tool_get_proposal(
     arguments: Option<Value>,
     proposals: &HashMap<Uuid, Proposal>,
 ) -> Result<Value, ToolCallError> {
@@ -618,17 +600,11 @@ fn tool_get_proposal(
                 ));
             }
 
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": false
-            }))
+            Ok(tool_response(&text, false))
         }
         None => {
             let text = format!("No proposal found for id: {}", uuid);
-            Ok(json!({
-                "content": [{"type": "text", "text": text}],
-                "isError": true
-            }))
+            Ok(tool_response(&text, true))
         }
     }
 }

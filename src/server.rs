@@ -63,7 +63,7 @@ async fn mcp_endpoint(
     State(state): State<Arc<AppState>>,
     body: String,
 ) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
-    match state.mcp_handler.handle_json(&body) {
+    match state.mcp_handler.handle_json(&body).await {
         Some(json) => (
             StatusCode::OK,
             [(header::CONTENT_TYPE, "application/json")],

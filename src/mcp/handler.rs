@@ -43,7 +43,7 @@ impl McpHandler {
 
     /// Main entry point for handling JSON-RPC requests
     /// Returns None for notifications (no response needed)
-    pub fn handle_json(&self, raw_json: &str) -> Option<String> {
+    pub async fn handle_json(&self, raw_json: &str) -> Option<String> {
         // Parse raw JSON
         let parsed: Value = match serde_json::from_str(raw_json) {
             Ok(v) => v,
@@ -90,7 +90,7 @@ impl McpHandler {
             "initialize" => self.handle_initialize(id, request.params),
             "notifications/initialized" => None, // Client notification - ignore
             "tools/list" => self.handle_tools_list(id, request.params),
-            "tools/call" => self.handle_tools_call(id, request.params),
+            "tools/call" => self.handle_tools_call(id, request.params).await,
             _ => Some(self.serialize_response(JsonRpcResponse::method_not_found(id))),
         }
     }
@@ -134,7 +134,7 @@ impl McpHandler {
     }
 
     /// Handle tools/call request
-    fn handle_tools_call(&self, id: Value, params: Option<Value>) -> Option<String> {
+    async fn handle_tools_call(&self, id: Value, params: Option<Value>) -> Option<String> {
         // Parse CallToolParams
         let call_params: CallToolParams = match params {
             Some(p) => match serde_json::from_value(p) {
@@ -158,7 +158,9 @@ impl McpHandler {
             &self.audit_log,
             &self.identities,
             &self.proposals,
-        ) {
+        )
+        .await
+        {
             Ok(result) => Some(self.serialize_response(JsonRpcResponse::success(id, result))),
             Err(ToolCallError::UnknownTool) => {
                 Some(self.serialize_response(JsonRpcResponse::method_not_found(id)))
@@ -205,8 +207,8 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_initialize_returns_protocol_version() {
+    #[tokio::test]
+    async fn test_initialize_returns_protocol_version() {
         let handler = test_handler();
 
         let request = r#"{
@@ -220,7 +222,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["jsonrpc"], "2.0");
@@ -230,8 +232,8 @@ mod tests {
         assert!(response["result"]["serverInfo"]["version"].is_string());
     }
 
-    #[test]
-    fn test_initialize_sets_initialized_flag() {
+    #[tokio::test]
+    async fn test_initialize_sets_initialized_flag() {
         let handler = test_handler();
         assert!(!handler.initialized.load(Ordering::SeqCst));
 
@@ -246,12 +248,12 @@ mod tests {
             }
         }"#;
 
-        handler.handle_json(request);
+        handler.handle_json(request).await;
         assert!(handler.initialized.load(Ordering::SeqCst));
     }
 
-    #[test]
-    fn test_pre_init_tools_list_rejected() {
+    #[tokio::test]
+    async fn test_pre_init_tools_list_rejected() {
         let handler = test_handler();
 
         let request = r#"{
@@ -260,7 +262,7 @@ mod tests {
             "method": "tools/list"
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32002);
@@ -270,8 +272,8 @@ mod tests {
             .contains("not initialized"));
     }
 
-    #[test]
-    fn test_pre_init_tools_call_rejected() {
+    #[tokio::test]
+    async fn test_pre_init_tools_call_rejected() {
         let handler = test_handler();
 
         let request = r#"{
@@ -281,14 +283,14 @@ mod tests {
             "params": {"name": "get_sources", "arguments": {}}
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32002);
     }
 
-    #[test]
-    fn test_batch_request_rejected() {
+    #[tokio::test]
+    async fn test_batch_request_rejected() {
         let handler = test_handler();
 
         let request = r#"[
@@ -296,15 +298,15 @@ mod tests {
             {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
         ]"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32600);
         assert_eq!(response["error"]["message"], "Batch requests not supported");
     }
 
-    #[test]
-    fn test_notification_returns_none() {
+    #[tokio::test]
+    async fn test_notification_returns_none() {
         let handler = test_handler();
 
         // Request without id field is a notification
@@ -313,12 +315,12 @@ mod tests {
             "method": "notifications/initialized"
         }"#;
 
-        let response = handler.handle_json(request);
+        let response = handler.handle_json(request).await;
         assert!(response.is_none());
     }
 
-    #[test]
-    fn test_unknown_method_returns_error() {
+    #[tokio::test]
+    async fn test_unknown_method_returns_error() {
         let handler = test_handler();
 
         // Initialize first
@@ -332,7 +334,7 @@ mod tests {
                 "clientInfo": {"name": "test", "version": "1.0"}
             }
         }"#;
-        handler.handle_json(init_request);
+        handler.handle_json(init_request).await;
 
         // Try unknown method
         let request = r#"{
@@ -341,26 +343,26 @@ mod tests {
             "method": "unknown/method"
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32601);
     }
 
-    #[test]
-    fn test_invalid_json_returns_parse_error() {
+    #[tokio::test]
+    async fn test_invalid_json_returns_parse_error() {
         let handler = test_handler();
 
         let request = r#"{ invalid json }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32700);
     }
 
-    #[test]
-    fn test_all_responses_have_jsonrpc_field() {
+    #[tokio::test]
+    async fn test_all_responses_have_jsonrpc_field() {
         let handler = test_handler();
 
         let test_cases = vec![
@@ -375,7 +377,7 @@ mod tests {
         ];
 
         for request in test_cases {
-            if let Some(response_str) = handler.handle_json(request) {
+            if let Some(response_str) = handler.handle_json(request).await {
                 let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
                 assert_eq!(
                     response["jsonrpc"], "2.0",
@@ -386,8 +388,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_invalid_params_on_initialize() {
+    #[tokio::test]
+    async fn test_invalid_params_on_initialize() {
         let handler = test_handler();
 
         // Missing protocolVersion field
@@ -401,14 +403,14 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32602);
     }
 
-    #[test]
-    fn test_invalid_jsonrpc_version() {
+    #[tokio::test]
+    async fn test_invalid_jsonrpc_version() {
         let handler = test_handler();
 
         let request = r#"{
@@ -417,14 +419,14 @@ mod tests {
             "method": "initialize"
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32600);
     }
 
     // Helper function to initialize a handler
-    fn init_handler(handler: &McpHandler) {
+    async fn init_handler(handler: &McpHandler) {
         let init_request = r#"{
             "jsonrpc": "2.0",
             "id": 1,
@@ -435,15 +437,15 @@ mod tests {
                 "clientInfo": {"name": "test", "version": "1.0"}
             }
         }"#;
-        handler.handle_json(init_request).expect("Initialize should succeed");
+        handler.handle_json(init_request).await.expect("Initialize should succeed");
     }
 
     // ===== TDD Tests for Plan 02: Tool Implementations =====
 
-    #[test]
-    fn test_tools_list_returns_eight_tools() {
+    #[tokio::test]
+    async fn test_tools_list_returns_eight_tools() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -451,7 +453,7 @@ mod tests {
             "method": "tools/list"
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["jsonrpc"], "2.0");
@@ -476,10 +478,10 @@ mod tests {
         assert!(tool_names.contains(&"get_proposal"));
     }
 
-    #[test]
-    fn test_tools_list_has_input_schemas() {
+    #[tokio::test]
+    async fn test_tools_list_has_input_schemas() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -487,7 +489,7 @@ mod tests {
             "method": "tools/list"
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         let tools = response["result"]["tools"].as_array().unwrap();
@@ -504,10 +506,10 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_get_sources_success() {
+    #[tokio::test]
+    async fn test_get_sources_success() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -519,7 +521,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["id"], 3);
@@ -538,10 +540,10 @@ mod tests {
         assert_eq!(response["result"]["isError"], false);
     }
 
-    #[test]
-    fn test_get_sources_includes_registry_metadata() {
+    #[tokio::test]
+    async fn test_get_sources_includes_registry_metadata() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -553,7 +555,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         let text = response["result"]["content"][0]["text"].as_str().unwrap();
@@ -561,10 +563,10 @@ mod tests {
         assert!(text.contains("Curator:"), "Should include curator name");
     }
 
-    #[test]
-    fn test_get_sources_no_match() {
+    #[tokio::test]
+    async fn test_get_sources_no_match() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -576,7 +578,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["result"]["isError"], true);
@@ -588,10 +590,10 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_get_sources_empty_query() {
+    #[tokio::test]
+    async fn test_get_sources_empty_query() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -603,7 +605,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["result"]["isError"], true);
@@ -615,10 +617,10 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_get_sources_custom_threshold() {
+    #[tokio::test]
+    async fn test_get_sources_custom_threshold() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         // With threshold 0.9, "learn rust" should fail to match (score likely < 0.9)
         let request = r#"{
@@ -631,17 +633,17 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         // Should return error due to high threshold
         assert_eq!(response["result"]["isError"], true);
     }
 
-    #[test]
-    fn test_list_categories_returns_all() {
+    #[tokio::test]
+    async fn test_list_categories_returns_all() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -653,7 +655,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["result"]["isError"], false);
@@ -667,10 +669,10 @@ mod tests {
         assert!(slug_count >= 10, "Should mention all 10 categories");
     }
 
-    #[test]
-    fn test_get_provenance_returns_curator() {
+    #[tokio::test]
+    async fn test_get_provenance_returns_curator() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -682,7 +684,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["result"]["isError"], false);
@@ -692,10 +694,10 @@ mod tests {
         assert!(text.contains("Curator:"), "Should have Curator label");
     }
 
-    #[test]
-    fn test_get_endorsements_empty_v1() {
+    #[tokio::test]
+    async fn test_get_endorsements_empty_v1() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -707,7 +709,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["result"]["isError"], false);
@@ -719,10 +721,10 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_unknown_tool_returns_error() {
+    #[tokio::test]
+    async fn test_unknown_tool_returns_error() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         let request = r#"{
             "jsonrpc": "2.0",
@@ -734,16 +736,16 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32601, "Should be Method not found");
     }
 
-    #[test]
-    fn test_invalid_tool_params() {
+    #[tokio::test]
+    async fn test_invalid_tool_params() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         // get_sources with extra unknown field
         let request = r#"{
@@ -756,16 +758,16 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32602, "Should be Invalid params");
     }
 
-    #[test]
-    fn test_get_sources_missing_query() {
+    #[tokio::test]
+    async fn test_get_sources_missing_query() {
         let handler = test_handler();
-        init_handler(&handler);
+        init_handler(&handler).await;
 
         // get_sources without query parameter
         let request = r#"{
@@ -778,7 +780,7 @@ mod tests {
             }
         }"#;
 
-        let response_str = handler.handle_json(request).expect("Expected response");
+        let response_str = handler.handle_json(request).await.expect("Expected response");
         let response: Value = serde_json::from_str(&response_str).expect("Valid JSON");
 
         assert_eq!(response["error"]["code"], -32602, "Should be Invalid params");
