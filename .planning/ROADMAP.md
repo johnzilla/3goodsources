@@ -61,7 +61,10 @@
   2. `PeerRegistry` deserialization tolerates unknown fields so a newer peer's registry does not panic an older node
   3. A peer whose pubkey matches the local node's own pubkey is filtered from the peer cache with a WARN log entry
   4. `reqwest` is listed as a runtime dependency (not dev-only) and the server builds without errors
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 15-01-PLAN.md — Endorsement struct, federation types/errors, reqwest runtime dep
+- [ ] 15-02-PLAN.md — PeerCache with self-endorsement guard and unit tests
 
 ### Phase 16: Core Federation
 **Goal**: AI agents can query sources across the federated network — the server fetches and caches peer registries on a background schedule, and the `get_federated_sources` tool returns merged results with trust-level tagging
@@ -103,7 +106,7 @@
 | 1-7 | v1.0 | 17/17 | Complete | 2026-02-03 |
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
-| 15. Federation Foundation | v3.0 | 0/? | Not started | - |
+| 15. Federation Foundation | v3.0 | 0/2 | Not started | - |
 | 16. Core Federation | v3.0 | 0/? | Not started | - |
 | 17. Fork CLI | v3.0 | 0/? | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |
