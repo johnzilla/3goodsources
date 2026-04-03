@@ -45,11 +45,11 @@ COPY --from=builder --chown=appuser:appgroup \
     /app/target/release/three-good-sources \
     /usr/local/bin/app
 
-# Copy data files (disk mount will override in production)
-COPY --chown=appuser:appgroup registry.json /app/registry.json
-COPY --chown=appuser:appgroup audit_log.json /app/audit_log.json
-COPY --chown=appuser:appgroup identities.json /app/identities.json
-COPY --chown=appuser:appgroup contributions.json /app/contributions.json
+# Copy data files to /data/ (DO App Platform may overlay /app/ at runtime)
+COPY --chown=appuser:appgroup registry.json /data/registry.json
+COPY --chown=appuser:appgroup audit_log.json /data/audit_log.json
+COPY --chown=appuser:appgroup identities.json /data/identities.json
+COPY --chown=appuser:appgroup contributions.json /data/contributions.json
 
 # Switch to non-root user
 USER appuser
@@ -57,8 +57,11 @@ USER appuser
 # Document exposed port
 EXPOSE 3000
 
-# Default environment variable
-ENV REGISTRY_PATH=/app/registry.json
+# Default environment variables
+ENV REGISTRY_PATH=/data/registry.json
+ENV AUDIT_LOG_PATH=/data/audit_log.json
+ENV IDENTITIES_PATH=/data/identities.json
+ENV CONTRIBUTIONS_PATH=/data/contributions.json
 
 # Run application
 ENTRYPOINT ["/usr/local/bin/app"]
