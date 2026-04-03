@@ -76,7 +76,11 @@ Plans:
   3. The background refresh task shuts down cleanly when the server receives a termination signal (no hanging tasks)
   4. Calling `get_federated_sources` returns sources from the local registry and all cached peer registries, each tagged with its trust level (local vs. peer pubkey)
   5. Calling `get_endorsements` returns real endorsement data (pubkey, url, name, since) rather than placeholder values
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 16-01-PLAN.md — PeerCache networking: HTTP fetch, refresh, staleness tracking
+- [ ] 16-02-PLAN.md — MCP async refactor, DRY tool_response helper, endorsements update
+- [ ] 16-03-PLAN.md — Server wiring, background refresh loop, get_federated_sources tool
 **UI hint**: no
 
 ### Phase 17: Fork CLI
@@ -107,6 +111,6 @@ Plans:
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
-| 16. Core Federation | v3.0 | 0/? | Not started | - |
+| 16. Core Federation | v3.0 | 0/3 | Not started | - |
 | 17. Fork CLI | v3.0 | 0/? | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |
