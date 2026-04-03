@@ -29,6 +29,18 @@ services:
         value: /app/registry.json
         scope: RUN_TIME
         type: GENERAL
+      - key: AUDIT_LOG_PATH
+        value: /app/audit_log.json
+        scope: RUN_TIME
+        type: GENERAL
+      - key: IDENTITIES_PATH
+        value: /app/identities.json
+        scope: RUN_TIME
+        type: GENERAL
+      - key: CONTRIBUTIONS_PATH
+        value: /app/contributions.json
+        scope: RUN_TIME
+        type: GENERAL
       - key: LOG_FORMAT
         value: json
         scope: RUN_TIME

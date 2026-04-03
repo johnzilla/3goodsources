@@ -45,8 +45,11 @@ COPY --from=builder --chown=appuser:appgroup \
     /app/target/release/three-good-sources \
     /usr/local/bin/app
 
-# Copy registry.json as fallback (disk mount will override at /data/registry.json)
+# Copy data files (disk mount will override in production)
 COPY --chown=appuser:appgroup registry.json /app/registry.json
+COPY --chown=appuser:appgroup audit_log.json /app/audit_log.json
+COPY --chown=appuser:appgroup identities.json /app/identities.json
+COPY --chown=appuser:appgroup contributions.json /app/contributions.json
 
 # Switch to non-root user
 USER appuser
