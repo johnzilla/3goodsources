@@ -103,7 +103,9 @@ Plans:
   1. A multi-platform Docker image (`linux/amd64` and `linux/arm64`) is published to GHCR under the project's namespace
   2. `docker pull ghcr.io/[owner]/3goodsources:latest` succeeds and the image runs the server correctly
   3. The GHCR publish is repeatable via CI or documented manual workflow (not a one-off manual push)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 18-01-PLAN.md — GitHub Actions workflow for multi-platform GHCR publish
 
 ## Progress
 
@@ -115,4 +117,4 @@ Plans:
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
 | 16. Core Federation | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 17. Fork CLI | v3.0 | 1/1 | Complete    | 2026-04-03 |
-| 18. Docker Distribution | v3.0 | 0/? | Not started | - |
+| 18. Docker Distribution | v3.0 | 0/1 | Not started | - |
