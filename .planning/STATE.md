@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
-status: executing
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-04-03T13:17:39.540Z"
+status: verifying
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-04-03T13:20:14.268Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-02)
 
 Phase: 15 (federation-foundation) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [░░░░░░░░░░] 0%
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | v1.1 DO Migration | 8-11 | 6 | 2 days |
 | v2.0 Community Curation | 12-14 | 6 | 1 day |
 | Phase 15-federation-foundation P01 | 15 | 2 tasks | 6 files |
+| Phase 15 P02 | 5 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -56,6 +57,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 - [Phase 15-federation-foundation]: Endorsement has no deny_unknown_fields for forward-compatible schema evolution (D-03)
 - [Phase 15-federation-foundation]: PeerEndorsement is separate from local Endorsement to avoid coupling local and peer data models (D-05)
+- [Phase 15-federation-foundation]: PeerCache stores peers in RwLock<HashMap<String, CachedPeer>> to support async reads from Phase 16 refresh loop
+- [Phase 15-federation-foundation]: Initial peer status is PeerStatus::Unreachable — assumed unreachable until first successful fetch
 
 ### Engineering Review Notes (from /plan-eng-review)
 
@@ -71,6 +74,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-03T13:17:39.536Z
-Stopped at: Completed 15-01-PLAN.md
+Last session: 2026-04-03T13:20:14.264Z
+Stopped at: Completed 15-02-PLAN.md
 Next step: /gsd:plan-phase 15
