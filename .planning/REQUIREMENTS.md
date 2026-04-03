@@ -64,27 +64,27 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FED-01 | — | Pending |
-| FED-02 | — | Pending |
-| FED-03 | — | Pending |
-| NET-01 | — | Pending |
-| NET-02 | — | Pending |
-| NET-03 | — | Pending |
-| NET-04 | — | Pending |
-| NET-05 | — | Pending |
-| MCP-01 | — | Pending |
-| MCP-02 | — | Pending |
-| MCP-03 | — | Pending |
-| MCP-04 | — | Pending |
-| DIST-01 | — | Pending |
-| DIST-02 | — | Pending |
-| DIST-03 | — | Pending |
+| FED-01 | Phase 15 | Pending |
+| FED-02 | Phase 15 | Pending |
+| FED-03 | Phase 15 | Pending |
+| NET-05 | Phase 15 | Pending |
+| NET-01 | Phase 16 | Pending |
+| NET-02 | Phase 16 | Pending |
+| NET-03 | Phase 16 | Pending |
+| NET-04 | Phase 16 | Pending |
+| MCP-01 | Phase 16 | Pending |
+| MCP-02 | Phase 16 | Pending |
+| MCP-03 | Phase 16 | Pending |
+| MCP-04 | Phase 16 | Pending |
+| DIST-01 | Phase 17 | Pending |
+| DIST-02 | Phase 17 | Pending |
+| DIST-03 | Phase 18 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after initial definition*
+*Last updated: 2026-04-02 — traceability mapped to Phases 15-18*

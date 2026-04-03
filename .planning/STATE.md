@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
-status: requirements
-stopped_at: Defining requirements
+status: ready_to_plan
+stopped_at: Roadmap created, ready to plan Phase 15
 last_updated: "2026-04-02T00:00:00.000Z"
-last_activity: 2026-04-02 -- Milestone v3.0 started
+last_activity: 2026-04-02 -- Roadmap created for v3.0 (Phases 15-18)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** v3.0 Federation Test -- defining requirements
+**Current focus:** v3.0 Federation Test — Phase 15: Federation Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-02 — Milestone v3.0 started
+Phase: 15 of 18 (Federation Foundation)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-04-02 — Roadmap created, 4 phases defined (15-18)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -50,20 +52,20 @@ Last activity: 2026-04-02 — Milestone v3.0 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+### Engineering Review Notes (from /plan-eng-review)
+
+- Phase 15 (data model + types) is foundational — Phases 16 and 17 both depend on it
+- Async refactor (MCP-04) must land before federated tool (MCP-01) can be wired — both in Phase 16
+- Fork CLI (Phase 17) depends on Phase 15 only, can execute in parallel with Phase 16 if needed
+- Docker publish (Phase 18) is independent — depends on Phase 15 only, no Phase 16/17 dependency
+- reqwest moves from dev to runtime dependency (NET-05) — belongs in Phase 15 as a prerequisite
+
 ### Blockers/Concerns
 
 - curve25519-dalek git patch dependency persists — monitor for stable release
 
-### Engineering Review Notes (from /plan-eng-review)
-
-- PeerRegistry lax types needed for forward-compatible federation (deny_unknown_fields breaks cross-version)
-- Async tool dispatch required for RwLock-based peer cache reads
-- Fork CLI must parse args before Config::load() to avoid requiring env vars
-- Self-endorsement guard prevents cache poisoning
-- reqwest moves from dev to runtime dependency
-
 ## Session Continuity
 
 Last session: 2026-04-02
-Stopped at: Milestone v3.0 started, defining requirements
-Next step: Define requirements and create roadmap
+Stopped at: Roadmap written (ROADMAP.md, STATE.md, REQUIREMENTS.md traceability updated)
+Next step: /gsd:plan-phase 15
