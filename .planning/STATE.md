@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
-status: planning
-stopped_at: Phase 15 planned, ready to execute
-last_updated: "2026-04-03T12:32:18.964Z"
-last_activity: 2026-04-02 — Roadmap created, 4 phases defined (15-18)
+status: executing
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-04-03T13:17:39.540Z"
+last_activity: 2026-04-03
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** v3.0 Federation Test — Phase 15: Federation Foundation
+**Current focus:** Phase 15 — federation-foundation
 
 ## Current Position
 
-Phase: 15 of 18 (Federation Foundation)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-02 — Roadmap created, 4 phases defined (15-18)
+Phase: 15 (federation-foundation) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-03
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,12 +46,16 @@ Progress: [░░░░░░░░░░] 0%
 | v1.0 MVP | 1-7 | 17 | 3 days |
 | v1.1 DO Migration | 8-11 | 6 | 2 days |
 | v2.0 Community Curation | 12-14 | 6 | 1 day |
+| Phase 15-federation-foundation P01 | 15 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+- [Phase 15-federation-foundation]: Endorsement has no deny_unknown_fields for forward-compatible schema evolution (D-03)
+- [Phase 15-federation-foundation]: PeerEndorsement is separate from local Endorsement to avoid coupling local and peer data models (D-05)
 
 ### Engineering Review Notes (from /plan-eng-review)
 
@@ -67,6 +71,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-03T12:32:18.961Z
-Stopped at: Phase 15 planned, ready to execute
+Last session: 2026-04-03T13:17:39.536Z
+Stopped at: Completed 15-01-PLAN.md
 Next step: /gsd:plan-phase 15

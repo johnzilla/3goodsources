@@ -63,7 +63,7 @@
   4. `reqwest` is listed as a runtime dependency (not dev-only) and the server builds without errors
 **Plans**: 2 plans
 Plans:
-- [ ] 15-01-PLAN.md — Endorsement struct, federation types/errors, reqwest runtime dep
+- [x] 15-01-PLAN.md — Endorsement struct, federation types/errors, reqwest runtime dep
 - [ ] 15-02-PLAN.md — PeerCache with self-endorsement guard and unit tests
 
 ### Phase 16: Core Federation
@@ -106,7 +106,7 @@ Plans:
 | 1-7 | v1.0 | 17/17 | Complete | 2026-02-03 |
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
-| 15. Federation Foundation | v3.0 | 0/2 | Not started | - |
+| 15. Federation Foundation | v3.0 | 1/2 | In Progress|  |
 | 16. Core Federation | v3.0 | 0/? | Not started | - |
 | 17. Fork CLI | v3.0 | 0/? | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |
