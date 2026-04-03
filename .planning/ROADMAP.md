@@ -111,6 +111,6 @@ Plans:
 | 8-11 | v1.1 | 6/6 | Complete | 2026-02-09 |
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
-| 16. Core Federation | v3.0 | 3/3 | Complete   | 2026-04-03 |
+| 16. Core Federation | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 17. Fork CLI | v3.0 | 0/? | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |
