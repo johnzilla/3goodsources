@@ -45,6 +45,30 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 
 ### Active
 
+- [ ] Endorsement data model with pubkey, url, name, since fields
+- [ ] Federation peer cache with background refresh (5min interval, 10s timeout per peer)
+- [ ] PeerRegistry lax deserialization types for forward-compatible federation
+- [ ] `get_federated_sources` MCP tool querying local + peer registries with trust tagging
+- [ ] Updated `get_endorsements` tool showing real endorsement data
+- [ ] `3gs fork` CLI subcommand to scaffold new nodes
+- [ ] Async MCP handler refactor for RwLock-based peer cache reads
+- [ ] DRY tool_response helper across all tools
+- [ ] Self-endorsement guard filtering own pubkey from peer cache
+- [ ] Graceful shutdown for background refresh task
+- [ ] Docker image published to GHCR (multi-platform amd64/arm64)
+- [ ] reqwest moved from dev to runtime dependency
+
+## Current Milestone: v3.0 Federation Test
+
+**Goal:** Turn 3GS from a single-node curation server into a federated web-of-trust protocol where curators endorse each other and AI agents query across the network.
+
+**Target features:**
+- Endorsement data model and peer cache with background refresh
+- `get_federated_sources` MCP tool for cross-node queries
+- `3gs fork` CLI to scaffold new nodes
+- Docker image on GHCR for fast node spin-up
+- Async handler refactor and DRY cleanup
+
 ### Out of Scope
 
 - stdio/SSE MCP transport — HTTP POST only for MVP, add transports later
@@ -107,5 +131,22 @@ Agents get curated, high-quality sources instead of SEO-gamed search results —
 
 - curve25519-dalek git patch dependency persists — monitor for v5.0.0 stable release
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-03-08 after v2.0 milestone*
+*Last updated: 2026-04-02 after v3.0 milestone started*

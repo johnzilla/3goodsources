@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Community Curation
-status: completed
-stopped_at: Milestone v2.0 archived
-last_updated: "2026-03-08T20:00:00.000Z"
-last_activity: 2026-03-08 -- v2.0 Community Curation milestone archived
+milestone: v3.0
+milestone_name: Federation Test
+status: requirements
+stopped_at: Defining requirements
+last_updated: "2026-04-02T00:00:00.000Z"
+last_activity: 2026-04-02 -- Milestone v3.0 started
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-08)
+See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Planning next milestone
+**Current focus:** v3.0 Federation Test -- defining requirements
 
 ## Current Position
 
-Milestone: v2.0 Community Curation — SHIPPED 2026-03-08
-All 3 phases (12-14), 6 plans complete.
-
-Progress: [██████████] 100% (v2.0)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-02 — Milestone v3.0 started
 
 ## Performance Metrics
 
@@ -54,8 +54,16 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 - curve25519-dalek git patch dependency persists — monitor for stable release
 
+### Engineering Review Notes (from /plan-eng-review)
+
+- PeerRegistry lax types needed for forward-compatible federation (deny_unknown_fields breaks cross-version)
+- Async tool dispatch required for RwLock-based peer cache reads
+- Fork CLI must parse args before Config::load() to avoid requiring env vars
+- Self-endorsement guard prevents cache poisoning
+- reqwest moves from dev to runtime dependency
+
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: Milestone v2.0 archived
-Next step: /gsd:new-milestone to plan next version
+Last session: 2026-04-02
+Stopped at: Milestone v3.0 started, defining requirements
+Next step: Define requirements and create roadmap
