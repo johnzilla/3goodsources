@@ -76,7 +76,7 @@ async fn test_tools_list_returns_six_tools() {
     assert!(body["result"]["tools"].is_array());
 
     let tools = body["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), 8, "Should return exactly 8 tools");
+    assert_eq!(tools.len(), 9, "Should return exactly 9 tools");
 
     // Verify tool names
     let tool_names: Vec<&str> = tools

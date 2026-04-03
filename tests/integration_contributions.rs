@@ -305,7 +305,7 @@ async fn test_mcp_get_proposal_not_found() {
 }
 
 #[tokio::test]
-async fn test_mcp_tools_list_returns_eight() {
+async fn test_mcp_tools_list_returns_nine() {
     let addr = common::spawn_test_server().await;
     let client = reqwest::Client::new();
 
@@ -326,7 +326,7 @@ async fn test_mcp_tools_list_returns_eight() {
     let body: Value = response.json().await.unwrap();
 
     let tools = body["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), 8, "Should return 8 tools");
+    assert_eq!(tools.len(), 9, "Should return 9 tools");
 
     let tool_names: Vec<&str> = tools
         .iter()
@@ -334,4 +334,5 @@ async fn test_mcp_tools_list_returns_eight() {
         .collect();
     assert!(tool_names.contains(&"list_proposals"), "Should include list_proposals");
     assert!(tool_names.contains(&"get_proposal"), "Should include get_proposal");
+    assert!(tool_names.contains(&"get_federated_sources"), "Should include get_federated_sources");
 }

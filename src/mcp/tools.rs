@@ -4,6 +4,7 @@ use serde_json::{json, Value};
 
 use crate::audit::{filter_entries, AuditEntry, AuditFilterParams};
 use crate::contributions::Proposal;
+use crate::federation::{PeerCache, PeerStatus};
 use crate::identity::{Identity, IdentityType};
 use crate::matcher::{MatchConfig, MatchError};
 use crate::registry::Registry;
@@ -90,6 +91,18 @@ pub struct GetProposalParams {
     pub id: String,
 }
 
+/// Tool parameter type for get_federated_sources
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct GetFederatedSourcesParams {
+    /// Natural language query describing what sources to find.
+    /// Searches local registry and all endorsed peer registries.
+    pub query: String,
+    /// Optional match threshold (0.0-1.0) for sensitivity tuning.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub threshold: Option<f64>,
+}
+
 /// Error type for tool call operations
 #[derive(Debug)]
 pub enum ToolCallError {
@@ -97,7 +110,7 @@ pub enum ToolCallError {
     InvalidParams,
 }
 
-/// Get the tools/list response with all 8 tool definitions
+/// Get the tools/list response with all 9 tool definitions
 pub fn get_tools_list() -> Value {
     let get_sources_schema = schema_for!(GetSourcesParams);
     let list_categories_schema = schema_for!(ListCategoriesParams);
@@ -107,6 +120,7 @@ pub fn get_tools_list() -> Value {
     let get_identity_schema = schema_for!(GetIdentityParams);
     let list_proposals_schema = schema_for!(ListProposalsParams);
     let get_proposal_schema = schema_for!(GetProposalParams);
+    let get_federated_sources_schema = schema_for!(GetFederatedSourcesParams);
 
     json!({
         "tools": [
@@ -149,6 +163,11 @@ pub fn get_tools_list() -> Value {
                 "name": "get_proposal",
                 "description": "Get full details of a community proposal by UUID, including all votes with voter pubkeys and timestamps.",
                 "inputSchema": serde_json::to_value(get_proposal_schema).unwrap()
+            },
+            {
+                "name": "get_federated_sources",
+                "description": "Search for curated sources across the federated network. Queries the local registry and all endorsed peer registries, returning results tagged with trust level (direct for local, endorsed for peers). Stale peer data is flagged. Use this instead of get_sources when you want results from the entire network.",
+                "inputSchema": serde_json::to_value(get_federated_sources_schema).unwrap()
             }
         ]
     })
@@ -164,6 +183,7 @@ pub async fn handle_tool_call(
     audit_log: &[AuditEntry],
     identities: &HashMap<String, Identity>,
     proposals: &HashMap<Uuid, Proposal>,
+    peer_cache: &PeerCache,
 ) -> Result<Value, ToolCallError> {
     match name {
         "get_sources" => tool_get_sources(arguments, registry, match_config).await,
@@ -174,6 +194,7 @@ pub async fn handle_tool_call(
         "get_identity" => tool_get_identity(arguments, identities).await,
         "list_proposals" => tool_list_proposals(arguments, proposals).await,
         "get_proposal" => tool_get_proposal(arguments, proposals).await,
+        "get_federated_sources" => tool_get_federated_sources(arguments, registry, match_config, peer_cache).await,
         _ => Err(ToolCallError::UnknownTool),
     }
 }
@@ -607,4 +628,127 @@ async fn tool_get_proposal(
             Ok(tool_response(&text, true))
         }
     }
+}
+
+/// Handle get_federated_sources tool call
+///
+/// Queries local registry and all cached peer registries, returning
+/// results tagged with trust level (direct for local, endorsed for peers).
+async fn tool_get_federated_sources(
+    arguments: Option<Value>,
+    registry: &Registry,
+    match_config: &MatchConfig,
+    peer_cache: &PeerCache,
+) -> Result<Value, ToolCallError> {
+    let params: GetFederatedSourcesParams = if let Some(args) = arguments {
+        serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?
+    } else {
+        return Err(ToolCallError::InvalidParams);
+    };
+
+    if params.query.trim().is_empty() {
+        return Ok(tool_response(
+            "Query cannot be empty. Provide a natural language query describing what sources you need.",
+            true,
+        ));
+    }
+
+    let config = if let Some(threshold) = params.threshold {
+        MatchConfig {
+            match_threshold: threshold,
+            match_fuzzy_weight: match_config.match_fuzzy_weight,
+            match_keyword_weight: match_config.match_keyword_weight,
+        }
+    } else {
+        match_config.clone()
+    };
+
+    let mut text = String::new();
+    let mut has_results = false;
+
+    // Local results first (trust: direct)
+    match crate::matcher::match_query(&params.query, registry, &config) {
+        Ok(match_result) => {
+            has_results = true;
+            text.push_str(&format!(
+                "=== Local Registry (trust: direct) ===\nCurator: {} ({})\n\nCategory: {}\nSlug: {}\nDescription: {}\n\nSources:\n",
+                registry.curator.name,
+                registry.curator.pubkey,
+                match_result.category.name,
+                match_result.slug,
+                match_result.category.description,
+            ));
+            for source in &match_result.category.sources {
+                text.push_str(&format!(
+                    "\n{}. {}\n   URL: {}\n   Type: {:?}\n   Why: {}\n",
+                    source.rank, source.name, source.url, source.source_type, source.why
+                ));
+            }
+        }
+        Err(_) => {
+            // No local match — continue to peer results
+        }
+    }
+
+    // Peer results (trust: endorsed)
+    let peers = peer_cache.get_all_cached().await;
+    for peer in &peers {
+        if peer.status == PeerStatus::Unreachable {
+            continue; // Skip unreachable peers
+        }
+        if let Some(ref peer_registry) = peer.registry {
+            // Build a temporary Registry from the peer's data so we can reuse match_query
+            let peer_as_registry = crate::registry::types::Registry {
+                version: peer_registry.version.clone(),
+                updated: peer_registry.updated.clone(),
+                curator: crate::registry::types::Curator {
+                    name: peer_registry.curator.name.clone(),
+                    pubkey: peer_registry.curator.pubkey.clone(),
+                },
+                endorsements: vec![],
+                categories: peer_registry.categories.clone(),
+            };
+
+            match crate::matcher::match_query(&params.query, &peer_as_registry, &config) {
+                Ok(match_result) => {
+                    has_results = true;
+                    let stale_tag = if peer.stale { " [STALE]" } else { "" };
+                    let peer_name = peer.name.as_deref().unwrap_or("(unnamed)");
+                    text.push_str(&format!(
+                        "\n=== Peer: {} (trust: endorsed){} ===\nCurator: {} ({})\n\nCategory: {}\nSlug: {}\nDescription: {}\n\nSources:\n",
+                        peer_name,
+                        stale_tag,
+                        peer_as_registry.curator.name,
+                        peer.pubkey,
+                        match_result.category.name,
+                        match_result.slug,
+                        match_result.category.description,
+                    ));
+                    for source in &match_result.category.sources {
+                        text.push_str(&format!(
+                            "\n{}. {}\n   URL: {}\n   Type: {:?}\n   Why: {}\n",
+                            source.rank, source.name, source.url, source.source_type, source.why
+                        ));
+                    }
+                }
+                Err(_) => {
+                    // No match from this peer — skip
+                }
+            }
+        }
+    }
+
+    if !has_results {
+        // No results from local or peers — return error with available local categories
+        let mut slugs: Vec<String> = registry.categories.keys().cloned().collect();
+        slugs.sort();
+        let text = format!(
+            "No matching sources found for query '{}' in local or peer registries. Available local categories: {}",
+            params.query,
+            slugs.join(", ")
+        );
+        return Ok(tool_response(&text, true));
+    }
+
+    Ok(tool_response(&text, false))
 }

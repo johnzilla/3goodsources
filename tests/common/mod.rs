@@ -1,5 +1,6 @@
 use three_good_sources::audit::AuditEntry;
 use three_good_sources::contributions::Proposal;
+use three_good_sources::federation::PeerCache;
 use three_good_sources::identity::Identity;
 use three_good_sources::matcher::MatchConfig;
 use three_good_sources::mcp::McpHandler;
@@ -52,6 +53,9 @@ pub async fn spawn_test_server() -> SocketAddr {
         .expect("Failed to parse contributions.json");
     let proposals = Arc::new(contributions);
 
+    // Build peer cache (empty endorsements for testing)
+    let peer_cache = Arc::new(PeerCache::new(vec![], pubkey.to_z32()));
+
     // Build MCP handler and app state
     let mcp_handler = McpHandler::new(
         Arc::clone(&registry),
@@ -60,6 +64,7 @@ pub async fn spawn_test_server() -> SocketAddr {
         Arc::clone(&audit_log),
         Arc::clone(&identities),
         Arc::clone(&proposals),
+        Arc::clone(&peer_cache),
     );
     let app_state = Arc::new(AppState {
         mcp_handler,
@@ -68,6 +73,7 @@ pub async fn spawn_test_server() -> SocketAddr {
         audit_log,
         identities,
         proposals,
+        peer_cache,
     });
 
     let app = build_router(app_state);
