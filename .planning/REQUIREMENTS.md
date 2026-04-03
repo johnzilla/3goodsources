@@ -15,9 +15,9 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 
 ### Federation Networking
 
-- [ ] **NET-01**: Peer cache fetches and caches endorsed peer registries via HTTP with 10s timeout
-- [ ] **NET-02**: Background tokio task refreshes peer cache every 5 minutes
-- [ ] **NET-03**: Stale cache (>1hr without success) served with stale flag, unreachable peers skipped
+- [x] **NET-01**: Peer cache fetches and caches endorsed peer registries via HTTP with 10s timeout
+- [x] **NET-02**: Background tokio task refreshes peer cache every 5 minutes
+- [x] **NET-03**: Stale cache (>1hr without success) served with stale flag, unreachable peers skipped
 - [ ] **NET-04**: Graceful shutdown for background refresh task via cancellation signal
 - [x] **NET-05**: reqwest moved from dev-dependency to runtime dependency
 
@@ -68,9 +68,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | FED-02 | Phase 15 | Complete |
 | FED-03 | Phase 15 | Complete |
 | NET-05 | Phase 15 | Complete |
-| NET-01 | Phase 16 | Pending |
-| NET-02 | Phase 16 | Pending |
-| NET-03 | Phase 16 | Pending |
+| NET-01 | Phase 16 | Complete |
+| NET-02 | Phase 16 | Complete |
+| NET-03 | Phase 16 | Complete |
 | NET-04 | Phase 16 | Pending |
 | MCP-01 | Phase 16 | Pending |
 | MCP-02 | Phase 16 | Pending |

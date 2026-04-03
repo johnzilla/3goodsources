@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
-status: verifying
-stopped_at: Phase 16 planned, ready to execute
-last_updated: "2026-04-03T13:49:29.571Z"
+status: executing
+stopped_at: Completed 16-01 (PeerCache HTTP networking)
+last_updated: "2026-04-03T14:03:56.281Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 15 — federation-foundation
+**Current focus:** Phase 16 — core-federation
 
 ## Current Position
 
-Phase: 16
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 16 (core-federation) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [░░░░░░░░░░] 0%
@@ -48,6 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 | v2.0 Community Curation | 12-14 | 6 | 1 day |
 | Phase 15-federation-foundation P01 | 15 | 2 tasks | 6 files |
 | Phase 15 P02 | 5 | 1 tasks | 2 files |
+| Phase 16-core-federation P01 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15-federation-foundation]: PeerEndorsement is separate from local Endorsement to avoid coupling local and peer data models (D-05)
 - [Phase 15-federation-foundation]: PeerCache stores peers in RwLock<HashMap<String, CachedPeer>> to support async reads from Phase 16 refresh loop
 - [Phase 15-federation-foundation]: Initial peer status is PeerStatus::Unreachable — assumed unreachable until first successful fetch
+- [Phase 16-core-federation]: Release read lock before HTTP call in PeerCache::fetch_peer to avoid holding RwLock across await — correct async pattern
+- [Phase 16-core-federation]: CachedPeerSnapshot stale flag = (status == Stale) only — Unreachable is not stale, it means never reached
 
 ### Engineering Review Notes (from /plan-eng-review)
 
@@ -74,6 +77,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-03T13:49:29.567Z
-Stopped at: Phase 16 planned, ready to execute
+Last session: 2026-04-03T14:03:56.277Z
+Stopped at: Completed 16-01 (PeerCache HTTP networking)
 Next step: /gsd:plan-phase 15
