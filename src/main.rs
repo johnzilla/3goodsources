@@ -3,6 +3,7 @@ mod config;
 mod contributions;
 mod error;
 mod federation;
+mod fork;
 mod identity;
 mod matcher;
 mod mcp;
@@ -36,6 +37,20 @@ fn init_logging(log_format: &str) {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // Check for fork subcommand before loading config (no env vars needed)
+    {
+        let args: Vec<String> = std::env::args().collect();
+        if args.len() > 1 && args[1] == "fork" {
+            match crate::fork::run(args) {
+                Ok(()) => std::process::exit(0),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+
     // Load configuration from environment
     let config = Config::load()?;
 
