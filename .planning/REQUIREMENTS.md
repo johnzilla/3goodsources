@@ -9,9 +9,9 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 
 ### Federation Data Model
 
-- [ ] **FED-01**: Endorsement struct populated with pubkey, url, name (optional), and since fields
-- [ ] **FED-02**: PeerRegistry lax deserialization types without deny_unknown_fields for forward compatibility
-- [ ] **FED-03**: Self-endorsement guard filters own pubkey from peer cache with WARN log
+- [x] **FED-01**: Endorsement struct populated with pubkey, url, name (optional), and since fields
+- [x] **FED-02**: PeerRegistry lax deserialization types without deny_unknown_fields for forward compatibility
+- [x] **FED-03**: Self-endorsement guard filters own pubkey from peer cache with WARN log
 
 ### Federation Networking
 
@@ -19,7 +19,7 @@ Requirements for Federation Test milestone. Each maps to roadmap phases.
 - [ ] **NET-02**: Background tokio task refreshes peer cache every 5 minutes
 - [ ] **NET-03**: Stale cache (>1hr without success) served with stale flag, unreachable peers skipped
 - [ ] **NET-04**: Graceful shutdown for background refresh task via cancellation signal
-- [ ] **NET-05**: reqwest moved from dev-dependency to runtime dependency
+- [x] **NET-05**: reqwest moved from dev-dependency to runtime dependency
 
 ### MCP Tools
 
@@ -64,10 +64,10 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FED-01 | Phase 15 | Pending |
-| FED-02 | Phase 15 | Pending |
-| FED-03 | Phase 15 | Pending |
-| NET-05 | Phase 15 | Pending |
+| FED-01 | Phase 15 | Complete |
+| FED-02 | Phase 15 | Complete |
+| FED-03 | Phase 15 | Complete |
+| NET-05 | Phase 15 | Complete |
 | NET-01 | Phase 16 | Pending |
 | NET-02 | Phase 16 | Pending |
 | NET-03 | Phase 16 | Pending |
