@@ -47,7 +47,7 @@
 
 - [x] **Phase 15: Federation Foundation** - Endorsement data model, peer types, self-guard, and reqwest runtime dependency (completed 2026-04-03)
 - [x] **Phase 16: Core Federation** - Async refactor, peer cache networking, federated tool, and DRY cleanup (completed 2026-04-03)
-- [ ] **Phase 17: Fork CLI** - `3gs fork` subcommand for scaffolding new nodes
+- [x] **Phase 17: Fork CLI** - `3gs fork` subcommand for scaffolding new nodes (completed 2026-04-03)
 - [ ] **Phase 18: Docker Distribution** - Multi-platform Docker image published to GHCR
 
 ## Phase Details
@@ -93,7 +93,7 @@ Plans:
   3. The scaffolded node compiles and starts without modification
 **Plans**: 1 plan
 Plans:
-- [ ] 17-01-PLAN.md — Fork module, main.rs wiring, end-to-end scaffolding
+- [x] 17-01-PLAN.md — Fork module, main.rs wiring, end-to-end scaffolding
 
 ### Phase 18: Docker Distribution
 **Goal**: Any curator can pull and run a 3GS node on any machine (Intel or ARM) using a single Docker command from GHCR
@@ -114,5 +114,5 @@ Plans:
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
 | 16. Core Federation | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 17. Fork CLI | v3.0 | 0/1 | Not started | - |
+| 17. Fork CLI | v3.0 | 1/1 | Complete   | 2026-04-03 |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |

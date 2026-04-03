@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Federation Test
 status: verifying
-stopped_at: Phase 17 planned, ready to execute
-last_updated: "2026-04-03T15:40:49.684Z"
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-04-03T16:13:32.603Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Agents get curated, high-quality sources instead of SEO-gamed search results -- three good sources per topic, human-vetted, cryptographically signed, served via open protocol.
-**Current focus:** Phase 16 — core-federation
+**Current focus:** Phase 17 — fork-cli
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
+Phase: 17 (fork-cli) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 16-core-federation P01 | 2 | 2 tasks | 2 files |
 | Phase 16-core-federation P02 | 8 | 2 tasks | 3 files |
 | Phase 16-core-federation P16-03 | 5 | 2 tasks | 7 files |
+| Phase 17-fork-cli P01 | 1 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 16-core-federation]: tool_response() DRY helper replaces 12 json!() boilerplate blocks across all tools
 - [Phase 16-core-federation]: tokio::sync::watch channel for shutdown broadcast — idiomatic pattern for background task lifecycle
 - [Phase 16-core-federation]: Temporary Registry constructed from PeerRegistry to reuse match_query — avoids duplicating matching logic
+- [Phase 17-fork-cli]: Fork module has no crate:: imports — decoupled from server logic; external crate deps only
+- [Phase 17-fork-cli]: contributions.json skeleton is '{}' (flat empty HashMap) matching actual loader deserialization
+- [Phase 17-fork-cli]: mod fork added to main.rs mod declarations (binary crate resolves modules independently from lib.rs)
 
 ### Engineering Review Notes (from /plan-eng-review)
 
@@ -83,6 +87,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-03T15:40:49.680Z
-Stopped at: Phase 17 planned, ready to execute
+Last session: 2026-04-03T16:13:32.600Z
+Stopped at: Completed 17-01-PLAN.md
 Next step: /gsd:plan-phase 15
