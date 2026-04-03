@@ -1,5 +1,6 @@
 use crate::audit::AuditEntry;
 use crate::contributions::Proposal;
+use crate::federation::PeerCache;
 use crate::identity::Identity;
 use crate::matcher::MatchConfig;
 use crate::mcp::tools::{self, ToolCallError};
@@ -19,6 +20,7 @@ pub struct McpHandler {
     audit_log: Arc<Vec<AuditEntry>>,
     identities: Arc<HashMap<String, Identity>>,
     proposals: Arc<HashMap<Uuid, Proposal>>,
+    peer_cache: Arc<PeerCache>,
 }
 
 impl McpHandler {
@@ -29,6 +31,7 @@ impl McpHandler {
         audit_log: Arc<Vec<AuditEntry>>,
         identities: Arc<HashMap<String, Identity>>,
         proposals: Arc<HashMap<Uuid, Proposal>>,
+        peer_cache: Arc<PeerCache>,
     ) -> Self {
         Self {
             initialized: Arc::new(AtomicBool::new(false)),
@@ -38,6 +41,7 @@ impl McpHandler {
             audit_log,
             identities,
             proposals,
+            peer_cache,
         }
     }
 
@@ -158,6 +162,7 @@ impl McpHandler {
             &self.audit_log,
             &self.identities,
             &self.proposals,
+            &self.peer_cache,
         )
         .await
         {
@@ -182,6 +187,7 @@ impl McpHandler {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::federation::PeerCache;
     use crate::matcher::MatchConfig;
     use crate::registry::Registry;
     use std::collections::HashMap;
@@ -197,6 +203,8 @@ mod tests {
             match_keyword_weight: 0.3,
         };
 
+        let peer_cache = Arc::new(PeerCache::new(vec![], "test-pubkey-z32".to_string()));
+
         McpHandler::new(
             Arc::new(registry),
             match_config,
@@ -204,6 +212,7 @@ mod tests {
             Arc::new(vec![]),
             Arc::new(HashMap::new()),
             Arc::new(HashMap::new()),
+            peer_cache,
         )
     }
 
@@ -443,7 +452,7 @@ mod tests {
     // ===== TDD Tests for Plan 02: Tool Implementations =====
 
     #[tokio::test]
-    async fn test_tools_list_returns_eight_tools() {
+    async fn test_tools_list_returns_nine_tools() {
         let handler = test_handler();
         init_handler(&handler).await;
 
@@ -461,7 +470,7 @@ mod tests {
         assert!(response["result"]["tools"].is_array());
 
         let tools = response["result"]["tools"].as_array().unwrap();
-        assert_eq!(tools.len(), 8, "Should return exactly 8 tools");
+        assert_eq!(tools.len(), 9, "Should return exactly 9 tools");
 
         // Check tool names
         let tool_names: Vec<&str> = tools
@@ -476,6 +485,7 @@ mod tests {
         assert!(tool_names.contains(&"get_identity"));
         assert!(tool_names.contains(&"list_proposals"));
         assert!(tool_names.contains(&"get_proposal"));
+        assert!(tool_names.contains(&"get_federated_sources"));
     }
 
     #[tokio::test]

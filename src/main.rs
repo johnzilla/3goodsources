@@ -2,6 +2,7 @@ mod audit;
 mod config;
 mod contributions;
 mod error;
+mod federation;
 mod identity;
 mod matcher;
 mod mcp;
@@ -79,6 +80,37 @@ async fn main() -> anyhow::Result<()> {
     let proposals = Arc::new(contributions);
     tracing::info!(count = proposals.len(), "Contributions loaded");
 
+    // Create peer cache from endorsements
+    let peer_cache = Arc::new(crate::federation::PeerCache::new(
+        registry.endorsements.clone(),
+        public_key.to_z32(),
+    ));
+    tracing::info!(peers = peer_cache.peer_count().await, "Peer cache initialized");
+
+    // Create shutdown channel
+    let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+
+    // Run initial refresh before server starts
+    peer_cache.refresh_all().await;
+
+    // Spawn background refresh loop (every 5 minutes)
+    let refresh_cache = Arc::clone(&peer_cache);
+    let refresh_handle = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(300));
+        let mut shutdown_rx = shutdown_rx;
+        loop {
+            tokio::select! {
+                _ = interval.tick() => {
+                    refresh_cache.refresh_all().await;
+                }
+                _ = shutdown_rx.changed() => {
+                    tracing::info!("Peer cache refresh loop shutting down");
+                    break;
+                }
+            }
+        }
+    });
+
     // Create MCP handler with shared registry and match config
     let pubkey_z32 = public_key.to_z32();
     let mcp_handler = mcp::McpHandler::new(
@@ -88,6 +120,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&audit_log),
         Arc::clone(&identities),
         Arc::clone(&proposals),
+        Arc::clone(&peer_cache),
     );
 
     // Build application state
@@ -98,6 +131,7 @@ async fn main() -> anyhow::Result<()> {
         audit_log,
         identities,
         proposals,
+        peer_cache,
     });
 
     // Build router with routes and middleware
@@ -108,6 +142,11 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!(port = config.port, "Server listening on {}", addr);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
+
+    // Signal background tasks to stop
+    let _ = shutdown_tx.send(true);
+    // Wait for refresh loop to finish (clean shutdown)
+    let _ = refresh_handle.await;
 
     Ok(())
 }

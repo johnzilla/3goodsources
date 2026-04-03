@@ -1,5 +1,6 @@
 use crate::audit::{AuditEntry, AuditFilterParams, filter_entries};
 use crate::contributions::{Proposal, ProposalFilterParams, ProposalSummary};
+use crate::federation::PeerCache;
 use crate::identity::Identity;
 use crate::mcp::McpHandler;
 use crate::registry::Registry;
@@ -27,6 +28,7 @@ pub struct AppState {
     pub audit_log: Arc<Vec<AuditEntry>>,
     pub identities: Arc<HashMap<String, Identity>>,
     pub proposals: Arc<HashMap<Uuid, Proposal>>,
+    pub peer_cache: Arc<PeerCache>,
 }
 
 /// Build the axum router with all routes and middleware
