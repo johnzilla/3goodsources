@@ -91,7 +91,9 @@ Plans:
   1. Running `3gs fork` produces a new directory with a generated keypair, skeleton registry JSON, and a populated `.env` file
   2. The `fork` subcommand parses its arguments before `Config::load()` so it does not require `PKARR_SECRET_KEY` or other env vars to be present
   3. The scaffolded node compiles and starts without modification
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 17-01-PLAN.md — Fork module, main.rs wiring, end-to-end scaffolding
 
 ### Phase 18: Docker Distribution
 **Goal**: Any curator can pull and run a 3GS node on any machine (Intel or ARM) using a single Docker command from GHCR
@@ -112,5 +114,5 @@ Plans:
 | 12-14 | v2.0 | 6/6 | Complete | 2026-03-08 |
 | 15. Federation Foundation | v3.0 | 2/2 | Complete    | 2026-04-03 |
 | 16. Core Federation | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 17. Fork CLI | v3.0 | 0/? | Not started | - |
+| 17. Fork CLI | v3.0 | 0/1 | Not started | - |
 | 18. Docker Distribution | v3.0 | 0/? | Not started | - |
