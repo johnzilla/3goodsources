@@ -64,6 +64,9 @@ pub enum PeerStatus {
     Stale,
     /// Never successfully fetched or repeated failures
     Unreachable,
+    /// Registry was unsigned, signed by a different key than the endorsed pubkey, or
+    /// tampered with. Its data is discarded and never used for matching.
+    InvalidSignature,
 }
 
 /// A cached peer entry in the peer cache

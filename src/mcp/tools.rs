@@ -136,7 +136,7 @@ pub fn get_tools_list() -> Value {
             },
             {
                 "name": "get_provenance",
-                "description": "Get curator identity and verification information for this registry. Returns the curator's name, PKARR public key (when available), registry version, and a note on what can currently be verified. No parameters required.",
+                "description": "Get curator identity and verification information for this registry. Returns the curator's name, PKARR public key, registry version, the registry's Ed25519 signature, and instructions for verifying it. No parameters required.",
                 "inputSchema": serde_json::to_value(get_provenance_schema).unwrap()
             },
             {
@@ -331,14 +331,26 @@ async fn tool_get_provenance(
             serde_json::from_value(args).map_err(|_| ToolCallError::InvalidParams)?;
     }
 
+    let signature_text = match &registry.signature {
+        Some(sig) => format!(
+            "Signature: {} {}\n\nVerification:\nThis registry is curated by {}. Each source is manually researched\nand vetted for quality. The registry is signed with the curator's\nPKARR key (curator.pubkey). To verify it yourself:\n  1. GET /registry and parse the JSON.\n  2. Remove the top-level \"signature\" field.\n  3. Serialize the rest as compact JSON with object keys sorted at every level.\n  4. Prefix it with \"3gs-registry-v1\\n\" and check the Ed25519 signature\n     against curator.pubkey (z-base-32 decoded).\nAudit log entries are also Ed25519-signed and hash-chained (see get_audit_log).",
+            sig.alg, sig.sig, registry.curator.name
+        ),
+        None => format!(
+            "Signature: none\n\nVerification:\nThis registry is curated by {}. Each source is manually researched\nand vetted for quality. WARNING: this registry is not signed, so its\ncontents cannot be verified against the curator's key.",
+            registry.curator.name
+        ),
+    };
+
     let text = format!(
-        "Curator: {}\nPublic Key: {}\nRegistry Version: {}\nLast Updated: {}\nEndorsements: {} endorsement(s)\n\nVerification:\nThis registry is curated by {}. Each source is manually researched\nand vetted for quality. The PKARR public key above identifies this\nserver. Audit log entries are Ed25519-signed and hash-chained (see\nget_audit_log); the registry itself is not yet signed.",
+        "Curator: {}\nCurator Public Key: {}\nServer Public Key: {}\nRegistry Version: {}\nLast Updated: {}\nEndorsements: {} endorsement(s)\n{}",
         registry.curator.name,
+        registry.curator.pubkey,
         pubkey_z32,
         registry.version,
         registry.updated,
         registry.endorsements.len(),
-        registry.curator.name
+        signature_text
     );
 
     Ok(tool_response(&text, false))
@@ -694,8 +706,8 @@ async fn tool_get_federated_sources(
     // Peer results (trust: endorsed)
     let peers = peer_cache.get_all_cached().await;
     for peer in &peers {
-        if peer.status == PeerStatus::Unreachable {
-            continue; // Skip unreachable peers
+        if matches!(peer.status, PeerStatus::Unreachable | PeerStatus::InvalidSignature) {
+            continue; // Skip unreachable peers and peers whose registry failed verification
         }
         if let Some(ref peer_registry) = peer.registry {
             // Build a temporary Registry from the peer's data so we can reuse match_query
@@ -708,6 +720,7 @@ async fn tool_get_federated_sources(
                 },
                 endorsements: vec![],
                 categories: peer_registry.categories.clone(),
+                signature: None,
             };
 
             match crate::matcher::match_query(&params.query, &peer_as_registry, &config) {

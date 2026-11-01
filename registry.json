@@ -1,9 +1,9 @@
 {
   "version": "0.1.0",
-  "updated": "2026-02-01",
+  "updated": "2026-11-01",
   "curator": {
     "name": "3GS Curator",
-    "pubkey": "pk:placeholder"
+    "pubkey": "qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o"
   },
   "endorsements": [],
   "categories": {
@@ -337,5 +337,6 @@
         }
       ]
     }
-  }
+  },
+  "signature": { "alg": "ed25519", "sig": "dd3ede968914451deb5f44b430d40582e2d54a68ef269a091962093c0f5182587734df4ec5da2b6c464ee4f7f4a615c21c0c8eeb39a0907654ea576a5d839b05" }
 }

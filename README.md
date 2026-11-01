@@ -86,7 +86,7 @@ Scaffold your own 3GS node that endorses an existing curator:
 cargo run -- fork --endorse <curator-pubkey> --url <curator-url> --name "Your Name"
 ```
 
-This generates a new directory with a fresh PKARR keypair, skeleton registry, and `.env` file. Add your own categories and run it.
+This generates a new directory with a fresh PKARR keypair, a signed skeleton registry, and `.env` file. Add your own categories, re-sign with `cargo run -- sign-registry --registry <dir>/registry.json` (with that node's `PKARR_SECRET_KEY`), and run it.
 
 **Test with curl:**
 
@@ -235,7 +235,8 @@ Configure via environment variables (loaded from `.env` if present):
 | CONTRIBUTIONS_PATH   | Yes      | ---        | Path to contributions.json file                                          |
 | PORT                 | No       | 3000     | Server port                                                              |
 | LOG_FORMAT           | No       | pretty   | Logging format: `pretty` (colored, dev) or `json` (structured, prod)     |
-| PKARR_SECRET_KEY     | No       | ---        | 64-char hex string (32 bytes) for persistent identity. Generates ephemeral keypair if not set |
+| PKARR_SECRET_KEY     | Yes*     | ---        | 64-char hex string (32 bytes) for persistent identity. registry.json must be signed by this key. Generates ephemeral keypair if not set (*then only starts with ALLOW_UNSIGNED_REGISTRY) |
+| ALLOW_UNSIGNED_REGISTRY | No    | false      | Dev only: start even if registry.json's signature is missing or doesn't match PKARR_SECRET_KEY |
 | MATCH_THRESHOLD      | No       | 0.4      | Minimum match score (0.0-1.0) to return a result                         |
 | MATCH_FUZZY_WEIGHT   | No       | 0.7      | Weight for fuzzy matching component (0.0-1.0)                            |
 | MATCH_KEYWORD_WEIGHT | No       | 0.3      | Weight for keyword boosting component (0.0-1.0)                          |
@@ -247,9 +248,10 @@ Configure via environment variables (loaded from `.env` if present):
 **How it works:**
 1. Curator A endorses Curator B by adding B's pubkey and URL to their registry's endorsements
 2. Node A fetches and caches B's registry in the background (every 5 minutes)
-3. When an agent queries `get_federated_sources`, it searches both A's local registry and B's cached registry
-4. Results are tagged with trust level: `direct` (local) or `endorsed` (peer)
-5. If B is unreachable, A serves stale cached data with a flag, or skips B entirely
+3. A verifies B's registry signature against the pubkey it endorsed; an unsigned or mismatched registry is ignored and B is marked `InvalidSignature`
+4. When an agent queries `get_federated_sources`, it searches both A's local registry and B's cached registry
+5. Results are tagged with trust level: `direct` (local) or `endorsed` (peer)
+6. If B is unreachable, A serves stale cached data with a flag, or skips B entirely
 
 **Start your own node:**
 
@@ -346,9 +348,27 @@ curl -X POST http://localhost:3000/mcp \
   }'
 ```
 
-**Step 3:** Verify the public key matches. This shows the server is running with a consistent, declared PKARR identity.
+**Step 3:** Verify the public keys match. `get_provenance` reports both the server's key and the registry's `curator.pubkey`; the server refuses to start unless they're equal.
 
-**What is and isn't signed today:** audit log entries are Ed25519-signed and hash-chained (see `GET /audit`). The registry itself is not yet signed, so a matching pubkey does not on its own prove that the sources haven't been altered. Registry signing is planned.
+**Step 4:** Verify the registry signature. `registry.json` is Ed25519-signed by the curator's PKARR key, and `GET /registry` serves it byte-for-byte with the signature included:
+
+```bash
+curl -s https://api.3gs.ai/registry > registry.json
+python3 scripts/verify_registry.py --pubkey qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o registry.json
+# OK: signed by qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o
+```
+
+(`pip install cryptography` first, or use `cargo run -- sign-registry --check --registry registry.json`.) A valid signature proves the sources, ranks, and explanations are exactly what the curator signed. It doesn't prove the copy is the newest one; check the signed `updated` date.
+
+**What's signed:** the registry (one signature over the whole document, see [docs/SCHEMA.md](docs/SCHEMA.md#signature)) and each audit log entry (Ed25519, hash-chained, see `GET /audit`). Federated peers are only trusted if their registry verifies against the pubkey you endorsed.
+
+**Editing the registry:** any change invalidates the signature. Re-sign before committing:
+
+```bash
+cargo run -- sign-registry   # reads PKARR_SECRET_KEY from the environment or .env
+```
+
+The server won't start with a missing or bad signature (set `ALLOW_UNSIGNED_REGISTRY=true` for local development with a throwaway key).
 
 For PKARR primer and federation details, see [docs/PUBKY.md](docs/PUBKY.md).
 

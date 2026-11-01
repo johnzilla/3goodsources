@@ -1,7 +1,7 @@
 //! Fork CLI subcommand — scaffolds a ready-to-run 3GS node.
 //!
-//! Intentionally decoupled from all server logic (no crate:: imports).
-//! Depends only on external crates: pkarr, hex, serde_json, chrono.
+//! Intentionally decoupled from server logic: the only crate:: import is the pure
+//! registry signing module. Otherwise depends only on pkarr, hex, serde_json, chrono.
 //!
 //! Usage:
 //!   3gs fork --endorse <pubkey> --url <peer_url> [--name <curator_name>] [--output <dir>]
@@ -100,8 +100,8 @@ pub fn run(args: Vec<String>) -> Result<(), String> {
     // Today's date for registry "updated" and endorsement "since" fields
     let today_iso = chrono::Local::now().format("%Y-%m-%d").to_string();
 
-    // 1. Write registry.json
-    let registry = serde_json::json!({
+    // 1. Write registry.json, signed with the new node's key
+    let mut registry = serde_json::json!({
         "version": "0.1.0",
         "updated": today_iso,
         "curator": {
@@ -116,6 +116,10 @@ pub fn run(args: Vec<String>) -> Result<(), String> {
         }],
         "categories": {}
     });
+    let signature = crate::registry::signing::sign_document(&registry, &keypair.secret_key())
+        .map_err(|e| format!("Failed to sign registry.json: {}", e))?;
+    registry["signature"] = serde_json::to_value(signature)
+        .map_err(|e| format!("Failed to serialize signature: {}", e))?;
     let registry_json = serde_json::to_string_pretty(&registry)
         .map_err(|e| format!("Failed to serialize registry.json: {}", e))?;
     std::fs::write(format!("{}/registry.json", dir), registry_json)
@@ -160,7 +164,9 @@ pub fn run(args: Vec<String>) -> Result<(), String> {
          \x20   # Copy the binary or run from repo root:\n\
          \x20   cargo run\n\
          \n\
-         \x20 To add categories, edit registry.json and add entries to the \"categories\" object.\n"
+         \x20 To add categories, edit registry.json and add entries to the \"categories\" object,\n\
+         \x20 then re-sign it (the server refuses to start with a bad signature):\n\
+         \x20   3gs sign-registry\n"
     );
 
     Ok(())
@@ -225,6 +231,10 @@ mod tests {
         assert_eq!(reg["endorsements"][0]["pubkey"], "testpubkey123");
         assert_eq!(reg["endorsements"][0]["url"], "http://localhost:3001");
         assert_eq!(reg["curator"]["name"], "Test Curator");
+
+        // registry.json must be signed by the new node's own key
+        let curator_pubkey = reg["curator"]["pubkey"].as_str().unwrap();
+        assert!(crate::registry::signing::verify_raw(&reg_content, curator_pubkey).is_ok());
 
         // identities.json and contributions.json must be empty objects
         assert_eq!(std::fs::read_to_string(format!("{}/identities.json", tmp)).unwrap(), "{}");

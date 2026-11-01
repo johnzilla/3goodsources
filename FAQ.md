@@ -49,9 +49,13 @@ This scaffolds a new node with fresh PKARR identity, skeleton registry, and conf
 <details>
 <summary>How are sources verified?</summary>
 
-Every registry is cryptographically signed using the node’s PKARR keypair. Agents (and humans) can:Call get_provenance to see the curator’s identity
-Verify signatures against the published registry
-Check the public audit log for changes
+Every registry is signed with its curator's PKARR (Ed25519) key, and the server refuses to start if the signature doesn't match. Agents (and humans) can:
+
+- Call `get_provenance` to see the curator's public key and the registry signature
+- Fetch `GET /registry` and verify the signature themselves (`scripts/verify_registry.py`, or `3gs sign-registry --check`)
+- Check the public audit log, whose entries are also signed and hash-chained
+
+Federated nodes only use a peer's sources if that peer's registry verifies against the key they endorsed.
 
 </details>
 

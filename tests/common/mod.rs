@@ -21,6 +21,7 @@ pub async fn spawn_test_server() -> SocketAddr {
     let registry: Registry = serde_json::from_str(registry_json)
         .expect("Failed to parse registry.json");
     let registry = Arc::new(registry);
+    let registry_raw = Arc::new(registry_json.to_string());
 
     // Load audit log
     let audit_log_json = include_str!("../../audit_log.json");
@@ -69,6 +70,7 @@ pub async fn spawn_test_server() -> SocketAddr {
     let app_state = Arc::new(AppState {
         mcp_handler,
         registry,
+        registry_raw,
         pubkey,
         audit_log,
         identities,

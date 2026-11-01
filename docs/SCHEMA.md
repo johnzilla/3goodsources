@@ -14,12 +14,13 @@ This registry is loaded on server startup and validated against strict schema ru
   "updated": "2026-02-01",
   "curator": {
     "name": "3GS Curator",
-    "pubkey": "pk:placeholder"
+    "pubkey": "qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o"
   },
   "endorsements": [],
   "categories": {
     "category-slug": { /* Category object */ }
-  }
+  },
+  "signature": { "alg": "ed25519", "sig": "<128 hex chars>" }
 }
 ```
 
@@ -30,6 +31,7 @@ This registry is loaded on server startup and validated against strict schema ru
 - **`curator`** (object, required): Curator identity information (see Curator Object below)
 - **`endorsements`** (array, required): Array of endorsement objects. Empty in v1, reserved for future federated trust features. Example: `[]`
 - **`categories`** (object, required): HashMap of categories keyed by slug. Each key is a category slug (e.g., `"rust-learning"`), and each value is a Category object.
+- **`signature`** (object, required to start the server): Ed25519 signature by `curator.pubkey` over the rest of the document. See [Signature](#signature) below. Written by `3gs sign-registry`; never edit it by hand.
 
 ## Curator Object
 
@@ -38,7 +40,7 @@ Identifies the curator who maintains this registry. The pubkey provides cryptogr
 ```json
 {
   "name": "3GS Curator",
-  "pubkey": "pk:placeholder"
+  "pubkey": "qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o"
 }
 ```
 
@@ -47,7 +49,7 @@ Identifies the curator who maintains this registry. The pubkey provides cryptogr
 - **`name`** (string, required): Human-readable display name for the curator
 - **`pubkey`** (string, required): PKARR public key in z-base-32 encoding (52 characters). This key proves the identity of the registry operator and enables cryptographic verification.
 
-Note: In production, the server's live public key (from `PKARR_SECRET_KEY` environment variable) is used for verification, not the static registry value. The registry pubkey is a placeholder; the `get_provenance` MCP tool returns the actual server keypair's public key.
+`curator.pubkey` must be the public key of the server's `PKARR_SECRET_KEY`, and the registry must be signed with that key. The server refuses to start otherwise (see [Signature](#signature)).
 
 ## Category Object
 
@@ -142,7 +144,51 @@ All registry structs use `#[serde(deny_unknown_fields)]` in Rust, which means:
 - Typos in field names are caught immediately
 - The schema is strictly enforced with no silent ignoring of extra data
 
-This fail-fast approach ensures the registry stays clean and schema violations are impossible to deploy.
+This fail-fast approach ensures the registry stays clean and schema violations are impossible to deploy. (Peers parse each other's registries leniently, so a newer peer can add fields; those fields are still covered by its signature.)
+
+## Signature
+
+The registry carries an embedded Ed25519 signature so that anyone holding the curator's public key can check that the sources haven't been altered, whether they got the file from the server, a peer, a mirror, or git.
+
+```json
+"signature": { "alg": "ed25519", "sig": "dd3ede96...9b05" }
+```
+
+- **`alg`** (string): Always `"ed25519"`.
+- **`sig`** (string): Hex-encoded 64-byte Ed25519 signature.
+
+### What is signed
+
+1. Parse the registry JSON.
+2. Remove the top-level `signature` field. Everything else is signed, including fields this version of the schema doesn't know about and explicit `null`s.
+3. Serialize the rest as **canonical JSON**: no whitespace, object keys sorted by Unicode code point at every level (equivalently, UTF-8 byte order), array order kept, strings escaped the way `serde_json` and Python's `json.dumps(..., ensure_ascii=False)` escape them. The registry only contains strings, integers, booleans, and nulls, so number formatting can't vary.
+4. Prefix the bytes with the domain tag `3gs-registry-v1\n` (the literal text plus one newline byte). The tag keeps a registry signature from being reused as any other kind of 3GS signature, such as an audit log entry.
+5. The signature is Ed25519 over those bytes, with the key in `curator.pubkey` (z-base-32 decoded to 32 bytes).
+
+In Python this is `b"3gs-registry-v1\n" + json.dumps(doc_without_signature, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()`. A complete verifier is in `scripts/verify_registry.py`.
+
+Because the signed bytes are computed from the parsed document, reformatting the file (indentation, key order) doesn't change the signature; changing any value does.
+
+### Who checks it
+
+- **The server, on startup.** `curator.pubkey` must equal the public key of `PKARR_SECRET_KEY`, and the signature must verify. If either fails, the server exits with an error. `ALLOW_UNSIGNED_REGISTRY=true` downgrades this to a warning, for local development only.
+- **Peers, on every fetch.** A node verifies an endorsed peer's `GET /registry` against the pubkey it endorsed, not the key the peer claims. Unsigned, tampered, or foreign-key registries are discarded and the peer is marked `InvalidSignature`.
+- **Anyone.** `GET /registry` serves the file byte-for-byte, so you can verify it yourself (see [PUBKY.md](PUBKY.md#registry-signatures)).
+
+### Signing after an edit
+
+Any edit to `registry.json` invalidates the signature. Re-sign it offline:
+
+```bash
+PKARR_SECRET_KEY=<64 hex chars> cargo run -- sign-registry   # or put the key in .env
+cargo run -- sign-registry --check                           # verify only, no key needed
+```
+
+The signer refuses to run if `curator.pubkey` doesn't match the key. It keeps the file's layout and writes the signature as the last top-level field. The test suite (`tests/integration_signing.rs`) fails if the committed `registry.json` isn't signed by the production key.
+
+### Limits
+
+A signature proves who published a registry and that it hasn't changed since. It doesn't prove it's the latest version: someone could replay an older, validly signed registry. The signed `updated` date is the only freshness signal today.
 
 ## Full Example
 
@@ -154,7 +200,7 @@ Here's a complete single-category example from the actual registry:
   "updated": "2026-02-01",
   "curator": {
     "name": "3GS Curator",
-    "pubkey": "pk:placeholder"
+    "pubkey": "qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o"
   },
   "endorsements": [],
   "categories": {
@@ -191,7 +237,8 @@ Here's a complete single-category example from the actual registry:
         }
       ]
     }
-  }
+  },
+  "signature": { "alg": "ed25519", "sig": "<128 hex chars>" }
 }
 ```
 
@@ -201,6 +248,7 @@ The registry schema is implemented in Rust using serde for serialization:
 
 - **Types defined in:** `src/registry/types.rs`
 - **Loader and validator:** `src/registry/loader.rs`
+- **Signing and verification:** `src/registry/signing.rs` (`3gs sign-registry` lives in `src/sign.rs`)
 - **Validation on startup:** Server crashes with descriptive errors if registry is invalid
 - **Thread-safe sharing:** Registry is wrapped in `Arc<Registry>` and shared across HTTP handlers
 

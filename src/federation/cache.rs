@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
 
+use crate::registry::signing::verify_raw;
 use crate::registry::types::Endorsement;
 use super::types::{CachedPeer, PeerRegistry, PeerStatus};
 
@@ -77,6 +78,8 @@ impl PeerCache {
     }
 
     /// Fetch the /registry endpoint from a single peer and update its cached state.
+    /// The registry must be signed by the endorsed pubkey; otherwise its data is dropped
+    /// and the peer is marked InvalidSignature.
     /// On success: sets status to Fresh, stores PeerRegistry, updates last_success.
     /// On failure: logs WARN, keeps existing registry, marks Stale if >1hr since last success.
     pub async fn fetch_peer(&self, pubkey: &str) {
@@ -96,56 +99,68 @@ impl PeerCache {
 
         let registry_url = format!("{}/registry", url.trim_end_matches('/'));
 
-        match self.client.get(&registry_url).send().await {
-            Ok(response) => {
-                match response.json::<PeerRegistry>().await {
-                    Ok(parsed) => {
-                        let mut peers = self.peers.write().await;
-                        if let Some(peer) = peers.get_mut(pubkey) {
-                            peer.registry = Some(parsed);
-                            peer.last_success = Some(Instant::now());
-                            peer.last_attempt = Some(Instant::now());
-                            peer.status = PeerStatus::Fresh;
-                            tracing::debug!(pubkey = %pubkey, url = %registry_url, "Peer registry fetched successfully");
-                        }
-                    }
-                    Err(err) => {
-                        tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to parse peer registry");
-                        let mut peers = self.peers.write().await;
-                        if let Some(peer) = peers.get_mut(pubkey) {
-                            peer.last_attempt = Some(Instant::now());
-                            let stale_threshold = Duration::from_secs(3600);
-                            let is_stale = peer.last_success
-                                .map(|t| t.elapsed() > stale_threshold)
-                                .unwrap_or(true);
-                            if is_stale {
-                                peer.status = if peer.registry.is_some() {
-                                    PeerStatus::Stale
-                                } else {
-                                    PeerStatus::Unreachable
-                                };
-                            }
-                        }
-                    }
+        let body = match self.client.get(&registry_url).send().await {
+            Ok(response) => response.text().await,
+            Err(err) => Err(err),
+        };
+        let body = match body {
+            Ok(body) => body,
+            Err(err) => {
+                tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to fetch peer registry");
+                self.mark_failed(pubkey).await;
+                return;
+            }
+        };
+
+        // Verify against the pubkey we endorsed, not the one the peer claims for itself
+        if let Err(err) = verify_raw(&body, pubkey) {
+            tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Peer registry failed signature verification; ignoring peer");
+            let mut peers = self.peers.write().await;
+            if let Some(peer) = peers.get_mut(pubkey) {
+                peer.registry = None;
+                peer.last_attempt = Some(Instant::now());
+                peer.status = PeerStatus::InvalidSignature;
+            }
+            return;
+        }
+
+        match serde_json::from_str::<PeerRegistry>(&body) {
+            Ok(parsed) => {
+                let mut peers = self.peers.write().await;
+                if let Some(peer) = peers.get_mut(pubkey) {
+                    peer.registry = Some(parsed);
+                    peer.last_success = Some(Instant::now());
+                    peer.last_attempt = Some(Instant::now());
+                    peer.status = PeerStatus::Fresh;
+                    tracing::debug!(pubkey = %pubkey, url = %registry_url, "Peer registry fetched and verified");
                 }
             }
             Err(err) => {
-                tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to fetch peer registry");
-                let mut peers = self.peers.write().await;
-                if let Some(peer) = peers.get_mut(pubkey) {
-                    peer.last_attempt = Some(Instant::now());
-                    let stale_threshold = Duration::from_secs(3600);
-                    let is_stale = peer.last_success
-                        .map(|t| t.elapsed() > stale_threshold)
-                        .unwrap_or(true);
-                    if is_stale {
-                        peer.status = if peer.registry.is_some() {
-                            PeerStatus::Stale
-                        } else {
-                            PeerStatus::Unreachable
-                        };
-                    }
-                }
+                tracing::warn!(pubkey = %pubkey, url = %registry_url, error = %err, "Failed to parse peer registry");
+                self.mark_failed(pubkey).await;
+            }
+        }
+    }
+
+    /// Record a failed fetch: keep any existing registry, mark Stale if >1hr since last success.
+    /// A peer whose last result was a bad signature stays InvalidSignature.
+    async fn mark_failed(&self, pubkey: &str) {
+        let mut peers = self.peers.write().await;
+        if let Some(peer) = peers.get_mut(pubkey) {
+            peer.last_attempt = Some(Instant::now());
+            if peer.status == PeerStatus::InvalidSignature {
+                return;
+            }
+            let stale_threshold = Duration::from_secs(3600);
+            let is_stale = peer.last_success
+                .map(|t| t.elapsed() > stale_threshold)
+                .unwrap_or(true);
+            if is_stale {
+                peer.status = if peer.registry.is_some() {
+                    PeerStatus::Stale
+                } else {
+                    PeerStatus::Unreachable
+                };
             }
         }
     }
