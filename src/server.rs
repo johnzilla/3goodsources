@@ -24,6 +24,8 @@ const LANDING_HTML: &str = include_str!("../docs/index.html");
 pub struct AppState {
     pub mcp_handler: McpHandler,
     pub registry: Arc<Registry>,
+    /// Raw registry.json contents, served verbatim so peers can verify the signature
+    pub registry_raw: Arc<String>,
     pub pubkey: PublicKey,  // PublicKey is Copy, no Arc needed
     pub audit_log: Arc<Vec<AuditEntry>>,
     pub identities: Arc<HashMap<String, Identity>>,
@@ -91,21 +93,16 @@ async fn health_endpoint(
 }
 
 /// GET /registry - Registry JSON endpoint
+///
+/// Serves the signed registry.json exactly as loaded, including its `signature` field.
 async fn registry_endpoint(
     State(state): State<Arc<AppState>>,
 ) -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], String) {
-    match serde_json::to_string_pretty(&*state.registry) {
-        Ok(json) => (
-            StatusCode::OK,
-            [(header::CONTENT_TYPE, "application/json")],
-            json,
-        ),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            [(header::CONTENT_TYPE, "application/json")],
-            format!(r#"{{"error":"Failed to serialize registry: {}"}}"#, e),
-        ),
-    }
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "application/json")],
+        state.registry_raw.to_string(),
+    )
 }
 
 /// GET /audit - Audit log endpoint with optional query filters

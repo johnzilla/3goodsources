@@ -1,7 +1,7 @@
 
 use three_good_sources::{
     audit, config::Config, contributions, federation, fork, identity, matcher, mcp, pubky, registry,
-    server,
+    server, sign,
 };
 use std::sync::Arc;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
@@ -28,17 +28,21 @@ fn init_logging(log_format: &str) {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Check for fork subcommand before loading config (no env vars needed)
+    // Check for CLI subcommands before loading server config
     {
         let args: Vec<String> = std::env::args().collect();
-        if args.len() > 1 && args[1] == "fork" {
-            match fork::run(args) {
-                Ok(()) => std::process::exit(0),
-                Err(e) => {
-                    eprintln!("Error: {}", e);
-                    std::process::exit(1);
-                }
+        let result = match args.get(1).map(String::as_str) {
+            Some("fork") => Some(fork::run(args)),
+            Some("sign-registry") => Some(sign::run(args)),
+            _ => None,
+        };
+        match result {
+            Some(Ok(())) => std::process::exit(0),
+            Some(Err(e)) => {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
             }
+            None => {}
         }
     }
 
@@ -70,8 +74,22 @@ async fn main() -> anyhow::Result<()> {
         "Server identity initialized"
     );
 
-    // Load and validate registry
-    let registry = Arc::new(registry::load(&config.registry_path).await?);
+    // Load and validate registry, then verify it is signed by this server's key
+    let (registry, registry_raw) = registry::load_with_raw(&config.registry_path).await?;
+    match registry::signing::verify_raw(&registry_raw, &public_key.to_z32()) {
+        Ok(signature) => tracing::info!(sig = %signature.sig, "Registry signature verified"),
+        Err(err) if config.allow_unsigned_registry => tracing::warn!(
+            error = %err,
+            "Registry signature check failed; continuing because ALLOW_UNSIGNED_REGISTRY=true"
+        ),
+        Err(err) => anyhow::bail!(
+            "Registry signature check failed: {}\n\nSign it with `3gs sign-registry` (uses PKARR_SECRET_KEY), \
+             or set ALLOW_UNSIGNED_REGISTRY=true for local development.",
+            err
+        ),
+    }
+    let registry = Arc::new(registry);
+    let registry_raw = Arc::new(registry_raw);
 
     // Load audit log
     let audit_log = Arc::new(audit::load(&config.audit_log_path).await?);
@@ -133,6 +151,7 @@ async fn main() -> anyhow::Result<()> {
     let app_state = Arc::new(server::AppState {
         mcp_handler,
         registry,
+        registry_raw,
         pubkey: public_key,
         audit_log,
         identities,

@@ -5,6 +5,14 @@ use tokio::fs;
 
 /// Load and validate registry from disk
 pub async fn load(path: impl AsRef<Path>) -> Result<Registry, RegistryError> {
+    load_with_raw(path).await.map(|(registry, _)| registry)
+}
+
+/// Load and validate registry from disk, also returning the raw file contents.
+///
+/// The raw contents are what gets served from `GET /registry` and what signatures are
+/// verified against, so peers see exactly the bytes the curator signed.
+pub async fn load_with_raw(path: impl AsRef<Path>) -> Result<(Registry, String), RegistryError> {
     let path = path.as_ref();
     let path_str = path.display().to_string();
 
@@ -39,7 +47,7 @@ pub async fn load(path: impl AsRef<Path>) -> Result<Registry, RegistryError> {
         "Registry loaded successfully"
     );
 
-    Ok(registry)
+    Ok((registry, contents))
 }
 
 /// Validate registry business rules

@@ -27,6 +27,11 @@ pub struct Config {
     /// If not set, server generates an ephemeral keypair on startup.
     /// Set via PKARR_SECRET_KEY environment variable for persistent identity.
     pub pkarr_secret_key: Option<String>,
+
+    /// Start even if registry.json is unsigned or its signature doesn't match this server's
+    /// PKARR key. Development only. Set via ALLOW_UNSIGNED_REGISTRY=true.
+    #[serde(default)]
+    pub allow_unsigned_registry: bool,
 }
 
 fn default_log_format() -> String {

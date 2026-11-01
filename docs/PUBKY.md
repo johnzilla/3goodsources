@@ -8,6 +8,7 @@ This document explains:
 - What PKARR is and why it matters
 - How 3GS uses PKARR for server identity
 - Step-by-step verification guide with curl commands
+- How registry.json is signed and how to verify it
 - The broader Pubky ecosystem
 - Future vision for federated trust and endorsements
 
@@ -48,7 +49,7 @@ For 3GS, this means a curator's identity is **independent of infrastructure**. E
 
 ## How 3GS Uses PKARR
 
-The 3GS server generates or loads a PKARR keypair on startup and uses it to prove operator identity.
+The 3GS server generates or loads a PKARR keypair on startup and uses it to prove operator identity. The same key signs `registry.json` (offline, with `3gs sign-registry`), and the server checks that signature before it serves anything.
 
 ### Startup Sequence
 
@@ -56,17 +57,21 @@ The 3GS server generates or loads a PKARR keypair on startup and uses it to prov
    - If set: Decode 64-character hex string → Load keypair from secret key
    - If not set: Generate random ephemeral keypair (logs warning)
 
-2. **Store public key in application state**
+2. **Verify the registry signature**
+   - `registry.json`'s `curator.pubkey` must equal this keypair's public key
+   - Its embedded Ed25519 signature must verify (see [Registry Signatures](#registry-signatures))
+   - If either check fails, the server exits with an error (unless `ALLOW_UNSIGNED_REGISTRY=true`, for development)
+
+3. **Store public key in application state**
    - Public key is extracted and stored as z-base-32 string
    - Shared across HTTP handlers for provenance responses
 
-3. **Expose public key via /health endpoint**
+4. **Expose public key via /health endpoint**
    - JSON response includes `pubkey` field
    - Quick verification that server is running with expected identity
 
-4. **Include public key in MCP get_provenance responses**
-   - Agents querying provenance learn the curator's identity
-   - Future: Could verify endorsements, trust graphs, signature chains
+5. **Include public key and registry signature in MCP get_provenance responses**
+   - Agents querying provenance learn the curator's identity and can verify the registry
 
 ### Persistent vs. Ephemeral Identity
 
@@ -74,6 +79,7 @@ The 3GS server generates or loads a PKARR keypair on startup and uses it to prov
 - Server generates random keypair each time it starts
 - Public key changes on every restart
 - Fine for testing, **bad for production** (identity not stable)
+- The signed registry won't match the random key, so the server refuses to start unless `ALLOW_UNSIGNED_REGISTRY=true`
 - Server logs warning: "PKARR_SECRET_KEY not set, generating ephemeral keypair"
 
 **With PKARR_SECRET_KEY:**
@@ -170,14 +176,14 @@ curl -s -X POST http://localhost:3000/mcp \
     "content": [
       {
         "type": "text",
-        "text": "Curator: 3GS Curator\nPubkey: o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy\nRegistry Version: 0.1.0\nLast Updated: 2026-02-01"
+        "text": "Curator: 3GS Curator\nCurator Public Key: qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o\nServer Public Key: qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o\nRegistry Version: 0.1.0\nLast Updated: 2026-11-01\nEndorsements: 0 endorsement(s)\nSignature: ed25519 dd3ede96...9b05\n\nVerification:\n..."
       }
     ]
   }
 }
 ```
 
-The `Pubkey:` line contains the server's public key.
+`Server Public Key` is the key the server is running with; `Curator Public Key` is the key in `registry.json`. The server only starts when they match. `Signature` is the registry signature, also included in `GET /registry`.
 
 ### Step 3: Verify Consistency
 
@@ -206,22 +212,39 @@ Compare the pubkey from `/health` (Step 1) with the pubkey from `get_provenance`
 
 ❌ **Does NOT prove:** The curator is trustworthy, the sources are high-quality, or anything about reputation - only identity
 
-### Future: Signature Verification
+❌ **Does NOT prove on its own:** that the sources haven't been altered. For that, verify the registry signature (next section).
 
-Currently, 3GS doesn't sign data with the PKARR key. Future versions could:
+### Registry Signatures
 
-1. **Sign registry.json** with the secret key
-2. **Include signature in responses**
-3. **Clients verify signature** matches the advertised public key
-4. **Proof of authenticity:** Registry hasn't been tampered with by a MITM
+`registry.json` carries an embedded Ed25519 signature made with the curator's PKARR key:
 
-This would require:
-- Canonicalization of JSON (consistent serialization)
-- Signature generation in server startup
-- Signature field in MCP responses
-- Client-side Ed25519 verification logic
+```json
+"signature": { "alg": "ed25519", "sig": "<128 hex chars>" }
+```
 
-Not implemented in v1, but the keypair infrastructure is in place.
+The signed bytes are `3gs-registry-v1\n` followed by the registry as canonical JSON (compact, keys sorted at every level) with the `signature` field removed. Full details are in [SCHEMA.md](SCHEMA.md#signature).
+
+**Verify the live registry yourself** (needs Python 3 and `pip install cryptography`):
+
+```bash
+curl -s https://api.3gs.ai/registry > registry.json
+python3 scripts/verify_registry.py --pubkey qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o registry.json
+# OK: signed by qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o
+```
+
+Or with the Rust binary: `cargo run -- sign-registry --check --registry registry.json`.
+
+Pass `--pubkey` with a key you got out-of-band (this page, the curator's site, an endorsement). Without it the script only proves the registry is signed by *whatever key it names*, which an attacker could swap together with the signature.
+
+**What a valid signature proves:**
+
+✅ The holder of the curator's secret key published exactly these sources, rankings, and explanations
+
+✅ Nobody changed them afterwards: not a mirror, a peer, a proxy, or a compromised host that lacks the key
+
+❌ **Does NOT prove** it's the newest version (an old signed registry can be replayed; check `updated`), or that the curator's judgment is good
+
+**Signing workflow (curators):** edit `registry.json`, then run `3gs sign-registry` (reads `PKARR_SECRET_KEY` from the environment or `.env`) and commit the result. Signing happens offline; the server only verifies. `3gs fork` signs the skeleton registry it creates.
 
 ## What Is Pubky?
 
@@ -273,6 +296,8 @@ Timestamp: 2026-02-03T12:00:00Z
 
 This is a **verifiable claim**: Anyone can check the signature and confirm that Curator A really endorsed Curator B.
 
+Today, peers fetch each other's `GET /registry` and only use a registry whose signature verifies against the pubkey they endorsed. A peer serving an unsigned, tampered, or differently-signed registry is marked `InvalidSignature` and its sources are ignored.
+
 ### How It Would Work
 
 1. **Each curator maintains their own registry.json**
@@ -297,7 +322,7 @@ This is a **verifiable claim**: Anyone can check the signature and confirm that 
 
 ### What's Not in v1
 
-❌ Endorsement signing and verification
+❌ Standalone signed endorsement claims (endorsements are covered by the registry signature, but there's no separate endorsement object a third party can carry around)
 ❌ get_endorsements tool implementation (scaffolded but returns empty)
 ❌ Trust graph traversal
 ❌ Cross-registry queries
@@ -322,6 +347,10 @@ The PKARR foundation in v1 enables this future without committing to the full co
 - **Public key storage:** `src/main.rs` (AppState)
 - **Health endpoint:** `src/http/routes.rs`
 - **MCP provenance tool:** `src/mcp/tools.rs`
+- **Registry signing/verification:** `src/registry/signing.rs`
+- **Offline signer (`3gs sign-registry`):** `src/sign.rs`
+- **Peer signature checks:** `src/federation/cache.rs`
+- **Standalone verifier:** `scripts/verify_registry.py`
 - **Environment config:** `src/config/mod.rs`
 
 ### Dependencies
@@ -350,10 +379,9 @@ PKARR provides 3GS with **self-sovereign cryptographic identity**:
 - Verifiable via public key checks (no trusted third party)
 - Foundation for future federated trust and endorsements
 
-While v1 uses only the keypair primitives, the infrastructure is in place for:
-- Signature verification
+The registry is signed with that key, so its contents can be verified end to end. The same infrastructure is in place for:
 - Cross-registry trust graphs
 - Decentralized curator networks
 - Pubky homeserver integration
 
-**Verify it yourself:** Use the curl commands above to confirm your 3GS server's identity.
+**Verify it yourself:** Use the curl commands above to confirm your 3GS server's identity, and `scripts/verify_registry.py` to confirm its registry.

@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use super::signing::RegistrySignature;
+
 /// Top-level registry structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -15,6 +17,9 @@ pub struct Registry {
     pub endorsements: Vec<Endorsement>,
     /// Categories keyed by slug (e.g., "rust-learning")
     pub categories: HashMap<String, Category>,
+    /// Ed25519 signature by `curator.pubkey` over the rest of the document (see `signing`)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signature: Option<RegistrySignature>,
 }
 
 /// Curator identity information

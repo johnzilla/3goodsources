@@ -10,3 +10,4 @@ pub mod mcp;
 pub mod pubky;
 pub mod registry;
 pub mod server;
+pub mod sign;
