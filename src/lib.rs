@@ -1,4 +1,5 @@
 pub mod audit;
+pub mod audit_append;
 pub mod config;
 pub mod contributions;
 pub mod error;

@@ -1,6 +1,6 @@
 
 use three_good_sources::{
-    audit, config::Config, contributions, federation, fork, identity, matcher, mcp, pubky, registry,
+    audit, audit_append, config::Config, contributions, federation, fork, identity, matcher, mcp, pubky, registry,
     server, sign,
 };
 use std::sync::Arc;
@@ -34,6 +34,7 @@ async fn main() -> anyhow::Result<()> {
         let result = match args.get(1).map(String::as_str) {
             Some("fork") => Some(fork::run(args)),
             Some("sign-registry") => Some(sign::run(args)),
+            Some("audit-append") => Some(audit_append::run(args)),
             _ => None,
         };
         match result {
@@ -101,7 +102,7 @@ async fn main() -> anyhow::Result<()> {
             "Audit log actor check failed; continuing because ALLOW_UNSIGNED_REGISTRY=true"
         ),
         Err(err) => anyhow::bail!(
-            "Audit log actor check failed: {}\n\nRe-sign it with `cargo run --example sign_audit` (uses PKARR_SECRET_KEY), \
+            "Audit log actor check failed: {}\n\nRe-sign it with `cargo run --example sign_audit -- --rewrite-history` (uses PKARR_SECRET_KEY), \
              or set ALLOW_UNSIGNED_REGISTRY=true for local development.",
             err
         ),

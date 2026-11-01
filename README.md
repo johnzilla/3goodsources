@@ -370,11 +370,16 @@ cargo run -- sign-registry   # reads PKARR_SECRET_KEY from the environment or .e
 
 The server won't start with a missing or bad signature (set `ALLOW_UNSIGNED_REGISTRY=true` for local development with a throwaway key).
 
-**Editing the audit log:** every entry's `actor` must be the server's own key, or the server won't start (same `ALLOW_UNSIGNED_REGISTRY` escape hatch). Re-sign and re-chain it with:
+**Recording a change in the audit log:** the log is append-only. Each entry is Ed25519-signed by the curator key over `3gs-audit-v2|timestamp|action|category|sha256(data)|actor|previous_hash|id`, and `previous_hash` links it to the entry before it. Because the signature covers the link, entries can't be deleted, reordered, or inserted without the key. After changing the registry, append an entry:
 
 ```bash
-PKARR_SECRET_KEY=<64 hex chars> cargo run --example sign_audit
+cargo run -- audit-append --action source_updated --category rust-learning \
+  --data '{"rank": 2, "name": "Rust by Example", "url": "https://doc.rust-lang.org/rust-by-example/"}'
 ```
+
+This reads `PKARR_SECRET_KEY` from the environment or `.env`, refuses to extend a log that doesn't verify, and leaves every existing entry byte-for-byte unchanged. On startup the server checks every signature, the whole hash chain, and that every `actor` is its own key, and won't start otherwise (same `ALLOW_UNSIGNED_REGISTRY` escape hatch for development).
+
+`cargo run --example sign_audit -- --rewrite-history` re-signs the entire log. It's only for migrations (a new key or message format), because it changes every past signature.
 
 For PKARR primer and federation details, see [docs/PUBKY.md](docs/PUBKY.md).
 
