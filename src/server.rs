@@ -212,7 +212,7 @@ async fn proposals_endpoint(
         .collect();
 
     // Sort by created_at descending
-    summaries.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    summaries.sort_by_key(|s| std::cmp::Reverse(s.created_at));
 
     match serde_json::to_string(&summaries) {
         Ok(json) => (

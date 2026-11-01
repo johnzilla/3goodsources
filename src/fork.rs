@@ -1,10 +1,10 @@
-/// Fork CLI subcommand — scaffolds a ready-to-run 3GS node.
-///
-/// Intentionally decoupled from all server logic (no crate:: imports).
-/// Depends only on external crates: pkarr, hex, serde_json, chrono.
-///
-/// Usage:
-///   3gs fork --endorse <pubkey> --url <peer_url> [--name <curator_name>] [--output <dir>]
+//! Fork CLI subcommand — scaffolds a ready-to-run 3GS node.
+//!
+//! Intentionally decoupled from all server logic (no crate:: imports).
+//! Depends only on external crates: pkarr, hex, serde_json, chrono.
+//!
+//! Usage:
+//!   3gs fork --endorse <pubkey> --url <peer_url> [--name <curator_name>] [--output <dir>]
 
 const USAGE: &str = "\
 Usage: 3gs fork --endorse <pubkey> --url <peer_url> [OPTIONS]

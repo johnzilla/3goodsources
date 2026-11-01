@@ -1,17 +1,8 @@
-mod audit;
-mod config;
-mod contributions;
-mod error;
-mod federation;
-mod fork;
-mod identity;
-mod matcher;
-mod mcp;
-mod pubky;
-mod registry;
-mod server;
 
-use config::Config;
+use three_good_sources::{
+    audit, config::Config, contributions, federation, fork, identity, matcher, mcp, pubky, registry,
+    server,
+};
 use std::sync::Arc;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
@@ -41,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
     {
         let args: Vec<String> = std::env::args().collect();
         if args.len() > 1 && args[1] == "fork" {
-            match crate::fork::run(args) {
+            match fork::run(args) {
                 Ok(()) => std::process::exit(0),
                 Err(e) => {
                     eprintln!("Error: {}", e);
@@ -70,7 +61,7 @@ async fn main() -> anyhow::Result<()> {
     );
 
     // Generate or load PKARR keypair for server identity
-    let keypair = crate::pubky::identity::generate_or_load_keypair(
+    let keypair = pubky::identity::generate_or_load_keypair(
         config.pkarr_secret_key.as_deref()
     )?;
     let public_key = keypair.public_key();
@@ -83,20 +74,20 @@ async fn main() -> anyhow::Result<()> {
     let registry = Arc::new(registry::load(&config.registry_path).await?);
 
     // Load audit log
-    let audit_log = Arc::new(crate::audit::load(&config.audit_log_path).await?);
+    let audit_log = Arc::new(audit::load(&config.audit_log_path).await?);
     tracing::info!(entries = audit_log.len(), "Audit log loaded");
 
     // Load identities
-    let identities = Arc::new(crate::identity::load(&config.identities_path).await?);
+    let identities = Arc::new(identity::load(&config.identities_path).await?);
     tracing::info!(count = identities.len(), "Identities loaded");
 
     // Load contributions (validates voter pubkeys against identities)
-    let contributions = crate::contributions::load(&config.contributions_path, &identities).await?;
+    let contributions = contributions::load(&config.contributions_path, &identities).await?;
     let proposals = Arc::new(contributions);
     tracing::info!(count = proposals.len(), "Contributions loaded");
 
     // Create peer cache from endorsements
-    let peer_cache = Arc::new(crate::federation::PeerCache::new(
+    let peer_cache = Arc::new(federation::PeerCache::new(
         registry.endorsements.clone(),
         public_key.to_z32(),
     ));

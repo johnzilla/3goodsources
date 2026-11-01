@@ -26,19 +26,19 @@ services:
       failure_threshold: 9
     envs:
       - key: REGISTRY_PATH
-        value: /app/registry.json
+        value: /data/registry.json
         scope: RUN_TIME
         type: GENERAL
       - key: AUDIT_LOG_PATH
-        value: /app/audit_log.json
+        value: /data/audit_log.json
         scope: RUN_TIME
         type: GENERAL
       - key: IDENTITIES_PATH
-        value: /app/identities.json
+        value: /data/identities.json
         scope: RUN_TIME
         type: GENERAL
       - key: CONTRIBUTIONS_PATH
-        value: /app/contributions.json
+        value: /data/contributions.json
         scope: RUN_TIME
         type: GENERAL
       - key: LOG_FORMAT
