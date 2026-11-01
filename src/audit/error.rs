@@ -23,4 +23,12 @@ pub enum AuditError {
     /// Signature verification failed
     #[error("Signature verification failed for audit entry {id}")]
     SignatureVerificationFailed { id: Uuid },
+
+    /// Entry was signed by a key other than the server's own
+    #[error("Audit entry {id} has actor {actual}, expected server key {expected}")]
+    ActorMismatch {
+        id: Uuid,
+        expected: String,
+        actual: String,
+    },
 }

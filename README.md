@@ -236,7 +236,7 @@ Configure via environment variables (loaded from `.env` if present):
 | PORT                 | No       | 3000     | Server port                                                              |
 | LOG_FORMAT           | No       | pretty   | Logging format: `pretty` (colored, dev) or `json` (structured, prod)     |
 | PKARR_SECRET_KEY     | Yes*     | ---        | 64-char hex string (32 bytes) for persistent identity. registry.json must be signed by this key. Generates ephemeral keypair if not set (*then only starts with ALLOW_UNSIGNED_REGISTRY) |
-| ALLOW_UNSIGNED_REGISTRY | No    | false      | Dev only: start even if registry.json's signature is missing or doesn't match PKARR_SECRET_KEY |
+| ALLOW_UNSIGNED_REGISTRY | No    | false      | Dev only: start even if registry.json's signature is missing or doesn't match PKARR_SECRET_KEY, or audit_log.json has entries signed by another key |
 | MATCH_THRESHOLD      | No       | 0.4      | Minimum match score (0.0-1.0) to return a result                         |
 | MATCH_FUZZY_WEIGHT   | No       | 0.7      | Weight for fuzzy matching component (0.0-1.0)                            |
 | MATCH_KEYWORD_WEIGHT | No       | 0.3      | Weight for keyword boosting component (0.0-1.0)                          |
@@ -369,6 +369,12 @@ cargo run -- sign-registry   # reads PKARR_SECRET_KEY from the environment or .e
 ```
 
 The server won't start with a missing or bad signature (set `ALLOW_UNSIGNED_REGISTRY=true` for local development with a throwaway key).
+
+**Editing the audit log:** every entry's `actor` must be the server's own key, or the server won't start (same `ALLOW_UNSIGNED_REGISTRY` escape hatch). Re-sign and re-chain it with:
+
+```bash
+PKARR_SECRET_KEY=<64 hex chars> cargo run --example sign_audit
+```
 
 For PKARR primer and federation details, see [docs/PUBKY.md](docs/PUBKY.md).
 

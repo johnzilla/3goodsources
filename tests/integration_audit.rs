@@ -10,6 +10,48 @@
 mod common;
 
 use serde_json::Value;
+use three_good_sources::audit::{self, hash_entry_json, AuditEntry};
+
+/// Hex pubkey of the curator's production PKARR key (z32 qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o).
+const PRODUCTION_ACTOR: &str = "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937";
+
+// ===== Committed audit_log.json =====
+
+#[tokio::test]
+async fn test_committed_audit_log_signed_by_production_key() {
+    let entries = audit::load(concat!(env!("CARGO_MANIFEST_DIR"), "/audit_log.json"))
+        .await
+        .expect("committed audit_log.json must load and verify");
+    assert_eq!(entries.len(), 40);
+    for entry in &entries {
+        assert_eq!(
+            entry.actor, PRODUCTION_ACTOR,
+            "audit entry {} must be signed by the production key",
+            entry.id
+        );
+    }
+    audit::verify_actors(&entries, PRODUCTION_ACTOR).unwrap();
+}
+
+#[test]
+fn test_committed_audit_log_hash_chain_intact() {
+    let entries: Vec<AuditEntry> = serde_json::from_str(include_str!("../audit_log.json")).unwrap();
+    let mut previous_hash: Option<String> = None;
+    for entry in &entries {
+        assert_eq!(entry.previous_hash, previous_hash, "chain broken at entry {}", entry.id);
+        previous_hash = Some(hash_entry_json(entry));
+    }
+}
+
+#[test]
+fn test_startup_check_rejects_test_key_actor() {
+    let entries: Vec<AuditEntry> = serde_json::from_str(include_str!("../audit_log.json")).unwrap();
+    let test_key_actor = "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61";
+    assert!(matches!(
+        audit::verify_actors(&entries, test_key_actor),
+        Err(audit::AuditError::ActorMismatch { .. })
+    ));
+}
 
 // ===== REST Endpoint Tests =====
 
