@@ -12,6 +12,10 @@ AI agents searching for resources often get SEO-gamed results, listicles stuffed
 
 The constraint is deliberate: **three sources per topic, always**. Quality over quantity. Primary sources over blog posts. Practical value over pagerank.
 
+## FAQ
+
+[FAQ](FAQ.md)
+
 ## Architecture
 
 ```mermaid
