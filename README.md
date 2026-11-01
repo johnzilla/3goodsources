@@ -1,6 +1,6 @@
 # 3 Good Sources (3GS)
 
-**Federated, cryptographically-signed source recommendations for AI agents**
+**Federated, human-curated source recommendations for AI agents, with PKARR curator identity**
 
 ## What & Why
 
@@ -342,10 +342,9 @@ curl -X POST http://localhost:3000/mcp \
   }'
 ```
 
-**Step 3:** Verify the public key matches. This proves:
-- The server is running with the declared identity
-- Responses come from the curator who signed the registry
-- Source recommendations haven't been tampered with
+**Step 3:** Verify the public key matches. This shows the server is running with a consistent, declared PKARR identity.
+
+**What is and isn't signed today:** audit log entries are Ed25519-signed and hash-chained (see `GET /audit`). The registry itself is not yet signed, so a matching pubkey does not on its own prove that the sources haven't been altered. Registry signing is planned.
 
 For PKARR primer and federation details, see [docs/PUBKY.md](docs/PUBKY.md).
 
@@ -363,7 +362,6 @@ docker run -p 3000:3000 ghcr.io/johnzilla/3goodsources:latest
 ```bash
 docker build -t 3gs .
 docker run -p 3000:3000 \
-  -e REGISTRY_PATH=/app/registry.json \
   -e PKARR_SECRET_KEY=your-64-char-hex-key \
   3gs
 ```

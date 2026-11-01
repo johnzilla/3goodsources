@@ -136,7 +136,7 @@ pub fn get_tools_list() -> Value {
             },
             {
                 "name": "get_provenance",
-                "description": "Get curator identity and verification information for this registry. Returns the curator's name, PKARR public key (when available), registry version, and instructions for cryptographic verification of source authenticity. No parameters required.",
+                "description": "Get curator identity and verification information for this registry. Returns the curator's name, PKARR public key (when available), registry version, and a note on what can currently be verified. No parameters required.",
                 "inputSchema": serde_json::to_value(get_provenance_schema).unwrap()
             },
             {
@@ -174,6 +174,7 @@ pub fn get_tools_list() -> Value {
 }
 
 /// Handle a tools/call request by dispatching to the appropriate tool
+#[allow(clippy::too_many_arguments)]
 pub async fn handle_tool_call(
     name: &str,
     arguments: Option<Value>,
@@ -331,7 +332,7 @@ async fn tool_get_provenance(
     }
 
     let text = format!(
-        "Curator: {}\nPublic Key: {}\nRegistry Version: {}\nLast Updated: {}\nEndorsements: {} endorsement(s)\n\nVerification:\nThis registry is curated by {}. Source authenticity can be verified\nusing the PKARR public key above. Each source is manually researched\nand vetted for quality. The registry is cryptographically signed to\nprevent tampering.",
+        "Curator: {}\nPublic Key: {}\nRegistry Version: {}\nLast Updated: {}\nEndorsements: {} endorsement(s)\n\nVerification:\nThis registry is curated by {}. Each source is manually researched\nand vetted for quality. The PKARR public key above identifies this\nserver. Audit log entries are Ed25519-signed and hash-chained (see\nget_audit_log); the registry itself is not yet signed.",
         registry.curator.name,
         pubkey_z32,
         registry.version,
@@ -524,7 +525,7 @@ async fn tool_list_proposals(
         .collect();
 
     // Sort by created_at descending
-    entries.sort_by(|a, b| b.1.created_at.cmp(&a.1.created_at));
+    entries.sort_by_key(|e| std::cmp::Reverse(e.1.created_at));
 
     let mut text = format!("Proposals ({}):\n", entries.len());
 
