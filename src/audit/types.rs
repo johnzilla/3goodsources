@@ -54,8 +54,14 @@ pub struct AuditFilterParams {
     pub action: Option<String>,
 }
 
+/// Domain tag prefixed to every audit signature (distinct from registry signatures).
+pub const AUDIT_SIGNING_DOMAIN: &str = "3gs-audit-v2";
+
 /// Build the canonical message for signing/verification.
-/// Format: `{timestamp}|{action}|{category_or_empty}|{sha256_of_data_json}|{actor}`
+/// Format: `3gs-audit-v2|{timestamp}|{action}|{category_or_empty}|{sha256_of_data_json}|{actor}|{previous_hash_or_empty}|{id}`
+///
+/// Covering `previous_hash` and `id` means the hash chain can't be re-linked (entries
+/// deleted, reordered, or inserted) without the signing key.
 pub fn canonical_message(entry: &AuditEntry) -> String {
     let data_json = serde_json::to_string(&entry.data).unwrap();
     let data_hash = hex::encode(Sha256::digest(data_json.as_bytes()));
@@ -70,9 +76,25 @@ pub fn canonical_message(entry: &AuditEntry) -> String {
         .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
     format!(
-        "{}|{}|{}|{}|{}",
-        timestamp_str, action_str, category_str, data_hash, entry.actor
+        "{}|{}|{}|{}|{}|{}|{}|{}",
+        AUDIT_SIGNING_DOMAIN,
+        timestamp_str,
+        action_str,
+        category_str,
+        data_hash,
+        entry.actor,
+        entry.previous_hash.as_deref().unwrap_or(""),
+        entry.id
     )
+}
+
+/// Set `actor` to `signing_key`'s pubkey and sign the entry in place.
+/// `previous_hash` and `id` must already be final, since the signature covers them.
+pub fn sign_entry(entry: &mut AuditEntry, signing_key: &ed25519_dalek::SigningKey) {
+    use ed25519_dalek::Signer;
+    entry.actor = hex::encode(signing_key.verifying_key().to_bytes());
+    let signature = signing_key.sign(canonical_message(entry).as_bytes());
+    entry.signature = hex::encode(signature.to_bytes());
 }
 
 /// Filter audit entries by optional since, category, and action parameters.
@@ -190,8 +212,8 @@ mod tests {
         let msg1 = canonical_message(&entry);
         let msg2 = canonical_message(&entry);
         assert_eq!(msg1, msg2);
-        assert!(msg1.starts_with("2026-02-03T00:00:00Z|source_added|rust-learning|"));
-        assert!(msg1.ends_with("|abcd1234"));
+        assert!(msg1.starts_with("3gs-audit-v2|2026-02-03T00:00:00Z|source_added|rust-learning|"));
+        assert!(msg1.ends_with("|abcd1234||550e8400-e29b-41d4-a716-446655440000"));
     }
 
     #[test]
@@ -240,6 +262,6 @@ mod tests {
             previous_hash: None,
         };
         let msg = canonical_message(&entry);
-        assert!(msg.starts_with("2026-02-03T00:00:00Z|"), "Expected Z suffix, got: {}", msg);
+        assert!(msg.starts_with("3gs-audit-v2|2026-02-03T00:00:00Z|"), "Expected Z suffix, got: {}", msg);
     }
 }

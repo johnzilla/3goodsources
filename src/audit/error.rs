@@ -31,4 +31,24 @@ pub enum AuditError {
         expected: String,
         actual: String,
     },
+
+    /// previous_hash doesn't match the hash of the preceding entry
+    #[error("Audit entry {id} breaks the hash chain: previous_hash {actual:?}, expected {expected:?}")]
+    ChainBroken {
+        id: Uuid,
+        expected: Option<String>,
+        actual: Option<String>,
+    },
+
+    /// Entry timestamp is earlier than the entry before it
+    #[error("Audit entry {id} is timestamped before the entry preceding it")]
+    TimestampOutOfOrder { id: Uuid },
+
+    /// Same entry id appears twice
+    #[error("Audit entry id {id} appears more than once")]
+    DuplicateId { id: Uuid },
+
+    /// Rejected new entry (bad action, data, etc.)
+    #[error("Invalid new audit entry: {0}")]
+    InvalidEntry(String),
 }

@@ -1,11 +1,12 @@
 use super::error::AuditError;
-use super::types::{canonical_message, AuditEntry};
+use super::types::{canonical_message, hash_entry_json, AuditEntry};
+use std::collections::HashSet;
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use std::path::Path;
 use tokio::fs;
 
 /// Load and verify the audit log from disk.
-/// Verifies Ed25519 signatures for every entry at load time.
+/// Verifies Ed25519 signatures for every entry and the hash chain at load time.
 pub async fn load(path: impl AsRef<Path>) -> Result<Vec<AuditEntry>, AuditError> {
     let path = path.as_ref();
     let path_str = path.display().to_string();
@@ -23,12 +24,40 @@ pub async fn load(path: impl AsRef<Path>) -> Result<Vec<AuditEntry>, AuditError>
             error: e.to_string(),
         })?;
 
-    for entry in &entries {
-        verify_signature(entry)?;
-    }
+    verify_entries(&entries)?;
 
     tracing::info!(entries = entries.len(), "Audit log loaded successfully");
     Ok(entries)
+}
+
+/// Verify every entry's signature and the hash chain linking them.
+///
+/// The first entry must have no `previous_hash`; every later entry's `previous_hash` must be
+/// the hash of the entry before it. Timestamps must not go backwards and ids must be unique.
+/// Because signatures cover `previous_hash`, a chain that verifies can't have had entries
+/// removed, reordered, or inserted except by the key holder.
+pub fn verify_entries(entries: &[AuditEntry]) -> Result<(), AuditError> {
+    let mut seen = HashSet::new();
+    let mut previous: Option<&AuditEntry> = None;
+    for entry in entries {
+        verify_signature(entry)?;
+        if !seen.insert(entry.id) {
+            return Err(AuditError::DuplicateId { id: entry.id });
+        }
+        let expected = previous.map(hash_entry_json);
+        if entry.previous_hash != expected {
+            return Err(AuditError::ChainBroken {
+                id: entry.id,
+                expected,
+                actual: entry.previous_hash.clone(),
+            });
+        }
+        if previous.is_some_and(|p| entry.timestamp < p.timestamp) {
+            return Err(AuditError::TimestampOutOfOrder { id: entry.id });
+        }
+        previous = Some(entry);
+    }
+    Ok(())
 }
 
 /// Check that every entry was signed by `expected_actor` (hex-encoded Ed25519 pubkey).

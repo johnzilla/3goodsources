@@ -29,8 +29,6 @@ Examples:
 ///
 /// `args` is the full `std::env::args()` collection (index 0 = binary, index 1 = "sign-registry").
 pub fn run(args: Vec<String>) -> Result<(), String> {
-    dotenvy::dotenv().ok();
-
     let mut path: Option<String> = None;
     let mut check_only = false;
 
@@ -56,6 +54,8 @@ pub fn run(args: Vec<String>) -> Result<(), String> {
         i += 1;
     }
 
+    // Load .env only once arguments are valid
+    dotenvy::dotenv().ok();
     let path = path
         .or_else(|| std::env::var("REGISTRY_PATH").ok())
         .unwrap_or_else(|| "registry.json".to_string());
@@ -82,6 +82,7 @@ pub fn run(args: Vec<String>) -> Result<(), String> {
     std::fs::write(&path, &signed).map_err(|e| format!("Failed to write '{}': {}", path, e))?;
 
     println!("Signed {} as {}", path, keypair.public_key().to_z32());
+    println!("Record the change in the audit log: 3gs audit-append --action <action> --category <slug> --data '<json>'");
     Ok(())
 }
 

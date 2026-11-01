@@ -1,22 +1,36 @@
-//! Signing utility for audit_log.json.
+//! History-rewriting signer for audit_log.json. For new entries, use `3gs audit-append`,
+//! which never touches existing entries.
+//!
+//! This tool re-signs and re-chains *every* entry, so anyone who saved an older copy of the
+//! log will see different signatures. Only use it to migrate the log (a new key, or a new
+//! canonical message format); it refuses to run without `--rewrite-history`.
 //!
 //! Usage:
-//!   PKARR_SECRET_KEY=<64-hex-chars> cargo run --example sign_audit
+//!   PKARR_SECRET_KEY=<64-hex-chars> cargo run --example sign_audit -- --rewrite-history
 //!       Re-sign the existing audit_log.json in place. Entry ids, timestamps, actions,
 //!       categories and data are kept; actor, signature and previous_hash are rewritten.
-//!   PKARR_SECRET_KEY=<64-hex-chars> cargo run --example sign_audit -- --from-registry
+//!   PKARR_SECRET_KEY=<64-hex-chars> cargo run --example sign_audit -- --rewrite-history --from-registry
 //!       Regenerate the retroactive entries from registry.json (new ids).
 //!
 //! PKARR_SECRET_KEY is required: the server rejects audit entries not signed by its own key.
 
 use chrono::{TimeZone, Utc};
-use ed25519_dalek::{Signer, SigningKey};
+use ed25519_dalek::SigningKey;
 use serde_json::json;
 use std::collections::BTreeMap;
-use three_good_sources::audit::{canonical_message, hash_entry_json, AuditAction, AuditEntry};
+use three_good_sources::audit::{hash_entry_json, sign_entry, verify_entries, AuditAction, AuditEntry};
 use uuid::Uuid;
 
 fn main() {
+    if !std::env::args().any(|a| a == "--rewrite-history") {
+        eprintln!(
+            "Error: this rewrites every audit signature. To add an entry, use:\n  \
+             cargo run -- audit-append --action <action> [--category <slug>] [--data <json>]\n\
+             To re-sign the whole log anyway (key or format migration), pass --rewrite-history."
+        );
+        std::process::exit(1);
+    }
+
     // Load signing key
     let hex_str = std::env::var("PKARR_SECRET_KEY").unwrap_or_else(|_| {
         eprintln!("Error: PKARR_SECRET_KEY must be set to the curator's production key.");
@@ -41,15 +55,11 @@ fn main() {
     // Sign and chain every entry
     let mut previous_hash: Option<String> = None;
     for entry in &mut entries {
-        entry.actor = actor_hex.clone();
         entry.previous_hash = previous_hash.clone();
-
-        let message = canonical_message(entry);
-        let sig = signing_key.sign(message.as_bytes());
-        entry.signature = hex::encode(sig.to_bytes());
-
+        sign_entry(entry, &signing_key);
         previous_hash = Some(hash_entry_json(entry));
     }
+    verify_entries(&entries).expect("re-signed log must verify");
 
     // Write to audit_log.json
     let json = serde_json::to_string_pretty(&entries).expect("Failed to serialize entries");
