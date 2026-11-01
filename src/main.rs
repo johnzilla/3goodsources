@@ -91,8 +91,22 @@ async fn main() -> anyhow::Result<()> {
     let registry = Arc::new(registry);
     let registry_raw = Arc::new(registry_raw);
 
-    // Load audit log
-    let audit_log = Arc::new(audit::load(&config.audit_log_path).await?);
+    // Load audit log, then verify every entry is signed by this server's key
+    let audit_log = audit::load(&config.audit_log_path).await?;
+    let actor_hex = hex::encode(public_key.as_bytes());
+    match audit::verify_actors(&audit_log, &actor_hex) {
+        Ok(()) => tracing::info!("Audit log actors verified"),
+        Err(err) if config.allow_unsigned_registry => tracing::warn!(
+            error = %err,
+            "Audit log actor check failed; continuing because ALLOW_UNSIGNED_REGISTRY=true"
+        ),
+        Err(err) => anyhow::bail!(
+            "Audit log actor check failed: {}\n\nRe-sign it with `cargo run --example sign_audit` (uses PKARR_SECRET_KEY), \
+             or set ALLOW_UNSIGNED_REGISTRY=true for local development.",
+            err
+        ),
+    }
+    let audit_log = Arc::new(audit_log);
     tracing::info!(entries = audit_log.len(), "Audit log loaded");
 
     // Load identities

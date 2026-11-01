@@ -31,6 +31,21 @@ pub async fn load(path: impl AsRef<Path>) -> Result<Vec<AuditEntry>, AuditError>
     Ok(entries)
 }
 
+/// Check that every entry was signed by `expected_actor` (hex-encoded Ed25519 pubkey).
+///
+/// [`load`] only proves each entry is signed by its own `actor`; call this with the
+/// server's own key so a log signed by any other key is rejected.
+pub fn verify_actors(entries: &[AuditEntry], expected_actor: &str) -> Result<(), AuditError> {
+    match entries.iter().find(|e| e.actor != expected_actor) {
+        Some(entry) => Err(AuditError::ActorMismatch {
+            id: entry.id,
+            expected: expected_actor.to_string(),
+            actual: entry.actor.clone(),
+        }),
+        None => Ok(()),
+    }
+}
+
 /// Verify an entry's Ed25519 signature against its canonical message.
 fn verify_signature(entry: &AuditEntry) -> Result<(), AuditError> {
     let pubkey_bytes =
@@ -117,6 +132,23 @@ mod tests {
             "Expected SignatureVerificationFailed, got: {:?}",
             result
         );
+    }
+
+    #[test]
+    fn test_verify_actors_accepts_matching_key() {
+        let entry = make_signed_entry();
+        let actor = entry.actor.clone();
+        assert!(verify_actors(&[entry], &actor).is_ok());
+    }
+
+    #[test]
+    fn test_verify_actors_rejects_other_key() {
+        let entry = make_signed_entry();
+        let other = hex::encode(SigningKey::from_bytes(&[8u8; 32]).verifying_key().to_bytes());
+        assert!(matches!(
+            verify_actors(&[entry], &other),
+            Err(AuditError::ActorMismatch { .. })
+        ));
     }
 
     #[tokio::test]

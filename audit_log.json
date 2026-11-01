@@ -8,8 +8,8 @@
       "description": "Running a Bitcoin full node for network participation, transaction validation, and sovereignty over your own blockchain data.",
       "name": "Bitcoin Node Setup"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "c9ac29d009e630b862349a6aab0570f9ba3e31df90c8fcafed840d595dd7aaf156fec7089250b9e142ad613045dcd8131dd001c6dc7f63dd1dd12e1a98ffd602",
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "915063bc389bcbcd22ff91cd2522fd7d1b52671927c181500b6a2520d7b45f2513c7698fd8a020f797bd0733d19d93c8fd88970af9e45f828690eec44a34060b",
     "previous_hash": null
   },
   {
@@ -21,9 +21,9 @@
       "description": "Building smart home automation systems that operate locally without cloud dependencies, protecting your privacy while automating your living space.",
       "name": "Privacy-Respecting Home Automation"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "95dae07ca8522cb91e7bb8f341db9c4420f606e33c31fe00551cb179374b480bcc57a231237de1fd8d3095ee48869d7d18c3e3e256af9395bedaa25a102f9900",
-    "previous_hash": "903cba951770e86e5c420b4b9ac08899c6719e18a2655dd579dac570588e1d11"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "dedefb52bc2b8cacce6e2d498dc1acdbb574f4665c58e4f37b4b655e9d50ed6369e53ccc570663cca5884727345f69b374731f3122952733b40f80b2eac3a301",
+    "previous_hash": "50fd6838d5341f2b915a451a3c38bd8a5e50012e844ad39b01cae1ca2eda7b1d"
   },
   {
     "id": "ff044df8-6817-4f9f-b612-71b0fe8f005d",
@@ -34,9 +34,9 @@
       "description": "Hardening Linux systems through security configurations, access controls, kernel parameters, and monitoring to reduce attack surface and improve resilience.",
       "name": "Linux Security Hardening"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "0a4ffe527bbdcf5d684527b3c6109d41b9a8640c7c8fd41066e5253a094585e69c8ede751a113374daa956aca3626a8cf9360a83f85dc741b7a2254f2cc4fd0e",
-    "previous_hash": "df1fd03732e0c2e0d6d77db7e4a5024382197b42c3cdcb4f8faba74eff0762d2"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "6438cc9660ad5313cd4ddc1c2268b7756e876c880f374842061b2ce2a5bbc86290944d1afd478b9e4282c4c04353cec4019ebcaa1a1f79cc6d92dd3fe5972e0c",
+    "previous_hash": "71642b63db4896f9e1fc7b78dbfd54dd646804f97eba92f76060c237a1cf18e4"
   },
   {
     "id": "1a817622-205e-4d2b-a9ed-30197359a1cf",
@@ -47,9 +47,9 @@
       "description": "Developing Model Context Protocol servers and clients for AI agent integration, enabling structured communication between language models and external systems.",
       "name": "MCP Development"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "762d9b3cc965c892cd9781a52b8f5034941ab02b415bcd759a3366a620243e9873a211904a0db4f1b084b5b29288daa4269c8e83522451a6b760a1e028ee0b01",
-    "previous_hash": "0e97cc41fe56a3cbdd244613499a2986fc94b57e6d9ae420100a26eafc91f04b"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "de29ba25e313c8461a8b46e47627b6c18adc378017ac8594ac2c3b06d9870aa6055009ace3d54500089794e62ff4a490ecc8f096b532f1f6987d10cde416890d",
+    "previous_hash": "78f1714eab8f7f0f941adb8ecad170ec2d9fdaf9cc29f746b69d8ddb04353b2e"
   },
   {
     "id": "0640e613-9f83-4bae-a1e7-68d98e51766c",
@@ -60,9 +60,9 @@
       "description": "Developing applications on Nostr, a decentralized social protocol using cryptographic keypairs and relay networks for censorship-resistant communication.",
       "name": "Nostr Protocol Development"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "96bcbb0fba9d1cbfe963da5221e75d91ab37792661310423774e5f01d8fb453ca90a41057a7438ede511ff4e9d5645027cfb63c5deaa01a3452ce9fb6ab8cc03",
-    "previous_hash": "37561abb7a024487a8092350239b21d4befa83be21517ce4d41ff3d7294161a8"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "85b107406a2c00821beec1814b552d3294075eb449118e7ee2be5f9ed2a2c79f4278a897617ac2c6d9b60f1397fe613782ca171bd6fd90d472b06704e42bd705",
+    "previous_hash": "7f1bd8fbf166f29af7256cc56d9d56e71a73a3b4ac4b1a7a482ec7d3db8f1b1b"
   },
   {
     "id": "1f6333d8-8b87-4e6c-b75f-05e5a147533d",
@@ -73,9 +73,9 @@
       "description": "Secure password management tools and practices for generating, storing, and organizing credentials with encryption and multi-device sync.",
       "name": "Password Management"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "0020c8387cf534f8c1473af93282c3c901d706f72896d863516a7868976ba0db57966d6bdc0a1806df0a51088fbf84b9e918ef4bded8ef83ffbf3bc708effb0c",
-    "previous_hash": "649374f0458c5d1d7f982ef8f1a224b796c44059890364203599fb985974b2ae"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "66dd1af4991263b9d8617d739f7abaf0854e74410815166998c44879935767a63bb503a55e519b1e478a8f3007561dc7da0b000b8de453c40d94947da88ab609",
+    "previous_hash": "9812d633803e342a6627bbdf16b7f729f1887b3b87050a115ca4a02f6cb23fa1"
   },
   {
     "id": "91d34bcf-67b0-4a27-802e-3dd2184c578d",
@@ -86,9 +86,9 @@
       "description": "Developing with Pubky and PKARR for decentralized identity, DNS, and data storage using public key infrastructure and homeserver architecture.",
       "name": "Pubky Development"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "227e409610b9df6e833b44945c9a43554f97e793ef9cf163e5abbbdd0f442292f31155a1f28c3a9f8bad061bef8e0c7e011911e121dcc44da818289b6552ca01",
-    "previous_hash": "8c38a31d63bcd2e95b21c5f6f59f4180cc319a61c2da481f516f09d1609be3ad"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "90658efd0152d3151829cc28bfbff8ceccdd21ad5321b844a66e963ee8d6f7cb3bacde12d62e774e739e6fa311feb33caa7cbb228cacdadeb80f3f5a561a4407",
+    "previous_hash": "0b0352b572eeb3f7cb6a26cf1bd3e2dd690420455e78efc66d8ed33717e75acc"
   },
   {
     "id": "2d0f3666-81c2-4a92-8981-ac8482bc268c",
@@ -99,9 +99,9 @@
       "description": "Learning the Rust programming language from basics through advanced concepts including ownership, lifetimes, async programming, and systems design.",
       "name": "Rust Learning"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "8a8bd48faf8bd87d19b521a2c4e5ff8835120d249a9b8269afa0f8bd2b12982ee4916029389af6e4684d62d36b3e8806de58830e7b6c6c575d981ca5496bd700",
-    "previous_hash": "878b6c8ce7182a28402f5a27ab8d1b0c0f621f9df45a87e6612901e4bd0db50f"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "37060b637f185ffaff3d3fbc2028b27f7f6ebda34ecc2e95dc6b2a5f0b09c34d901c36390e83ca6a214538ed1956e7f1d1e1862f9c51acf573702dccebb35f03",
+    "previous_hash": "c80513dd4e207a9a4bf4c6b1ce8ba288c73794c9e1ed2acd95018ed0e82321b6"
   },
   {
     "id": "66b067eb-9b6f-4d88-b539-ef1a054f86a6",
@@ -112,9 +112,9 @@
       "description": "Self-hosting email servers with complete control over your communication infrastructure, including SMTP, IMAP, spam filtering, and domain configuration.",
       "name": "Self-Hosted Email"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "ee8f55a8a4116fc4965497a6e2bb50d87987befe053b124f40e4bbb75f73f5da3d9983d2a922487f3c3c90e0bda00bfa012e53f56b2bb292d01f70efb1991b0c",
-    "previous_hash": "c92e71d47a6def80bd90592ba2b3f711b154798103f9141ab28f827a873e1cef"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "0f3687617372871a6908daf630f5915fcae9491ed464a8af8cbe0e88922dc9138d192522c9dcb42126bc47794636d56b854e351e06c959c83741ce44f9262f00",
+    "previous_hash": "89f3bee883dfab7f97be629af7488d734a71967a818f6fd1427137cab8d5e60e"
   },
   {
     "id": "c6df997e-249f-443b-86dd-800fdc42f722",
@@ -125,9 +125,9 @@
       "description": "Methodologies for identifying, prioritizing, and mitigating security threats through structured analysis of systems, assets, and attack vectors.",
       "name": "Threat Modeling"
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "a393cd715b3c454e0b47bec5940d898ce4b7a7f12e5f91eb2c32ca477480fa9e01c9d59642638c877b599dc3dccf2013217127d812b4b354261f6e1d48ff060d",
-    "previous_hash": "6470f552ea8347860d233ed796dea3cda0043e346db50a547d1763bc86999484"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "736bc064e432f43c0286eeecb34cf0d4ab908bd607f307159da52920dbc7322caf86a836b35970878d4632d0d254274865003ac784f292d3fd4cb9137ca8390e",
+    "previous_hash": "3f0005e1c7d8e459a1b973a7c38742384ab980d1f44315f1c8cdda8aa2032f88"
   },
   {
     "id": "05dcec57-c79c-49b8-9bfa-5f3e8c9a3b18",
@@ -141,9 +141,9 @@
       "url": "https://bitcoin.org/en/full-node",
       "why": "Official guide from Bitcoin Core covering installation, configuration, and best practices for running a full node."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "c37d006e525e2c0691369a9bef0ea393845590cb6f797087261a5b708451ed15def20b30eeb79cb0ede29b1344853835542cae44784b44b890fc5a0c8ab75a0b",
-    "previous_hash": "85cd9b735f5918a7f88dade382977d43c75cd785e466ce40fca8e0012d10325a"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "f0e758df6ef32d099ffdf5c41fa3317c08f894013eaf01b1789900fb006914f417641068936578fa18fe5f2acb50dff545203ad2b42e611977b6138237d60507",
+    "previous_hash": "2af8116c86f7fc96b562b4c249a7e29ab2b2e1615f341d9814a109672bca069a"
   },
   {
     "id": "432b63fd-3430-44a2-8fc2-07d2cc04eae1",
@@ -157,9 +157,9 @@
       "url": "https://umbrel.com/",
       "why": "User-friendly self-hosted platform for running Bitcoin and Lightning nodes with a web interface on Raspberry Pi or other hardware."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "cd6c7fc1e8c61eabf81ef38a5b0c3e46159c4f0a86f6d58a5d4039ead208ed48ed0e391396b4be3b3d1dbb53f43abf11fc09137520cf709d5697e0deb0efae03",
-    "previous_hash": "c6bd41d666a3c7f216e4de2182d755672d532edfa6af4910b09d9fe5bc3dd392"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "470864111d68e1d0b3bccd3562ab3d788a31a43ec0d0fa375306fff0ddc2ea14463f67c50550a44854322d8addf02b8a44e388a33ca1fe32a637f3f52085040c",
+    "previous_hash": "52b789f7110fcdef273a6743adf87fdc305aafca353e87c116451a3207ab8b5e"
   },
   {
     "id": "54434106-f5c7-49ba-b18a-6a2144bc1fd0",
@@ -173,9 +173,9 @@
       "url": "https://raspibolt.org/",
       "why": "Comprehensive step-by-step guide to building a Bitcoin and Lightning node on a Raspberry Pi from scratch."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "aa22b6aa85a786801af67c0efe214257124966d866e74d6d246e58b8ccc2d33a07b64d4dc0466c3bf0346ef9ea4e9dbb94955bbcc6fbad3f9555f01424129004",
-    "previous_hash": "13bf67c4303e037dcaa4161ef0aabfc63ad6e964cdc430ece4764a6cff67fc44"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "dd25a1ebf7c482c9d4b5d79a087bfa2343c8f327ea9ab4c31ffa2e97430842746fb582e4829cb353e462d9bfbaf94ca762db199d71c1639bd6e0c8ef33e3390b",
+    "previous_hash": "4ea8097674740ea1391346ec1b76d9104f5f99d0c6e2174a2b3d7dae255d34ed"
   },
   {
     "id": "68454cd6-88a9-4490-bce8-010ee60081cf",
@@ -189,9 +189,9 @@
       "url": "https://www.home-assistant.io/docs/",
       "why": "Official documentation for Home Assistant, the leading open-source home automation platform with local-first architecture."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "88c7bcd736581365e82781fe77ee6ed2ca6fd22497f4600bbeae09616344771ea4dc926e49e726fa3015b52d3a60c61f17528625b12a67d0502bb5a126040207",
-    "previous_hash": "de8b4ca80322dd8e5081d686b386c5aa986e42189b1a5ef917cc17d9b0b64ed1"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "e952245d4a6bbb571d66e0dc607b1bfbcf585ef88e370334f86d35060ca7ec8c951c866786a28a6a543724b0f45f10f8efcb5e42010b032ee2e575f91e1e7e00",
+    "previous_hash": "bd28507fa8b3167505beb8ba6fd8b1d429d5be8f381c525588205611c01a33da"
   },
   {
     "id": "a9673c28-a504-4ed3-b0cc-6c5146d53f0a",
@@ -205,9 +205,9 @@
       "url": "https://www.home-assistant.io/installation/",
       "why": "Step-by-step installation instructions for various platforms including Raspberry Pi, Docker, and dedicated hardware."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "63c3257c5a7e7a3467903f795d07310174ebdc4720fcd3e0c87c69cecaf1ac1f176602a4d79b1db8db5eca05c5ababbabd19742522dc649d62492b47f6a0910f",
-    "previous_hash": "389c227c97a1629e27598bdce57c69b8f367bd4c037dcb801d8d98930b4fc2e7"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "cd9fc580f4d9b9c44d4f0b1b7927c3beed9940d32464f82959ab88bb4b461c9d78961ce04edfc229b2c4cdaee329a8759216f5c5d178170283cbfcf177803502",
+    "previous_hash": "1f8a430cf4f21003e15444ce9a5b9ad66edad47c8aa0efe1160002bd17ffbf3d"
   },
   {
     "id": "ef91ade7-519b-4820-9784-e1548ed407b2",
@@ -221,9 +221,9 @@
       "url": "https://esphome.io/",
       "why": "System for controlling ESP8266/ESP32 devices with simple YAML configuration, enabling DIY sensors and actuators without programming."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "38a48cba55d29ba9c6d45d1472f9f48b021169f696729fa2c19642ffffaca6979f287b0b2ad374cac5b7b99629a936289595a3fed2324af85ff1c75b9ee8a204",
-    "previous_hash": "38fc104fa776eef6ac797668fe4d031e5d5a40eaf2d8641adcc2e913bdb1b375"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "41ec6d71cc29163e77b259c8e2af3e3f0944f63ddccbfe7cddf7ba26804a1c1cbe14324b989bd7b4e10cc8de0be0cc6f3a11d3d3b9c8121c532c5b722da01f04",
+    "previous_hash": "c971488c4d499b8e4a3801b8f78e194a30c4cc65cef81532996821bcdeaa1c5c"
   },
   {
     "id": "0f240518-2277-40e6-bdce-395fb05d3986",
@@ -237,9 +237,9 @@
       "url": "https://www.cisecurity.org/benchmark/distribution_independent_linux",
       "why": "Industry-standard security configuration benchmarks for Linux distributions developed by consensus of cybersecurity experts."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "96f7aec5fa44eb315f2beff28036df496c24fbd8c2a5e972ddd9caf25a085f16027fed364b338671a1282bd1713a1034d31e51096779a02142c54fc9b3f1120e",
-    "previous_hash": "d5383db2d729e009b37edeaa6dda96f278d7eb44541b6cc173104bc4960d59b0"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "f7af774c5f125c6abd758b7f3e19cc1d98c5114019d1e37c89ea03ae757d562a275a5c0bd4454b91e4697d5c7ed6eeb075139878f18c23bfdf00b7c614c25f0d",
+    "previous_hash": "efdbed6fac5aaee96d22e7ca9bca99df72ed685470b908a860ee88785c2692b0"
   },
   {
     "id": "1a10fe81-9bce-4f97-ab88-4784425cfb86",
@@ -253,9 +253,9 @@
       "url": "https://cisofy.com/lynis/",
       "why": "Open-source security auditing tool for Linux systems that scans for vulnerabilities and provides hardening recommendations."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "2fa0cb166fa8e86b51961aa661081a88bb594549597b59eb3f6dedde58785244e135bbd8c27273673df912452bfc2d0211d3a9bfe13cba1c1f66907aa8c99f04",
-    "previous_hash": "20385de3a6c14d0a5fb7c8e91d5a16a065a69451ecf48255562b598ed0111adf"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "b3771ceae7649a7cfdde08ac18dc43fe2c7dfefc588497d249b74d8c16405e2caa6e44c1981cb7a359daa10d6569f21f396fb7f5c7e6acfd0da04042b753dd07",
+    "previous_hash": "927f8e6dfeff3742dd973f1b6d0985b0adfc6d0dbb4d9d0578c17570d37d9e6d"
   },
   {
     "id": "9af06f9a-c747-42cb-b896-e2e8dc8e4dbb",
@@ -269,9 +269,9 @@
       "url": "https://wiki.archlinux.org/title/Security",
       "why": "Comprehensive community-maintained guide covering Linux security concepts, tools, and hardening techniques applicable to all distributions."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "cf202cc76c4c9e78abf47fc27ca28728c2a3d46e571f46800d5d58f4b129ab9f37cc31e2b70560c01acb957177a8545248c0ab6afeaa0a74acc22cdd7db44a05",
-    "previous_hash": "d634bd8f5ba7d20d53d82538b0e2b49e5b4b2024f7ac9e93ac09ebbe1f7f2c14"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "0bd2dd4bc1493b502cb1d921144ef79ef8220e6a18cc4d1f55a4335f579d8c358adccf0596afcb58c7e54ada9ca7465683bbc08b70700012594dd9317324350c",
+    "previous_hash": "c028198662066b1e26c4df661c8f547d02ae8a0654143f7ccb7415393c3a6080"
   },
   {
     "id": "80af70cd-e680-400c-bb77-c042ff4ba8af",
@@ -285,9 +285,9 @@
       "url": "https://spec.modelcontextprotocol.io/",
       "why": "Official Model Context Protocol specification defining the protocol, transport layers, and implementation requirements."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "aae55961f4b5a8ac54b4f5a12b37e2a119b13ccb9e92baf27b5c1b0aee97fe9f7264f9bc19d46f68d5be6475e97bd76bd2cdfba37794a304ac6b81bc8440c20e",
-    "previous_hash": "3c0c94385f85e09c2e55f5ac8adfbac20644914bdc9c9a94c5826e9705fcf4b5"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "d57a6b36e3531206b2972afccd067b7487d1f1196b0eefd304abc85f9775db5d12077f8e91f4b23c2e2eaf7dcb73cd2accb818ad7205559322d486e245472405",
+    "previous_hash": "3f96a612bc3e14add81ab172a80c72565a20a51ec7dc78f4d06b31cbbd2a5cbc"
   },
   {
     "id": "457d6e92-cbca-41d3-916a-e01cf2e22cfd",
@@ -301,9 +301,9 @@
       "url": "https://github.com/modelcontextprotocol/typescript-sdk",
       "why": "Official TypeScript SDK for building MCP servers and clients with examples and reference implementations."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "349150aa322c1c9661ae03ff2fc6682fffea4ced5d295504e6a53e0753aee3f02ed9e8415114bcfb69e9abe57366ac1fd6675514d8fe1eb2d78039b5ae01bb09",
-    "previous_hash": "95d40fafc20d01d077393bc731b8ddc4bbbeac5e5c6bf106b3792f4f4aa8503a"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "a0378ec06a4b0716e0ffe4b99426c009d91eaff3c780c3a9626bd1cd060e109bfc4840dfb0ddf5ba8040661b006374111d3dd514de1b97cb756db7d7e5e0e508",
+    "previous_hash": "8790cc04875217190b0cbaafd1a7b1e5df56ae9d252a1887f14c3429d0afc853"
   },
   {
     "id": "0a75eb73-7705-4def-acdc-321ed2c3a47f",
@@ -317,9 +317,9 @@
       "url": "https://modelcontextprotocol.io/docs/building-mcp-servers",
       "why": "Step-by-step tutorial for creating MCP servers, covering tool definitions, resource handling, and client integration."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "fddd02b9b8e46295dc7dd9550ab581dd9102e1f633d3860ea5a75bedfd6f5b8bef2d3acf76956a869655db929d0342a34f5943f606eb692540defde6ed7b960b",
-    "previous_hash": "d784a20aa0323e66b8e743be983f41b971fc307d2ab70625e53f272483b48de9"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "280264777c932da43664ea8364230d88a112b7921357fbc3cd5344c0f26946c60107485480d5c2773225db9f3208fc8ed578ca987fee7f00ad3d1a4259ea9301",
+    "previous_hash": "448618a010f000f8f5a585d500733c338c871222f2c86ff6a5af7d8a00db1092"
   },
   {
     "id": "620f934b-cc88-46c9-ada6-fbee132ada8e",
@@ -333,9 +333,9 @@
       "url": "https://github.com/nostr-protocol/nips",
       "why": "Official Nostr Implementation Possibilities (NIPs) repository defining protocol specifications and extensions."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "c37630ac7a6cedede645c87597ef2e7ffefc2ae1e7ca86cc993dc03ae0519e9a3733ed1eb3add0fe01b9e97d3f229cc9fbef406fffa837d0bfdf1baa543da30c",
-    "previous_hash": "9ba9d39199950f949acad1e1456d6e36d2dcc19cfdd07ec6554568237710597e"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "3db1da77dd7f2c0eac0a2a5dc146f451f305982b66d0bca3e0a5562b193c56d950658c0f7e14243e4cc127fc467a45af5ef5505bbfa9fd792be832afe043b205",
+    "previous_hash": "b8b2ab5c04dc83a285823644e458213775b0a984ab496c93be12d264d32db3c6"
   },
   {
     "id": "0e1dd429-d2ee-42de-9342-46bd985735f8",
@@ -349,9 +349,9 @@
       "url": "https://nostr.how/en/developers",
       "why": "Comprehensive developer guide covering protocol basics, client development, relay implementation, and best practices."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "a67ad5a7cf6eff4ffce3607ff7a5c9048c17bd4ebc447645a9f3725ac49232395fc2863623495165158ae3bb377cb963b72b0b8ba82e8708382159e0075c1a09",
-    "previous_hash": "b9a279071717e646deb0a99fa00bb1be2df0326e564e034cabc602d529fe83a3"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "cea60779a4168e1c4505008390fa502f0b6eb02adbf41bf6fdea7e7ad248f898821f5b3121ba0b2f45173582ce4d51c40233625e6e9fc947740fb9656e954e00",
+    "previous_hash": "79d8e454b4680afe9b40c81e5a9695ce1caa6732009e01975054664f7c7fefb9"
   },
   {
     "id": "de2bd90d-2c04-4b39-8c0e-aa01670d9332",
@@ -365,9 +365,9 @@
       "url": "https://github.com/nbd-wtf/nostr-tools",
       "why": "JavaScript/TypeScript library for Nostr protocol implementation with utilities for keys, events, and relay connections."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "26f7efe9c946bf52abc6ba1b6cea1f177bdcee59bc984270e0a8a499fcf4a4c1970b5797944f2a305e97ae2c680c4fb01b0c4cfa7c3cae96475c5bc1264da904",
-    "previous_hash": "9d6c461dd1a2eb0b4c90c3fc61b8da5b16103be0d69476795372ddd14d52c7e2"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "b21ee4268d8d8171c854f4e0b199182a086b99a29b1dd0687c41155b122c71245189396475726b148eebe44f84f59618847ad48a45797c7e2c13e49bef917103",
+    "previous_hash": "cc8539e225cdad9179a5b452e4a98a94f506054095c586b0f56ca271b358c702"
   },
   {
     "id": "ebd4c01d-2cc0-455c-ad97-0774407ff313",
@@ -381,9 +381,9 @@
       "url": "https://bitwarden.com/help/",
       "why": "Comprehensive documentation for Bitwarden, a leading open-source password manager with self-hosting options and strong encryption."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "7197932b8b9cb848d22bdb42c2465d0a8997e18695100d8a433ab7f4ed7fb8384b7f7e4525bd316a4f2c2297a7b27147578c593c2dee6dfc247214b87ff2ed03",
-    "previous_hash": "384a49819bfdf6cc20552acd194b31d9034997de7ca4331f5703f05f277861cc"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "3b94d05009888cddf96171eadba65946fbbf640dec743755bf621671bc7642b620ea1a906460d7ea020c94f3f94fea4113ea129131a005ee07981202b2c90a03",
+    "previous_hash": "66940d754620abf34459f30037b695d5fe53a832c61fab3e131b95673aa0735a"
   },
   {
     "id": "a6431649-ae14-4de3-ac80-178ca618a523",
@@ -397,9 +397,9 @@
       "url": "https://ssd.eff.org/module/creating-strong-passwords",
       "why": "Electronic Frontier Foundation's guide to password security best practices, including generation, storage, and common pitfalls."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "270d2164b56114b2b96cbdcefcba6f7c22446c2f73c3072949f559c0ab3a776eb0d6e53187987950ae81a6f9cd0662c5e480b4b2e230955d7d60d71daae9ec0c",
-    "previous_hash": "6e56170a5a006d538a7c2368e4ae172adc480a17b72d8a54e47d1e75127c0089"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "7dd0f687ce1713c8541ed2f02d43616441eb15e6344edda1b23643b9c5c3b66301d3b97334d09d18e10177b73dceda847f0d65341861907965488f0ef0dafb0f",
+    "previous_hash": "85a862017c91d82fe4ee1a1f9df3090ce9f026b4ada518a13bd8af2e772834c2"
   },
   {
     "id": "0421e270-d8f4-4b8c-acda-5de6d1ab6efa",
@@ -413,9 +413,9 @@
       "url": "https://keepassxc.org/",
       "why": "Cross-platform, community-driven password manager with local-only encrypted database and no cloud dependencies."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "d8009da1ab4bb8d6e2e898e99c027580a6aaa60167e03d6f41d5e03774f5d9fd7b16dac22a67e477b42d935712aa2d57b129acf61df7cedb5822fc5b8aa7ea06",
-    "previous_hash": "37e87d582c51a46e7f4f6f1a53c64d235ab9262fdbf8c496d91da1f422396297"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "71e76f27ce2dc36dcf823f4b77b73c9010c078200e127bc6e0ddca634cdd4e4b6824d434c3e6f64959543a8938ab01f058e763ae4179f6f9dfe6498871a0790f",
+    "previous_hash": "047b5666a6425ae7f64ba99e9453690265e2b53959a123ebf8ae710dc9910f27"
   },
   {
     "id": "f9bf0b29-4879-4aed-88c4-d6b23a8c4ac3",
@@ -429,9 +429,9 @@
       "url": "https://github.com/pubky/pubky-core",
       "why": "Core Pubky implementation in Rust with examples, documentation, and reference code for decentralized identity and data."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "57e370618729d592dc8cc8aa54b3032fa561bd09daeab60e5ff99fd13fdf0336c59f51b8f223a08955cdd24d36f980054f2e3c4d1b4beac1bbd39b509237ea0c",
-    "previous_hash": "91404fc7b04ec9c103701332a3613a34fd055a60ee08fcae22b550bce8254deb"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "c66cd14d73e9fce01163f033a115b4824fb881cd4917b86e58f1547badcc979fddd1e41a29e312b2bf5ad2d7e87c2b233816f6f1f993b0b1abebd31882fde207",
+    "previous_hash": "9671c604e0a3ec5a01cbeb3ddba4808647d6d17709c74ab192b43b66b868a0ec"
   },
   {
     "id": "02edc61c-0a04-4b20-86da-faafbb4c7960",
@@ -445,9 +445,9 @@
       "url": "https://github.com/Nuhvi/pkarr",
       "why": "Public Key Addressable Resource Records specification explaining the DNS-over-mainline-DHT approach underlying Pubky."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "2bb65a7fa6a76469def0975b9af2267cc3efe2e95e2890054fa3cbde7d42f024da6d35a41874e30de304d9b551005b559b0347b62eb9d97bba0aabc37e312a02",
-    "previous_hash": "746047b59bcc04189ec1a16da787d9f4e3da7708e5d9ddcc82e783006874400a"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "8a4c33f47b90f14fee9b3a84d3a224edf2ef9c0ed36b083d1bb0fcd57120212e9331b96782ed6d0f132053bb484cdafd612b082ba266e58ecfc78e2410d67500",
+    "previous_hash": "eb4dfd42affd8b471b825b5a47c286e08f2bc5de99532fee183bde70db468062"
   },
   {
     "id": "03bf6c0a-94cc-44b0-908c-70efff18af4a",
@@ -461,9 +461,9 @@
       "url": "https://pubky.github.io/pubky-core/",
       "why": "Official API documentation and developer guide for building applications on the Pubky protocol."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "29194807d1e4c6b5d724b6d95c21ee0754dd2188dce4e77b9384eeb8edc0897c6dd649845237d27383798312d94a463f36bf851488957906f529ee233e119f03",
-    "previous_hash": "8d657be94ec2b781419f94f86ff3b9ea46c2744d5b161b4c7f47c030d5a314dc"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "f0b1bb209087c545f205d225236080d4012d702aa782df74416cfcfaae1aa4d53ac9faab3b643a8f1828269292b4d116fa40f59d782a319a4c85849c3f54a60c",
+    "previous_hash": "a413fd019ef99c4c20821042f851df38c908b7bfdab99e73219a2796c98f6267"
   },
   {
     "id": "0238891d-5071-4328-ba33-526e6d9c85fc",
@@ -477,9 +477,9 @@
       "url": "https://doc.rust-lang.org/book/",
       "why": "Official comprehensive guide to Rust, covering fundamentals through advanced topics with clear examples and exercises."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "0e5229b35c00b7ca1759db133553549bc85d0500e3d31e7c6c872c6ba067584f60031b2e2fcea96ae9a37d2a5c13d80e5c7b1f5208a9cdc76c278b8b7ad97407",
-    "previous_hash": "c3a0e71dcac6334ea88969152ebd903d6198a91e21d38cf40a17c201bf5c3510"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "7c3fbbcf4254340919644ef29509f5d223ee631fbcf1fcef9f0439f60816eb04475c5dfb6cf3d56c801dfc400289da11471317cb60746bc9b2441e6ac3fc180c",
+    "previous_hash": "8b1416ded0201b08ef8967dc2ed47c1649d6efcea52e1c6679c4ef7b2fed1eb5"
   },
   {
     "id": "3fbf5d08-55ff-46c9-b839-efffcc493bb6",
@@ -493,9 +493,9 @@
       "url": "https://doc.rust-lang.org/rust-by-example/",
       "why": "Collection of runnable examples illustrating Rust concepts and standard libraries with hands-on code snippets."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "b862098579c6c402fcd7300dfb52d7ccb42a27f8b8a198dba1adc95e39ec393bab64060a480e67b18d6f9fe2b8ff53f206711c12a6de07858bf2bce8f4462401",
-    "previous_hash": "5bc1bf09eff0bae100729fd5314a8f58912986d340cd4345ebbcd1f3654bf134"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "240c1f6171819323bde5fc187ab034784c59dc467213efc5ddff2c18b4d2afffac3eec3be099bffa384f7576230791eb9a2c0d5ec04d3ce716d6d59bfb9a4c00",
+    "previous_hash": "a2af104afa91c097f63a3033bc9154e09cd2c4f0fee1bb468746817df6faeb13"
   },
   {
     "id": "27a47e2c-98d8-47ec-a2ef-34c504637f39",
@@ -509,9 +509,9 @@
       "url": "https://www.zero2prod.com/",
       "why": "Practical guide to building production-ready backend applications in Rust, covering real-world API development and deployment."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "7099e393d79fbd9f74317804fd590227d8be9c9d05f09ec59e00e6f0e068f127336ce29b8484f08c30db2b536c28d05ff1b1c4955e7e389e44b5b0f75801c200",
-    "previous_hash": "534c168ece2f5c3802f5db216173a552350170de0fea5c045effd2a5d4ab232a"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "c70b66980f19bf4894da2e9e0e97f91a5d57a0ec18b38e7b2f66668363a38c5de69967df150d0600422c8bb4b32fd307fc2f1ef5e4a6522d26bd370dc54bb709",
+    "previous_hash": "a1c658c7bc4e7c4e37e6c1d35a239f19637c6d44b04b744b697c56e4032a9cc9"
   },
   {
     "id": "e6419d85-d110-4593-a942-c93d2f640dae",
@@ -525,9 +525,9 @@
       "url": "https://mailinabox.email/",
       "why": "Turnkey email server solution that sets up a complete mail server on Ubuntu with automated configuration for SMTP, IMAP, DNS, and webmail."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "726dec1cbd75f4620c6e819e76f1befa7097b99e30e8c31a81dc7300d143308c0e661ac35486adf0d593c924dce7cea2e686d83de8a04ef20bf9d112ce5dac04",
-    "previous_hash": "45d67013585afefa77afa3d975f425a3101955640520ac743c198ed51444ca19"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "c05279b788026f4b255b468d5ce77c1ce3e841f27f4dfceed441fba6c866375f4327bece4514ab552d5b5f570df297dc1b2a86f5476555870a4ee0a892386802",
+    "previous_hash": "cf97b88a39416d24cccfcb1bf88e14f6997a4a58c448e9cdcd0dc0d5b74d25a7"
   },
   {
     "id": "a65f417a-62a8-4fb5-9588-5c670b35c6ea",
@@ -541,9 +541,9 @@
       "url": "https://emailselfdefense.fsf.org/",
       "why": "Free Software Foundation guide to email encryption and privacy, essential reading for anyone self-hosting email."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "45dd80aa233c09897c2db68bc78a59063bd007d20a92f95966b459f436fc5a23f61e3b827cbf19332ea027122c92c4887d625752a9cf84b782bdee1e4a277405",
-    "previous_hash": "a279f93c87566db281ef0dc2db4ca9a5d8022dc4a4ca4010dbca518220faa064"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "a6fd0f75f39c2aa4f4d82a37c10231b1309174ab396ccfcfba4d06ba7d32435542847404012f4912df1bcbc30f7efb771db8b56f7a6f0bccd6bb1319ae203f01",
+    "previous_hash": "da8ac422e44fbe45de75ff04795696229aa9f7e73a8bbb12da9261072835d5ae"
   },
   {
     "id": "1e296b6c-458d-47e8-b673-d52dfe420304",
@@ -557,9 +557,9 @@
       "url": "https://docker-mailserver.github.io/docker-mailserver/latest/",
       "why": "Production-ready, containerized fullstack mail server with extensive documentation for Docker-based deployments."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "30be2e53b88ed488aa0fec876daf7ee3285ac835f02fba58c6b85bd20c7ad74b1b39433f49036871f03e7cd4855a53391f045b3bbe269dc00b4c097c3d84cd08",
-    "previous_hash": "e48e67f2fbf97ed9b81c98a55efd6740f79f478e2fd76d26de483593b8d38464"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "01ebb11a3d32e9455f11243cf836ed596fe01dba08510245c9d00f3d4b3b5e0db7d17f9aaa02e7ba292c02031ff2f8a9c9a6595636ddff7c020ed2d66b799b00",
+    "previous_hash": "d97c21b7a0982a4f3409c063f522d7880d2691a3d3ea1aef6f828b74a42734e3"
   },
   {
     "id": "def125ac-ad1b-442d-9cf9-49a92f092b51",
@@ -573,9 +573,9 @@
       "url": "https://owasp.org/www-community/Threat_Modeling",
       "why": "OWASP's comprehensive guide to threat modeling covering methodologies, processes, and practical application for web applications."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "11cb27fc156d3c303be0079b531df37910610d9f08836d5edb04b3ad11ac4e12711be6f23742309ec2a85443e18e0ba4ff15e0445e448cca158060f3e6e5f50c",
-    "previous_hash": "4141b1641761406c7de8a06b165e9ad97404a5741436f7cc8b1c8476ec1d3006"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "f3823fc98a9b23a6396e63e8b6188dfca2867917dd2fc102ce9a335a0aaa8661812480ada0abb88745e4bdaab62a3b11ee7897669a1244c02fe2d8a2dbf26d02",
+    "previous_hash": "d0b8d7a4103cd1750459c3f1db25e48ea6558f8a3d06b03c6dae0414dfb88dd3"
   },
   {
     "id": "a55ee0d3-d587-4a37-955b-31c145c40dd2",
@@ -589,9 +589,9 @@
       "url": "https://www.threatmodelingmanifesto.org/",
       "why": "Community-driven manifesto defining values, principles, and patterns for effective threat modeling across different contexts."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "0bca7ab7d47c4693bb0ef15c51c71c6db48f9fa742fcfd463610a894603d4754c87086a3a0212fa5b2e2f216660f03249f2b9f6e521f8af74fa47fec5f2ef800",
-    "previous_hash": "ddde31aaf415350e02dfc92873995a883d8f37680b4e03bd4cd0726c98557ed5"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "4f794cb0bd7cea584ca0dde6d0393dc255f6d5ce570e8aa32f1abe702785cea6808b6fb4a62e1c76cf6e4be7c31fb61521a7474a085aaaa4608a98549229a301",
+    "previous_hash": "e9c2c25ab6b667c577a07bf960e81b1973ae33b9565bd0f5dc46aeaefbc84973"
   },
   {
     "id": "10951065-354c-4eb3-9a87-39a141679cb3",
@@ -605,8 +605,8 @@
       "url": "https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats",
       "why": "Microsoft's STRIDE methodology documentation explaining threat categorization and analysis for secure system design."
     },
-    "actor": "197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61",
-    "signature": "0898ae7cc7e448958546eb83046dfff3a7199f8fec2d949015f5e67b07568927f4a440885aee5223ac703bff2f3db08a4f2fec2e700a74e210183a86a78f9f0f",
-    "previous_hash": "62a6a8ba8d4092b4c75213e2d34e7bdccf182574aac09702eccaa876ae6f8eae"
+    "actor": "737cf044cfbe8b2164d99d605545a1a4e97a9ff8d720b62061687d8269030937",
+    "signature": "a8d7002ddabc6d1a1fe42025604fe25a0aa3167d0e32f761881d42668848f8a39b1994e473e5de0896a470441b1ffea902e6b073ff2d34ca342a1af71ccbfb03",
+    "previous_hash": "c0bf950fd146cfb0144025cb027ec77a9acc82de18f5df82e2a7b169c4870576"
   }
 ]

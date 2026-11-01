@@ -29,7 +29,8 @@ pub struct Config {
     pub pkarr_secret_key: Option<String>,
 
     /// Start even if registry.json is unsigned or its signature doesn't match this server's
-    /// PKARR key. Development only. Set via ALLOW_UNSIGNED_REGISTRY=true.
+    /// PKARR key, or audit_log.json has entries signed by another key.
+    /// Development only. Set via ALLOW_UNSIGNED_REGISTRY=true.
     #[serde(default)]
     pub allow_unsigned_registry: bool,
 }
