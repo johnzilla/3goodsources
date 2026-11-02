@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Three Good Sources (3GS)</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="site-name" href="/">Three Good Sources</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="/">Home</a>
+                <a href="/about" aria-current="page">About</a>
+                <a href="https://api.3gs.ai/registry">Registry</a>
+                <a href="https://api.3gs.ai/audit">Audit log</a>
+                <a href="https://github.com/johnzilla/3goodsources">GitHub</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <h1>About 3GS</h1>
+
+        <h2>What it is</h2>
+        <p>
+            Three Good Sources is a small, human-curated registry that answers one question for
+            AI agents: "where should I learn about this?" Each topic gets exactly three sources,
+            ranked, with a short note on why each one is there. Agents reach it over MCP; people
+            can read the same data as JSON at <a href="https://api.3gs.ai/registry">/registry</a>.
+        </p>
+
+        <h2>How curation works</h2>
+        <p>
+            A curator researches a topic, picks three sources, ranks them, and writes down why.
+            Each topic also lists the plain-language questions people actually ask, so agents can
+            match "how do I run a bitcoin node" to the right entry. Everything lives in a single
+            <code>registry.json</code> file; its format is described in
+            <a href="https://github.com/johnzilla/3goodsources/blob/main/docs/SCHEMA.md">SCHEMA.md</a>.
+        </p>
+        <p>
+            Every change to the registry is recorded in an append-only
+            <a href="https://api.3gs.ai/audit">audit log</a>, so you can see what was added or
+            replaced, and when.
+        </p>
+
+        <h2>How signing works</h2>
+        <p>
+            The curator is identified by an Ed25519 key (a PKARR public key), not an account.
+            The registry file carries a signature made with that key, and each audit log entry is
+            signed and linked to the one before it by hash. The server refuses to start with a
+            registry that doesn't verify, peers check it on every fetch, and anyone can check it
+            themselves. A valid signature shows who published the registry and that nobody changed it
+            since. It does not prove it is the newest version.
+        </p>
+        <p>
+            Step-by-step verification is in
+            <a href="https://github.com/johnzilla/3goodsources/blob/main/docs/PUBKY.md">PUBKY.md</a>.
+        </p>
+
+        <h2>Fork it, run your own</h2>
+        <p>
+            3GS is meant to be one node among many. Anyone can run a server with their own
+            registry and their own key, specialize in the topics they know, and endorse other
+            curators they trust. A node then answers from its own registry and, for federated
+            queries, from the signed registries of the curators it endorses.
+        </p>
+        <pre><code>cargo run -- fork --endorse &lt;curator-pubkey&gt; --url &lt;curator-url&gt; --name "Your Name"</code></pre>
+        <p>
+            This scaffolds a new node with a fresh keypair and a signed starter registry. Add your
+            topics, re-sign, and deploy. See the
+            <a href="https://github.com/johnzilla/3goodsources#readme">README</a> for details.
+        </p>
+
+        <h2>Who runs this one</h2>
+        <p>
+            This node is curated by John Turner. The code is open source under the MIT license.
+            Suggestions and corrections are welcome as
+            <a href="https://github.com/johnzilla/3goodsources/issues">GitHub issues</a>.
+        </p>
+    </main>
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; 2026 Three Good Sources &middot; Curated by John Turner &middot; <a href="https://github.com/johnzilla/3goodsources">Source on GitHub</a> (MIT)</p>
+            <p>The registry is Ed25519-signed by the curator key <code class="pubkey">qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o</code>. <a href="https://github.com/johnzilla/3goodsources/blob/main/docs/PUBKY.md#registry-signatures">How to verify</a>.</p>
+        </div>
+    </footer>
+</body>
+</html>

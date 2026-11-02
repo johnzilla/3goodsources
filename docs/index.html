@@ -4,113 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three Good Sources (3GS) - Curated Knowledge for AI Agents</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #fafafa;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 0.5em;
-            color: #111;
-        }
-        h2 {
-            font-size: 1.5em;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            color: #222;
-        }
-        p {
-            margin-bottom: 1em;
-        }
-        ul, ol {
-            margin-left: 1.5em;
-            margin-bottom: 1em;
-        }
-        li {
-            margin-bottom: 0.5em;
-        }
-        a {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        pre {
-            background: #f4f4f4;
-            padding: 15px;
-            overflow-x: auto;
-            border-radius: 4px;
-            margin-bottom: 1em;
-            border: 1px solid #ddd;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9em;
-        }
-        .badge {
-            display: inline-block;
-            background: #28a745;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        .header-links {
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-        .header-links a {
-            margin-right: 15px;
-        }
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            font-size: 0.9em;
-            color: #666;
-        }
-        .tool-list {
-            margin-left: 0;
-            list-style: none;
-        }
-        .tool-list li {
-            margin-bottom: 0.5em;
-        }
-        .tool-list code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Three Good Sources (3GS) <span class="badge">LIVE</span></h1>
-
-        <div class="header-links">
-            <a href="https://api.3gs.ai/health">API Health</a>
-            <a href="https://api.3gs.ai/registry">View Registry</a>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="site-name" href="/">Three Good Sources</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="/" aria-current="page">Home</a>
+                <a href="/about">About</a>
+                <a href="https://api.3gs.ai/registry">Registry</a>
+                <a href="https://api.3gs.ai/audit">Audit log</a>
+                <a href="https://github.com/johnzilla/3goodsources">GitHub</a>
+            </nav>
         </div>
+    </header>
+    <main>
+        <h1>Three Good Sources (3GS) <span class="badge">LIVE</span></h1>
 
         <h2>What is 3GS?</h2>
         <p>
@@ -182,6 +92,7 @@
         <ul>
             <li><a href="https://api.3gs.ai/health">GET /health</a> - Server status, version, and public key</li>
             <li><a href="https://api.3gs.ai/registry">GET /registry</a> - Full registry JSON with all categories and sources, Ed25519-signed by the curator</li>
+            <li><a href="https://api.3gs.ai/audit">GET /audit</a> - Append-only audit log of registry changes, each entry signed and hash-chained</li>
         </ul>
 
         <h2>Vision</h2>
@@ -200,13 +111,12 @@
             cryptographic identity, and live API. Future versions will expand federation,
             endorsements, and cross-registry trust traversal.
         </p>
-
-        <div class="footer">
-            <p>
-                Built with Rust • Pubky identity • MCP protocol<br>
-                Curated by John Turner • Open protocol, open source
-            </p>
+    </main>
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; 2026 Three Good Sources &middot; Curated by John Turner &middot; <a href="https://github.com/johnzilla/3goodsources">Source on GitHub</a> (MIT)</p>
+            <p>The registry is Ed25519-signed by the curator key <code class="pubkey">qp6xytgxz4f1n3g3uiofktpbwuwzi89a4homcedbpb6ar4edbr5o</code>. <a href="https://github.com/johnzilla/3goodsources/blob/main/docs/PUBKY.md#registry-signatures">How to verify</a>.</p>
         </div>
-    </div>
+    </footer>
 </body>
 </html>
