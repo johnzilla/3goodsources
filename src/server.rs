@@ -19,6 +19,8 @@ use tower_http::cors::CorsLayer;
 use uuid::Uuid;
 
 const LANDING_HTML: &str = include_str!("../docs/index.html");
+const ABOUT_HTML: &str = include_str!("../docs/about.html");
+const STYLE_CSS: &str = include_str!("../docs/style.css");
 
 /// Application state shared across all route handlers
 pub struct AppState {
@@ -50,6 +52,8 @@ pub fn build_router(state: Arc<AppState>) -> Router {
 
     Router::new()
         .route("/", get(landing_page_endpoint))
+        .route("/about", get(about_page_endpoint))
+        .route("/style.css", get(style_css_endpoint))
         .route("/mcp", post(mcp_endpoint))
         .route("/health", get(health_endpoint))
         .route("/registry", get(registry_endpoint))
@@ -260,4 +264,14 @@ async fn proposal_by_id_endpoint(
 /// GET / - Landing page endpoint
 async fn landing_page_endpoint() -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], &'static str) {
     (StatusCode::OK, [(header::CONTENT_TYPE, "text/html; charset=utf-8")], LANDING_HTML)
+}
+
+/// GET /about - About page endpoint
+async fn about_page_endpoint() -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], &'static str) {
+    (StatusCode::OK, [(header::CONTENT_TYPE, "text/html; charset=utf-8")], ABOUT_HTML)
+}
+
+/// GET /style.css - Shared stylesheet for the static pages
+async fn style_css_endpoint() -> (StatusCode, [(axum::http::HeaderName, &'static str); 1], &'static str) {
+    (StatusCode::OK, [(header::CONTENT_TYPE, "text/css; charset=utf-8")], STYLE_CSS)
 }
